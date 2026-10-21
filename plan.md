@@ -1,510 +1,538 @@
-# Plan: Live Compute Dashboard (Android)
+# Plan: Compute Monitor tab (Android)
 
-A live, top-down "network" view of the collective: which compute nodes are working right
-now, tokens flowing between them in real time, and the task the collective is working on.
-**Android only.** Nothing in this plan targets iOS. That means no Cupertino variants, no SF
-Symbols, and no iOS native tab bar wiring.
+A **read-only** tab in Conduit that shows, at a glance, what each compute node behind the
+user's **Hermes Agent backend** is doing:
+
+* which nodes are in use;
+* what each one is working on;
+* how fast it is going;
+* how much CPU, GPU, VRAM and RAM it is using.
+
+Tapping a node opens a sheet with more detail. Nothing on this tab does any work: it
+starts nothing, stops nothing and changes nothing.
+
+**Android only.** No Cupertino variants and no iOS wiring.
 
 ---
 
-## 1. Definitions
+## 1. Goals and non-goals
 
-| Term | Meaning in this plan |
+**Goals**
+
+* A top-down network view: the Hermes hub, each node connected to it, active nodes
+  highlighted, and animated token flow on every connection that is carrying tokens.
+* For every node, at a glance: **what** it is doing, its **speed** in tok/s, and its
+  **resource use** (CPU, GPU, VRAM, RAM).
+* **Tap a node** to see more detail (§3.3).
+* A short line showing what the collective is working on overall.
+
+**Non-goals**
+
+* Any action: no load/unload, stop, steer, approve, or changing models or config. The new
+  Hermes API is GET-only, and the app only reads from it.
+* Using the tab to chat or to start runs.
+* iOS. Ollama, Open WebUI and Direct connections also do not count as nodes.
+
+---
+
+## 2. Definitions
+
+| Term | Meaning |
 | --- | --- |
-| **Node** | One machine that serves models. Two kinds: (a) a **local machine running one or more llama.cpp `llama-server` endpoints** that Hermes Agent calls, or (b) a **cloud provider** that Hermes calls (OpenRouter, Anthropic, Nous Portal, Gemini, and so on). |
-| **Engine** | One `llama-server` process (one base URL / port) on a local node. A machine with three ports is **one node with three engines**. |
-| **Hub** | The Hermes Agent server Conduit is connected to. It orchestrates the work and routes calls to nodes. It is not itself a compute node. |
-| **Collective** | The Hub plus every node it can route to: main model, delegated subagents, Mixture-of-Agents (MoA) reference and aggregator models, and auxiliary models. |
-| **Task** | What the collective is doing now: the running Hermes session's title, latest prompt, todo list, active subagents, and MoA phase. |
-| **Client** | This Android device ("You"). |
-
-Ollama, Open WebUI and Direct connections are **out of scope** as nodes. A node is a
-llama.cpp machine or a cloud provider used by Hermes.
+| **Hub** | The Hermes Agent server the app is connected to. It orchestrates work and routes model calls to nodes. |
+| **Node** | One machine that serves models for Hermes. It is either a **local machine running llama.cpp** (`llama-server`), including Hermes's own managed local runtime, or a **cloud provider** (OpenRouter, Anthropic, Nous Portal, Gemini, and so on). |
+| **Engine** | One `llama-server` endpoint on a local node. One machine can run several engines, and in router mode one engine can host several models. |
+| **Work item** | One in-flight model call, labelled with what it is for: a main turn, a subagent and its goal, a scheduled job, a messaging platform, a Desktop session, or "untracked". |
 
 ---
 
-## 2. What the user sees
+## 3. What the user sees
 
-### 2.1 Network view (default)
+### 3.1 The tab
+
+* There is a new sidebar destination, **Compute**. It is visible only on Android, and only
+  while a Hermes connection is enabled (§6.3).
+* If the Hermes plugin (§5) is not installed, the tab shows a read-only setup card. The
+  card explains the install steps and has a "Copy command" button. Nothing is ever run
+  from the phone.
+
+### 3.2 Network view (portrait phone, top-down)
 
 ```
-                 ┌──────────────── summary strip ────────────────┐
-                 │ 3/5 nodes active · 142 tok/s · 18.2k tokens    │
-                 └────────────────────────────────────────────────┘
-
-   [gpu-box-1]  ●══════>>>>══════╗                ╔═══════○ [Anthropic]
-   2/4 slots ◕                   ║                ║        idle
-                                 ▼                ║
-   [gpu-box-2]  ●═══>>>>>>>>═══▶ ( HERMES HUB ) ◀═╝ <<<══● [OpenRouter]
-   1/1 slots ●                   ◉ 2 subagents        ▲    routing → Fireworks
-                                 │                    │
-   [mac-mini]   ○ - - - - - - - -│                    │
-   offline                       ▼ >>>>               │
-                              ( YOU )                 │
-
-  ┌──────────────────────── task panel (draggable sheet) ─────────────────────┐
-  │ ▶ "Refactor the billing module"        running · 02:14 · 18.2k tokens     │
-  │   ☑ read billing/*.py   ☐ write tests   ☐ open PR                         │
-  │   subagent #1  "write unit tests"   on gpu-box-1 · qwen3-coder · 51 tok/s  │
-  │   subagent #2  "review diff"        on OpenRouter · deepseek  · 33 tok/s   │
-  │   MoA: 2/3 references done → aggregating on Anthropic                     │
-  └────────────────────────────────────────────────────────────────────────────┘
+ ┌──────────────────────────────────────────────────────────────┐
+ │ 3 of 5 nodes busy · 142 tok/s · 2 sessions · updated 0.4 s    │  summary strip
+ │ "Refactor the billing module" (Desktop) · Daily digest (cron) │  what the collective is on
+ └──────────────────────────────────────────────────────────────┘
+                     ┌──────────────────────┐
+                     │  HERMES HUB  hermes-1 │  CPU 22% · RAM 41%
+                     └──┬──────┬──────┬───┬──┘
+          >>>>>>>>>>>>  │      │>>>   │   │ <<<<<<<<<<<<
+   ┌────────────────────┴─┐  ┌─┴──────┴─┐ └─┴───────────────────┐
+   │● gpu-box-1     51 t/s│  │● OpenRouter│ │○ Anthropic     idle │
+   │ Subagent: write tests│  │ Main turn  │ │                     │
+   │ GPU ▇▇▇▇▇▇▇▁ 92%     │  │ 33 t/s     │ │                     │
+   │ VRAM ▇▇▇▇▇▁▁ 21/24GB │  │ TTFB 0.6 s │ │                     │
+   │ CPU ▇▇▁▁▁▁▁ 34%      │  └────────────┘ └─────────────────────┘
+   └──────────────────────┘
+   ┌──────────────────────┐  ┌──────────────────────┐
+   │● gpu-box-2     58 t/s│  │◌ mac-mini    offline │
+   │ Daily digest (cron)  │  │ last seen 12 min ago │
+   │ GPU ▇▇▇▇▇▁▁ 71% ...  │  └──────────────────────┘
+   └──────────────────────┘
 ```
 
-* **Layout (top-down):** Hub in the centre and Client below it. Local nodes sit on the
-  left arc and cloud providers on the right arc. Positions are stable, based on a sort
-  plus a hash of the node ID, so nodes never jump when the set changes. Up to 12 nodes are
-  drawn; any extra collapse into a "+N" node that opens a list.
-* **Active nodes are highlighted:**
-  * Glow and pulse strength scale with activity.
-  * A ring gauge on each local node shows busy slots out of total slots.
-  * Cloud nodes show a cloud glyph and pulse while they have attributed in-flight work.
-  * Idle nodes are dimmed.
-  * Offline or unreachable nodes have a dashed grey outline.
-  * Probe errors show in amber with a badge.
-* **Edges** are curves between Hub and node, and between Hub and Client. An idle edge is a
-  faint hairline. An active edge takes the node's accent colour.
-* **Token animation:** particles travel along the edge.
-  * Node → Hub is generated tokens. Hub → node is prompt tokens, sent as a short burst
-    when a request starts.
-  * Reasoning tokens use a lighter shade.
-  * Hub → Client is the stream to the user.
-  * Particle spawn rate is a capped log scale of tokens/sec, so 5 tok/s and 500 tok/s both
-    read correctly. It is representative, not one particle per token.
-* **MoA:** while references run, their nodes' edges light up together. When `moa.phase =
-  aggregator` fires, the reference edges fade and the aggregator node's edge lights.
-* **Subagents** appear as small satellites around the Hub, each linked by a thin leader
-  line to the node it is running on.
-* **Untracked work:** if a local node is busy but no attributed Hermes work explains it,
-  the node still lights up and shows "untracked work". Examples are a cron job, an
-  auxiliary task, or another client.
+* **Layout:**
+  * On a portrait phone the Hub sits at the top and node cards flow below it in two
+    columns: local machines first, then cloud providers.
+  * Card order is stable (by kind, then name), so cards never shuffle when activity
+    changes.
+  * In landscape the same cards sit around the Hub in a ring.
+* **A card shows at a glance:**
+  * a status dot: active, idle, loading, offline, or error;
+  * the node name;
+  * a big **tok/s** figure;
+  * one line for **what it is doing** (the top work item, plus "+N more");
+  * for local nodes, mini bars for **GPU %, VRAM, CPU %** (RAM goes in the detail sheet);
+  * for cloud nodes, **TTFB** in place of the resource bars.
+* **Highlighting:**
+  * Active cards are full contrast and glow in proportion to tok/s.
+  * Idle cards are dimmed and compact.
+  * Offline cards have a dashed outline and show when they were last seen.
+  * Error cards are amber with a reason, for example "probe failed: 401".
+* **Connections:** curves from the Hub to each card. When a connection carries tokens,
+  particles flow along it:
+  * node → Hub for generated tokens;
+  * Hub → node as a short burst when a prompt is sent.
+  * Particle rate is a capped log scale of tok/s. It is representative, not one particle
+    per token.
 
-### 2.2 Node detail (tap a node → bottom sheet)
+### 3.3 Tapping a node (read-only detail sheet)
 
-* **Name, kind, host, and engines.** Each engine shows its model, `n_ctx`, and a state:
-  loading, ready, sleeping, or offline.
-* **Live stats:**
-  * Generation and prompt tok/s.
-  * Busy and total slots.
-  * Queue depth (`requests_deferred`).
-  * Requests processing.
-  * Tokens generated since the dashboard opened.
-* A 60-second tok/s sparkline.
-* **What is running on this node now:** the main agent turn, subagent goals, MoA slot
-  labels, or "untracked".
-* **Cloud nodes:** model(s) in use, the OpenRouter upstream (when it is reported), and
-  token counts attributed this session.
+Tapping a card opens a bottom sheet. It can be expanded to full height, and it keeps
+updating live while open.
 
-### 2.3 Task panel
+**Every node:**
 
-A draggable sheet built from the focused running Hermes session:
+* **Header:** name, kind (local machine or cloud provider), host or provider ID, status,
+  and how recently the data was updated (for example "0.6 s ago").
+* **Doing now:** every work item on this node. Each shows:
+  * its label, for example "Subagent: write unit tests", "Scheduled job: Daily digest",
+    "Desktop: Refactor billing", or "Telegram";
+  * the session title, the model, and elapsed time;
+  * live tok/s, tokens generated so far, and time to first token.
+* **Speed:** generation and prompt tok/s now, plus a 60-second sparkline of each.
+* **Totals for the last hour:** requests, tokens in and out, and errors.
 
-* The title (`session.info.title`) and the latest user prompt, truncated.
-* Status: thinking, running a tool, streaming, or waiting for approval. Elapsed time comes
-  from `turn_started_at`.
-* The todo list (`todo.updated`).
-* Active subagents with their goal, node, model, and tok/s.
-* MoA progress (`refs_done/refs_total`).
-* If several sessions are running (`session.active_list`), a chip row switches between
-  them.
+**Local machines also show:**
 
-### 2.4 Accessibility and motion
+* **System resources:**
+  * CPU % and load average;
+  * RAM used and total;
+  * for each GPU: name, utilisation %, VRAM used and total, temperature, and power draw
+    (where the platform reports them).
+* **Engines:** one row per `llama-server`, showing:
+  * the model or models, with file size and context size;
+  * state: ready, loading (with %), sleeping, or offline;
+  * busy and total slots, and queue depth;
+  * the llama.cpp build, and whether `--metrics` is enabled.
+* **Missing-data hints** in plain language, for example "Prompt speed needs llama-server
+  `--metrics`", or "Install the node-stats helper on this machine for CPU/GPU figures".
 
-* **Reduce motion** (`context.reduceMotion`, `lib/shared/theme/theme_extensions.dart`, plus
-  the app animation settings in `lib/shared/services/animation_service.dart`) turns off
-  particles. Edges then show static thickness and numeric tok/s labels instead.
-* Every node and edge has `Semantics`, for example "gpu-box-1, active, 2 of 4 slots,
-  51 tokens per second".
-* A **List** toggle gives a TalkBack-friendly table of nodes in place of the canvas.
+**Cloud providers also show:**
+
+* models in use;
+* median time to first token;
+* recent errors (status code and time only);
+* the upstream provider when OpenRouter reports one.
+
+**Tapping the Hub** shows the Hermes version, host resources, running sessions, and the
+node inventory with each node's role: main model, subagents, auxiliary tasks, or MoA.
+
+The sheet has **no action buttons**. The only interactions are close and expand.
+
+### 3.4 Accessibility and motion
+
+* **Reduce motion** (`context.reduceMotion` in `lib/shared/theme/theme_extensions.dart`,
+  plus the app animation settings) turns off particles and glow pulses. The numbers and
+  bars stay.
+* Every card has `Semantics`, for example "gpu-box-1, active, 51 tokens per second,
+  running subagent write unit tests, GPU 92 percent".
+* A **List** toggle replaces the canvas with a plain list of cards.
 * Colours come from `conduit_theme` tokens and work in both light and dark.
 
 ---
 
-## 3. Data sources (verified against `hermes-src` and llama.cpp)
+## 4. Architecture overview
 
-The dashboard fuses three layers:
+All data comes from the **Hermes Agent backend**. The phone never talks to llama.cpp
+machines or providers directly. There are two reasons:
 
-* **Inventory:** which nodes exist.
-* **Telemetry:** ground truth on whether a node is computing right now.
-* **Attribution:** which part of the task each node is doing.
+* Hermes's managed `llama-server` binds to `127.0.0.1` with a generated `--api-key`
+  (`hermes_cli/local_runtime/supervisor.py:150-160`), so the phone cannot reach it.
+* Only Hermes knows which call is for which task.
 
-### 3.1 Inventory: which nodes exist
+```
+ Hermes host
+ ┌──────────────────────────────────────────────────────────────────────────┐
+ │  Agent processes (gateway: API server, cron, messaging; dashboard:       │
+ │  Desktop sessions)                                                       │
+ │    └─ conduit-compute hooks ── content-free activity records ──┐         │
+ │                                     ~/.hermes/conduit-compute/activity/  │
+ │  Dashboard process                                              │        │
+ │    └─ conduit-compute API  ◀────────────────────────────────────┘        │
+ │         ├─ inventory from Hermes config (main, providers, managed        │
+ │         │   runtime, auxiliary, MoA, delegation)                         │
+ │         ├─ polls llama.cpp engines: /health /props /slots /metrics       │
+ │         ├─ Hub resources: psutil + nvidia-smi                            │
+ │         └─ remote machine resources: node-stats helper (optional)        │
+ └──────────────┬───────────────────────────────────────────────────────────┘
+                │  GET /api/plugins/conduit-compute/snapshot   (1 Hz, while the tab is visible)
+                ▼
+ Android: Compute tab (renders the snapshot; no other network calls)
+```
 
-From the Hermes dashboard REST API (Desktop Gateway mode). These calls are profile-scoped,
-like the existing `/api/sessions` and `/api/cron`.
+Two pieces get built:
 
-| Endpoint | Gives | Source |
+1. A **Hermes plugin, `conduit-compute`** (Python), kept in this repo. It observes,
+   samples and serves one snapshot (§5).
+2. The **Compute tab** in the Android app. It polls the snapshot and renders it (§6).
+
+---
+
+## 5. Hermes side: the `conduit-compute` plugin
+
+It lives in this repo at `hermes-plugin/conduit-compute/` and is installed into
+`~/.hermes/plugins/conduit-compute/`, then enabled through `plugins.enabled`. User
+plugins must be listed there before their Python runs; that gate is
+`_plugin_api_mount_skip_reason` in `hermes_cli/web_server_dashboard.py`.
+
+```
+hermes-plugin/conduit-compute/
+  plugin.yaml              name, version, hooks: [pre_api_request, post_api_request,
+                           api_request_error, on_stream_start, on_stream_delta,
+                           on_stream_end, subagent_start, subagent_stop]
+  __init__.py              register(ctx): hook handlers → activity records
+  activity_store.py        per-process ring of in-flight + recent calls; atomic JSON file
+  dashboard/
+    manifest.json          {"name": "conduit-compute", "api": "plugin_api.py",
+                            "tab": {"hidden": true}}   ← API only, no dashboard tab
+    plugin_api.py          FastAPI router mounted at /api/plugins/conduit-compute/
+  inventory.py             Hermes config → nodes and engines
+  llama_probe.py           server-side llama.cpp polling + Prometheus text parsing
+  host_stats.py            psutil + nvidia-smi for the Hub (same facts as
+                           /api/local-models/hardware and /api/system/stats)
+  node_stats/node_stats.py optional zero-dependency helper for remote llama.cpp machines
+  config.example.yaml      per-node display names, node-stats URLs/tokens, poll interval
+  tests/                   pytest
+```
+
+### 5.1 Attribution: "what is each node doing?" (agent hooks)
+
+These are the same public observability hooks the bundled Langfuse plugin uses
+(`plugins/observability/langfuse/`). They fire in **every** process that runs an agent,
+so the work they capture covers **every** session on the Hub. That includes cron jobs,
+messaging platforms, other clients and subagents, not only the phone's own chats.
+
+| Hook | Fields used (verified) | Source |
 | --- | --- | --- |
-| `GET /api/model/info` | Main `model`, `provider`, effective context length | `hermes_cli/web_routers/models.py:52` |
-| `GET /api/providers/custom-endpoints` | Every named custom endpoint: `id`, `name`, `base_url`, models, and which one is active. **This is the llama.cpp machine list.** | `hermes_cli/web_routers/config_env.py:529` |
-| `GET /api/model/auxiliary` | Per-task `{task, provider, model, base_url, local_endpoint}` for vision, web_extract, compression, title generation, and so on | `models.py:172` |
-| `GET /api/model/moa` | MoA `reference_models[]` and `aggregator` slots (provider/model) | `models.py:199` |
-| `GET /api/system/stats` | CPU, memory and load for the **Hub host**, shown on the Hub node | `web_routers/status.py:469` |
-| Delegation config (`delegation.provider/model/base_url`) | Where subagents run | `tools/delegate_tool_config.py`. It is only reachable through `GET /api/config/raw` (raw YAML). See §8 on why that endpoint is risky. |
+| `pre_api_request` | `api_request_id`, `session_id`, `task_id`, `turn_id`, `platform`, `model`, `provider`, `base_url`, `api_call_count` | `agent/turn_api_request.py:64` |
+| `post_api_request` | `api_request_id`, `started_at`, `first_chunk_at` (gives TTFB), `api_duration`, `usage` (token buckets), `response_model` | `agent/turn_response_intake.py:63` |
+| `api_request_error` | status code and error class only | `agent/api_request_hooks.py` |
+| `on_stream_start/delta/end` | `session_id`, `model`, `provider`, `surface`, plus **only the length** of `delta` (both text and reasoning kinds) | `agent/stream_delivery.py:269-334` |
+| `subagent_start/stop` | `parent_session_id`, `child_session_id`, `child_goal`, `child_role` | `tools/delegate_tool.py:287` |
 
-**Grouping into nodes:**
+**How events become records:**
 
-* Custom endpoints are grouped by normalised host, so several ports on one machine become
-  one node with many engines.
-* Every other provider ID (`openrouter`, `anthropic`, `nous`, `gemini`, and so on) is one
-  cloud node.
-* `local_endpoint`, using Hermes's `is_local_endpoint` (RFC-1918, Tailscale CGNAT,
-  `.local`, unqualified hosts), decides local versus cloud for custom URLs.
+* **Node key:**
+  * If `base_url` is local, the key is the normalised host. "Local" uses Hermes's own
+    `agent.model_metadata.is_local_endpoint`.
+  * Otherwise the key is the canonical provider ID. `custom` is resolved to `custom:<name>`
+    the same way `tui_gateway/server.py` does it.
+* **Label:**
+  * A `child_session_id` that has been seen in `subagent_start` gets "Subagent: <goal>".
+  * Otherwise the label comes from the platform: cron gives "Scheduled job: <name>",
+    telegram/discord/etc. give the platform name, api_server/desktop give "Session:
+    <title>".
+  * Session titles are looked up in the Hermes session DB (`hermes_state`), read-only and
+    cached.
+* **Live tok/s:** an EWMA of streamed characters ÷ ~4 per token, replaced by exact
+  `usage` counts when `post_api_request` arrives.
 
-**Manual node overrides (stored in Conduit).** A base URL as Hermes sees it, such as
-`http://localhost:8080/v1` when llama.cpp runs on the Hub's own host, is often not
-reachable from the phone. Each discovered engine can therefore take:
+**The store:**
 
-* a **probe URL override** (for example `http://192.168.1.20:8080` or a Tailscale name);
-* an optional **llama.cpp `--api-key`**, held in secure storage;
-* a display name and an accent colour;
-* "Allow self-signed certificate", reusing the existing Direct/Hermes TLS pattern
-  (`server_tls_http_client_factory.dart`).
+* Each process keeps a small ring of in-flight and recent calls.
+* It writes `~/.hermes/conduit-compute/activity/<pid>.json` by atomic replace, at most
+  2 times a second, and only while there is recent activity.
+* The API side merges files whose PID is still alive and whose modification time is under
+  10 s old.
 
-Users can also add a node by hand that Hermes config does not list.
+**Content is never kept.** The hooks also receive `user_message`, `conversation_history`,
+`request_messages`, `response`, `assistant_message` and the delta text. The plugin ignores
+all of them and records only IDs, model and provider names, timings and counts.
 
-### 3.2 Telemetry: is the node computing right now? (llama.cpp nodes)
+### 5.2 Inventory: which nodes exist
 
-Each engine is polled directly from the phone. Android already permits cleartext to LAN
-hosts (`android/app/src/main/res/xml/network_security_config.xml` has
-`cleartextTrafficPermitted="true"`).
+The plugin reads Hermes config server-side with Hermes's own loaders. Secrets stay on the
+Hub. Sources:
 
-| Endpoint | Availability | Used for |
-| --- | --- | --- |
-| `GET /health` | Always on, no API key | Reachability. 503 means "loading model". |
-| `GET /props` | On by default | `total_slots`, `model_path`, `is_sleeping`, `build_info` (fetched once, refreshed every 60 s) |
-| `GET /v1/models` | On by default | Model `id` (or alias), `meta.n_params` and `meta.size` (fetched once) |
-| `GET /slots` | On by default (`--no-slots` turns it off) | Per slot: `id`, `id_task`, `is_processing`, `n_ctx`, `next_token.n_decoded`, `next_token.n_remain`. **The primary live signal.** |
-| `GET /metrics` | Only with `--metrics` | Prometheus: `llamacpp:predicted_tokens_seconds`, `llamacpp:prompt_tokens_seconds`, `llamacpp:tokens_predicted_total`, `llamacpp:prompt_tokens_total`, `llamacpp:requests_processing`, `llamacpp:requests_deferred`, `llamacpp:n_busy_slots_per_decode` |
-| Router mode (`--models-dir`) | When used | `GET /models` lists loaded models. `/metrics` then needs `?model=<id>`. |
+* the main `model` block;
+* `providers:` custom endpoints (the same data as `GET /api/providers/custom-endpoints`);
+* the **managed local runtime** (`hermes_cli.local_runtime.endpoint._state_endpoint()`
+  gives `base_url` and `api_key`; loaded models and load progress come from the same
+  helpers that back `GET /api/local-models/status`);
+* `auxiliary.*`, `moa`, and `delegation` slots that set a `base_url` or provider.
 
-**How rates are derived:**
+Local endpoints are grouped by host into machines. Every provider ID that is not local is
+one cloud node.
 
-* Generation tok/s comes from Δ`tokens_predicted_total` / Δt when `/metrics` exists.
-* Otherwise it comes from Σ Δ`n_decoded` across processing slots / Δt. A slot whose
-  `id_task` changed counts as a new request; its decode counter reset is not read as a
-  negative rate.
-* Prompt tok/s comes from Δ`prompt_tokens_total`. Without metrics, a burst is inferred
-  when a slot moves from idle to processing.
-* Rates are smoothed with an EWMA (τ ≈ 1.5 s) and decay to zero after 3 s with no samples.
+### 5.3 Speed and engine state (server-side llama.cpp polling)
 
-**Polling and battery:**
+* The plugin polls each **local** engine **only while a snapshot was requested in the last
+  15 s**, so it costs nothing when nobody is looking. Cloud URLs are never probed.
+* Poll interval is 1 s per engine, with jitter. Each engine's own key is used.
 
-* Polling runs only while the dashboard route is visible and the app is resumed.
-* It runs at 1 Hz per engine, with jitter, and at most 4 requests in flight at once.
-* After repeated failures it backs off exponentially, from 1 s up to 30 s.
-* There is an optional setting to slow to 0.2 Hz on metered networks
-  (`connectivity_plus` is already a dependency).
-
-**Cloud providers** have no live telemetry, so their activity comes from attribution
-only (§3.3). The one exception is OpenRouter, where the upstream provider name can be shown
-when Hermes reports it.
-
-### 3.3 Attribution: what each node is doing (Hermes Desktop Gateway events)
-
-Conduit already holds one WebSocket to the gateway: `HermesDesktopRpcClient.events`
-(`packages/conduit_core/lib/features/hermes/services/hermes_desktop_transport.dart:145`),
-which emits `HermesDesktopEvent {type, sessionId, payload}`. Today, the dashboard-relevant
-events are either flattened or dropped. `_projectHermesTurnEvent`
-(`hermes_desktop_event_projection.dart`) turns `subagent.*` into a generic
-`HermesToolProgress(subagent: true)` and **throws away** `model`, `parent_id`, `depth`,
-and the token counts. `moa.*` and `todo.updated` are not consumed at all.
-
-A new **read-only tap** on the same stream (a second listener, not a change to chat
-projection) consumes these events:
-
-| Event | Payload fields used | Source |
-| --- | --- | --- |
-| `session.info` | `model`, `provider` (for example `custom:<name>`), `running`, `turn_started_at`, `title`, `usage` | `tui_gateway/server.py:2046` |
-| `message.delta` / `reasoning.delta` | Delta length → main-agent token flow (Hub → Client, and main node → Hub) | existing |
-| `tool.start` / `tool.complete` | Current tool, for the task panel | existing |
-| `subagent.start/thinking/tool/progress/complete` | `subagent_id`, `parent_id`, `depth`, `goal`, `model`, `input_tokens`, `output_tokens`, `reasoning_tokens`, `api_calls`, `status`, `duration_seconds`, `task_index/task_count` | `tui_gateway/tool_progress.py:362` (`_SUBAGENT_FIELDS`) |
-| `moa.reference` / `moa.progress` / `moa.aggregating` / `moa.phase` | `label`, `index/count`, `refs_done/refs_total`, `aggregator`, `phase` | `tool_progress.py:300-345` |
-| `todo.updated` | Full todo snapshot | `tool_progress.py:288` |
-| RPC `subagent.list` | Snapshot reconcile on open/reconnect: `subagent_id`, `parent_id`, `depth`, `goal`, `model`, `status`, `tool_count`, `last_tool` | `tui_gateway/methods_subagents.py` |
-| RPC `session.active_list` | Which live sessions exist and are running | `methods_session.py:914` |
-| RPC `session.usage` | Authoritative token totals per session | `methods_session.py:1168` |
-
-**Attribution rules (pure function, unit-tested):**
-
-1. **Main agent:**
-   * A `custom:<name>` provider maps to the endpoint `<name>` from
-     `/api/providers/custom-endpoints`, then to that endpoint's host, then to its node.
-   * A cloud provider ID maps to that provider's cloud node.
-2. **Subagent:**
-   * Payloads carry `model` but **not** `provider` or `base_url`. If `delegation.provider`
-     or `delegation.base_url` is configured, use it.
-   * Otherwise the subagent inherits its parent's node.
-   * If `model` matches exactly one engine's model ID, that engine wins.
-   * If it is still ambiguous, correlate with telemetry: the local engine whose slot went
-     busy within ±1.5 s of `subagent.start`.
-   * Failing all of that, draw a dashed "unattributed" leader line to the Hub.
-3. **MoA:** reference and aggregator slots from `/api/model/moa` map to nodes using rule 1.
-4. **Cloud rate estimation:**
-   * The main agent's rate is the EWMA of `message.delta` characters ÷ ~4 chars per token.
-     It is corrected when `session.usage` arrives.
-   * A subagent's rate is Δ`output_tokens` between `subagent.progress` frames.
-5. **Untracked:** local telemetry activity that no attributed work explains becomes
-   "untracked work" on that node.
-
-**Degraded modes:**
-
-* **Responses-API mode** (`HermesBackendMode.responsesApi`): no gateway socket. The view
-  shows only the main model's node from `/v1/models`, plus Conduit-started runs from
-  `hermes.tool.progress`. A banner explains that full detail needs Desktop Gateway mode.
-* **No Hermes connected:** an empty state with a link to Hermes settings.
-
----
-
-## 4. Architecture
-
-The work follows the repo's extraction rule. Logic lives in the **Flutter-free core
-package**, and the app holds only widgets. `tool/check_package_boundaries.dart` and CI
-enforce this.
-
-### 4.1 Core: `packages/conduit_core/lib/features/compute_dashboard/`
-
-```
-models/
-  compute_node.dart            ComputeNode {id, kind: localMachine|cloud, label, host?,
-                               engines: List<ComputeEngine>, accent?}
-  compute_engine.dart          ComputeEngine {id, baseUrl (Hermes view), probeUrl (phone
-                               view), modelIds, totalSlots?, hasMetrics, state}
-  compute_sample.dart          Raw probe sample {engineId, at, slots[], metrics?, health}
-  compute_activity.dart        Attributed activity {nodeId, source: main|subagent|moa|
-                               untracked, label, genTps, promptTps, tokens}
-  collective_task.dart         Task panel state (title, prompt, status, todos, subagents,
-                               moa progress, elapsed)
-  compute_snapshot.dart        Immutable frame-ready snapshot: nodes + live stats, edges +
-                               flow rates, task, generatedAt
-services/
-  prometheus_text_parser.dart  Minimal exposition-format parser (gauge/counter lines,
-                               labels, ignores HELP/TYPE)
-  llama_cpp_probe.dart         Dio client per engine; health/props/models/slots/metrics;
-                               router-mode aware; defensive parsing across versions
-  node_inventory_service.dart  Hermes REST inventory + manual overrides → List<ComputeNode>
-  manual_node_store.dart       Non-secret overrides in prefs; API keys in secure storage
-                               (same split as direct_connection_profile_store.dart)
-  hermes_compute_event_tap.dart  Listens to HermesDesktopRpcClient.events; projects the
-                               §3.3 events into typed ComputeHermesEvent values; RPC
-                               reconcile (subagent.list, session.active_list) on connect
-  compute_attribution.dart     Pure §3.3 rules
-  compute_aggregator.dart      Pure reducer: (snapshot, sample|event, now) → snapshot;
-                               EWMA, decay, slot-task tracking; uses package:clock
-providers/
-  compute_dashboard_providers.dart
-                               Riverpod (non-Flutter `riverpod` import, like the rest of
-                               core). autoDispose: polling starts on first listener and
-                               stops when the page leaves. Emits snapshots at ≤ 4 Hz.
-```
-
-**Hermes service additions** (small and contained):
-
-* `hermes_desktop_api_service.dart`: add typed getters for `/api/model/info`,
-  `/api/model/auxiliary`, `/api/model/moa`, `/api/providers/custom-endpoints` and
-  `/api/system/stats`. Add `/api/model` and `/api/providers` to
-  `_isProfileScopedRestPath`.
-* Expose a capability flag (for example `supportsComputeDashboard`) driven by the desktop
-  contract and a probe of the new endpoints. It goes through `hermes_capabilities.dart`.
-* **Do not** change `_projectHermesTurnEvent`. The tap is additive, so chat rendering
-  stays exactly as it is.
-
-### 4.2 App: `lib/features/compute_dashboard/`
-
-```
-views/
-  compute_dashboard_page.dart  Scaffold via the platform_ui facade; network/list toggle;
-                               summary strip; task sheet
-  compute_node_settings_page.dart  Per-engine probe URL / API key / name / colour
-widgets/
-  network_layout.dart          Pure: (nodes, size) → positions + edge curves (unit-tested)
-  network_canvas.dart          One CustomPainter + one Ticker; hit-testing for taps;
-                               RepaintBoundary; Semantics overlay
-  token_particles.dart         Fixed-size particle pool (≤ 400), spawn from edge rates,
-                               advanced in the painter. No per-frame allocations.
-  node_glyph.dart              Painting helpers: ring gauge, glow, cloud glyph, badges
-  node_detail_sheet.dart
-  task_panel.dart
-  summary_strip.dart
-  compute_node_list.dart       Accessible list alternative
-```
-
-### 4.3 Routing and entry points
-
-* **Route:** add `Routes.hermesCompute = '/profile/hermes/compute'` in
-  `packages/conduit_core/lib/navigation/routes.dart`, following `hermesJobs` and
-  `hermesMcp`. Register it in `lib/core/router/app_router.dart`.
-* **Entry points:**
-  1. A "Compute dashboard" row in Hermes settings (`lib/features/hermes/views/hermes_settings_page.dart`).
-  2. A header action in the Hermes sessions tab (`lib/features/hermes/widgets/hermes_sessions_tab.dart`).
-  3. An optional small "collective live" pill in the chat app bar while a Hermes turn is
-     running. Tapping it opens the dashboard.
-* **Android gating:** entry points render only when `defaultTargetPlatform ==
-  TargetPlatform.android`. The route redirects elsewhere so a deep link cannot open it.
-* **No new sidebar tab.** `SidebarTabDescriptor` requires SF Symbols and native tab-bar
-  assets, which would mean iOS work.
-
-### 4.4 Rendering and performance
-
-* There is **one** `Ticker` for the canvas. It is muted with `TickerMode` when the route
-  is covered, and stopped on `AppLifecyclePhase.paused`.
-* The canvas repaints every frame only while some edge has a non-zero rate. When all nodes
-  are idle it paints once and stops, the same idea as the low-frequency
-  `ConduitStreamingOrbit` (`lib/features/chat/widgets/conduit_streaming_orbit.dart`).
-* Snapshots arrive at ≤ 4 Hz. The painter interpolates node glow and rates between
-  snapshots, so data updates never trigger widget rebuilds or layout.
-* Edge paths are cached per layout. Particles hold a `t ∈ [0,1]` on a cached path.
-* **Budget:** under 4 ms of UI-thread work per frame on a mid-range ARM phone (Pixel 6a
-  class), with 10 nodes and 3 active edges. Check with `flutter run --profile` and
-  `lib/platform/frame_profiler.dart`.
-
----
-
-## 5. Implementation phases
-
-Each phase ends green on `flutter analyze`, `dart run tool/run_test_shards.dart`,
-`dart tool/platform_ui_lint.dart`, `dart run tool/check_package_boundaries.dart`, and
-the ARB validators.
-
-### Phase 0: Contract spike (≈1 day)
-
-* Run `llama-server` (one plain instance, one in router mode, one with `--api-key`)
-  against an Android ARM emulator or device on the same LAN.
-* Record real `/slots`, `/metrics` and `/props` bodies as test fixtures.
-* Confirm which endpoints need the API key when `--api-key` is set.
-* Connect to a real Hermes Desktop Gateway. Record `session.info`, `subagent.*`, `moa.*`
-  and `todo.updated` frames from a delegated task and from an MoA turn into fixtures.
-* Confirm the new REST endpoints exist at the `hermes-src` commit Conduit targets.
-  Record the minimum Hermes version.
-* **Exit:** a fixtures directory and a short notes section appended to this file.
-
-### Phase 1: Core data layer, no UI (≈3–4 days)
-
-* Models, `prometheus_text_parser`, `llama_cpp_probe`, `node_inventory_service`,
-  `manual_node_store`, `hermes_compute_event_tap`, `compute_attribution`,
-  `compute_aggregator`, providers.
-* Hermes service REST getters and the capability flag.
-* **Exit:** unit tests cover parsing (all fixture shapes), rate derivation (counter
-  deltas, `n_decoded` with task changes, decay), grouping by host, every attribution rule
-  including the ambiguous and untracked cases, and polling lifecycle (starts on listen,
-  stops on dispose or pause, backoff).
-
-### Phase 2: Static network view (≈3 days)
-
-* `network_layout`, `network_canvas` (nodes, edges and highlight states, no particles
-  yet), summary strip, node detail sheet, task panel, list view, node settings page.
-* Route, entry points and Android gating.
-* Localised strings: add keys to `lib/l10n/app_en.arb`, each with an `@key` description,
-  and mirror them in all 14 locales.
-* **Exit:** widget tests cover layout stability, highlight states, semantics labels, the
-  empty, degraded and offline states, and gating that hides the feature off Android.
-
-### Phase 3: Live animation (≈2–3 days)
-
-* Particle system, direction and colour rules, rate-to-spawn mapping, interpolation, the
-  reduce-motion fallback, and the idle-stop optimisation.
-* **Exit:** a profile-mode run on device meets the §4.4 budget. Widget tests show the
-  ticker stops when idle, on pause, and under reduce motion.
-
-### Phase 4: Collective specifics (≈2–3 days)
-
-* Subagent satellites and leader lines, MoA fan-out and aggregator transitions, todo
-  list, the multi-session chip row, "untracked work", and OpenRouter upstream labels.
-* Reconcile on reconnect and resume (`subagent.list`, `session.active_list`), using the
-  existing `_reconcileForeground` hook as the trigger.
-* **Exit:** fixture-replay tests that feed the recorded Phase 0 event streams through the
-  tap and aggregator, and assert the snapshot sequence.
-
-### Phase 5: Stretch (optional, Android-native)
-
-* **Ongoing notification** while a Hermes turn runs, for example "Collective · 3 nodes ·
-  142 tok/s". It reuses the existing foreground-service channel in
-  `android/app/src/main/kotlin/app/cogwheel/conduit/BackgroundStreamingHandler.kt`,
-  updates at most every 2 s, and is off by default.
-* **Home-screen widget** showing active nodes and tok/s, alongside
-  `ConduitWidgetProvider.kt`.
-* **Upstream Hermes PR** adding `provider` and an endpoint ID to `subagent.*` payloads.
-  That removes the attribution heuristics in §3.3 rule 2.
-* **Optional per-node GPU telemetry.** The user would enter a Prometheus URL for
-  `node_exporter`, DCGM or an `nvidia-smi` exporter, and the node would show GPU and VRAM
-  use. llama.cpp itself does not expose GPU utilisation.
-
----
-
-## 6. Testing
-
-* **Core unit tests:** `packages/conduit_core/test/features/compute_dashboard/`.
-  * `package:checks` and `mocktail`.
-  * `fake_async` and `clock` for EWMA, decay, backoff and polling.
-  * Dio mocked at the adapter level for probes.
-  * Fixtures from Phase 0 under `test/fixtures/compute_dashboard/`.
-* **Widget tests:** `test/features/compute_dashboard/`. Cover layout, semantics, reduce
-  motion, gating, and the sheets.
-* **Manual matrix:** Android ARM emulator plus one physical device.
-  * 1 Hub + 2 llama.cpp machines (one in router mode, one with `--metrics` off) + 1 cloud
-    provider.
-  * Delegated task with 2 subagents.
-  * MoA turn.
-  * Hub restart, Wi-Fi loss, app backgrounded mid-turn, light/dark, TalkBack, and reduce
-    motion.
-
----
-
-## 7. Android specifics
-
-* **Android is the only target.** The code still uses the shared `platform_ui` facade,
-  because CI enforces the seam on every file. iOS behaviour is left undefined, and entry
-  points are hidden off Android.
-* **Networking:** the phone talks straight to llama.cpp hosts on the LAN or Tailscale.
-  Cleartext is already allowed, and self-signed TLS is opt-in per engine. No new
-  permissions are needed (`INTERNET` is already declared).
-* **Lifecycle:** polling and the ticker stop on `paused`/`hidden`. Nothing runs in the
-  background unless the Phase 5 notification is turned on.
-* **Battery:** one shared Dio pool, ≤ 4 concurrent requests, a metered-network slow mode,
-  and no wakelocks.
-
----
-
-## 8. Security and privacy
-
-* **llama.cpp `/slots`** can include sampling params, and on some versions prompt text.
-  The probe reads **numeric and state fields only**. Raw bodies are never logged or
-  persisted. Diagnostics go through `DebugLogger` with the scope `compute/probe` and IDs
-  only.
-* **Engine API keys** live in secure storage only. They are added to the
-  sensitive-values sanitiser, using the same pattern as `directProfileSensitiveValues`
-  and `HermesConfig.sensitiveValues`.
-* **`/api/config/raw` returns the whole Hermes YAML, which may hold inline API keys.** It
-  should be used only if delegation routing cannot be read any other way. If it is used:
-  parse it in memory, pull out only `delegation.{provider,model,base_url}`, drop the rest
-  immediately, and never cache or log it. The better fix is the Phase 5 upstream field.
-  A second option is an RPC `config.get` on the delegation keys
-  (`tui_gateway/methods_config.py`).
-* **Traffic stays local.** The only new network traffic goes from the phone to hosts the
-  user's Hermes config or the user listed. Nothing goes to third parties.
-
----
-
-## 9. Risks and open questions
-
-| Risk | Mitigation |
+| Endpoint | Used for |
 | --- | --- |
-| Hermes's `base_url` is `localhost`, which the phone cannot reach | Per-engine probe URL override (§3.1). The setup sheet suggests the Hub's host with the same port. |
-| Subagent payload has no provider or endpoint | Heuristics plus telemetry correlation now; upstream field later (Phase 5). |
-| The socket only carries events for sessions this client is attached to; cron jobs and other clients are invisible | Local nodes still light up from telemetry ("untracked"). Cloud-only background work is not visible, and the UI says so. |
-| Cloud tok/s is estimated, not measured | Mark it "≈" in the detail sheet and correct it from `session.usage`. |
-| llama.cpp `/slots` and `/metrics` shapes differ across versions | Defensive parsing and fixture tests per version. Missing fields degrade to "active / idle" only. |
-| Responses-API mode has much less data | A clear degraded-mode banner, plus a link to switch the connection to Desktop Gateway. |
-| Animation cost on low-end devices | Idle-stop, a particle cap, a reduce-motion path, and an automatic drop to reduced particles if frame time is over budget. |
+| `GET /health` | Reachability. 503 means "loading". |
+| `GET /props` | `total_slots`, `model_path`, `is_sleeping`, `build_info`. This is also how an engine is identified as llama.cpp; vLLM and LM Studio show as "local, no engine telemetry". |
+| `GET /v1/models` (or `GET /models` in router mode) | Models, `meta.size`, `meta.n_ctx_train`, and which models are loaded |
+| `GET /slots` (`?model=` in router mode) | Per slot: `is_processing`, `id_task`, `n_ctx`, `next_token.n_decoded` |
+| `GET /metrics` (`?model=` in router mode; needs `--metrics`) | `llamacpp:predicted_tokens_seconds`, `prompt_tokens_seconds`, `tokens_predicted_total`, `prompt_tokens_total`, `requests_processing`, `requests_deferred` |
 
-**Questions for you:**
+* **Generation tok/s:** Δ`tokens_predicted_total` / Δt when metrics are on. Otherwise,
+  Σ Δ`n_decoded` over processing slots / Δt; a change in `id_task` counts as a new
+  request, not a negative rate.
+* **Prompt tok/s** needs metrics.
+* Hermes's managed runtime always runs with `--metrics --slots` in router mode
+  (`supervisor.py:150-160`).
+* **Untracked work:** if slots are busy but no attributed call explains it, the node shows
+  "Untracked". This catches auxiliary calls, which do not fire the request hooks (§9), and
+  other clients of the same `llama-server`.
 
-1. **Entry point.** Is Hermes settings plus the Hermes tab header enough, or should the
-   dashboard be a first-class destination (for example a FAB or a launcher shortcut via
-   `quick_actions`)?
-2. **Multiple Hubs.** If several Hermes connections are saved, should the dashboard show
-   only the active Hub, or merge every Hub into one network?
-3. **GPU stats.** Do your llama.cpp machines already run a Prometheus exporter for
-   GPU/VRAM? If so, the optional GPU telemetry in Phase 5 could move into Phase 2.
-4. **Token text.** Should particles on the Hub → You edge carry real token text from
-   `message.delta` (small glyph chips), or stay abstract dots?
+### 5.4 Resource usage
+
+* **The Hub host:**
+  * psutil gives CPU %, load average, and RAM.
+  * nvidia-smi gives GPU name, utilisation, VRAM used and total, temperature, and power.
+    This extends the query in `hermes_cli/web_routers/local_models.py:_nvidia_smi_facts`.
+  * VRAM total and UMA come from `local_runtime.hardware`.
+  * Other GPU vendors show fewer readouts, and the UI hides what is missing.
+* **Remote llama.cpp machines:** llama.cpp reports no system resources, so an optional
+  helper `node_stats.py` runs on each machine.
+  * It is stdlib only, using psutil and nvidia-smi or rocm-smi when they are installed.
+  * It serves `GET /stats` with the same field names as the Hub.
+  * It binds to the LAN or Tailscale interface and is protected by a shared token set in
+    the plugin config.
+  * The plugin scrapes it at 1 s alongside the engine polls.
+* **Without the helper,** the node's card shows speed and work only, and its detail sheet
+  explains how to add the helper.
+
+### 5.5 Snapshot API (GET-only)
+
+* `GET /api/plugins/conduit-compute/health` returns `{"schema": 1, "version": "…"}`. The
+  app uses it to detect the plugin.
+* `GET /api/plugins/conduit-compute/snapshot` returns:
+
+```json
+{
+  "schema": 1,
+  "generated_at": 1761040000.4,
+  "hub": {"name": "hermes-1", "version": "…", "resources": {"cpu_percent": 22, "ram_used": 0, "ram_total": 0, "gpus": []},
+          "sessions": [{"title": "Refactor the billing module", "surface": "desktop", "running_for_s": 134}]},
+  "nodes": [
+    {"id": "local:192.168.1.20", "kind": "local", "label": "gpu-box-1", "status": "active", "last_seen": 1761040000.1,
+     "speed": {"gen_tps": 51.2, "prompt_tps": 812.0, "gen_tps_60s": [0, 12.1, 48.0], "prompt_tps_60s": []},
+     "resources": {"cpu_percent": 34, "load_avg": [2.1, 1.8, 1.5], "ram_used": 0, "ram_total": 0,
+                   "gpus": [{"name": "RTX 4090", "util_percent": 92, "vram_used": 0, "vram_total": 0, "temp_c": 71, "power_w": 310}]},
+     "engines": [{"id": "e1", "models": [{"id": "qwen3-coder-30b", "size_bytes": 0, "n_ctx": 32768, "state": "ready"}],
+                  "slots_busy": 2, "slots_total": 4, "queue": 0, "metrics": true, "build": "b6xxx"}],
+     "work": [{"kind": "subagent", "label": "Subagent: write unit tests", "session_title": "Refactor the billing module",
+               "surface": "desktop", "model": "qwen3-coder-30b", "elapsed_s": 41, "gen_tps": 38.0,
+               "tokens_out": 1203, "ttfb_ms": 420}],
+     "last_hour": {"requests": 57, "tokens_in": 0, "tokens_out": 0, "errors": 0},
+     "hints": []},
+    {"id": "cloud:openrouter", "kind": "cloud", "label": "OpenRouter", "status": "active",
+     "speed": {"gen_tps": 33.0}, "resources": null, "ttfb_ms_p50": 610, "upstream": "Fireworks",
+     "work": [], "last_hour": {}, "recent_errors": [{"status": 429, "at": 1761039900}]}
+  ]
+}
+```
+
+* The plugin keeps the 60 s history, so the detail sheet is complete the moment it opens.
+* The schema is versioned. The app rejects unknown major versions and shows an "update the
+  plugin" card.
+
+---
+
+## 6. Android app side
+
+### 6.1 Core, Flutter-free: `packages/conduit_core/lib/features/compute_monitor/`
+
+This follows the repo rule that logic lives in `conduit_core`, enforced by
+`tool/check_package_boundaries.dart`.
+
+```
+models/compute_snapshot.dart     Immutable, defensive fromJson for schema 1
+                                 (Hub, ComputeNode, Engine, Gpu, WorkItem, Speed, Hints)
+services/compute_monitor_client.dart
+                                 GET health/snapshot through the existing Hermes Desktop
+                                 REST session (auth, access headers and TLS settings
+                                 already handled by HermesDesktopApiService._requestJson)
+providers/compute_monitor_providers.dart
+                                 autoDispose stream provider: polls at 1 Hz only while
+                                 watched and the app is resumed; backs off from 1 s to
+                                 15 s on failure; keeps the last good snapshot with an age
+```
+
+Small Hermes service change: expose a typed `getPluginJson(name, path)` on
+`HermesDesktopApiService` that is restricted to `/api/plugins/conduit-compute/`. It is
+read-only, and nothing else in the Hermes services changes.
+
+### 6.2 App: `lib/features/compute_monitor/`
+
+```
+views/compute_monitor_tab.dart   tab body: summary strip, canvas or list, setup card
+widgets/compute_layout.dart      pure: (nodes, size, orientation) → card rects + edge curves
+widgets/compute_canvas.dart      one CustomPainter for edges + particles under the cards;
+                                 one Ticker; RepaintBoundary
+widgets/node_card.dart           glanceable card (§3.2), Semantics
+widgets/node_detail_sheet.dart   read-only detail sheet (§3.3), live-updating
+widgets/hub_detail_sheet.dart
+widgets/mini_bar.dart, sparkline.dart
+widgets/compute_setup_card.dart  install steps + "Copy command"
+```
+
+UI controls go through the `platform_ui` facade, as `tool/platform_ui_lint.dart` requires
+in CI.
+
+### 6.3 Registration (Android only)
+
+* Add `SidebarTabId.compute` to
+  `packages/conduit_core/lib/features/navigation/models/sidebar_navigation_model.dart`.
+* Register a descriptor in `lib/features/navigation/widgets/sidebar_tab_registry.dart`
+  with a Material icon such as `Icons.hub_outlined` / `Icons.hub`. The required SF Symbol
+  fields get placeholder names, because they never render on Android.
+* Visible when `defaultTargetPlatform == TargetPlatform.android` **and** Hermes is enabled
+  **and** the Hermes connection is in Desktop Gateway mode. See question 1 in §10 for
+  Responses API connections.
+* Add localised strings to `lib/l10n/app_en.arb`, each with an `@key` description, and
+  mirror them in all 14 locales (checked by `tool/validate_arb_locales.dart` and
+  `tool/verify_arb_descriptions.dart`).
+
+### 6.4 Rendering and battery
+
+* The canvas runs on a **single Ticker**. It is muted when the tab is not the active
+  layer, stopped on pause, and stopped whenever every rate is zero. In that last case it
+  paints once and idles, in the same spirit as `ConduitStreamingOrbit`.
+* Snapshots arrive at 1 Hz. The painter interpolates tok/s and glow between snapshots, so
+  data updates never rebuild layout.
+* Cards rebuild only when their own values change, using `select`.
+* Particles are capped at 300, from a pool with no per-frame allocation.
+* **Budget:** under 4 ms of UI-thread work per frame on a Pixel 6a-class phone with 8
+  nodes. Check with `flutter run --profile` and `lib/platform/frame_profiler.dart`.
+* **Network:** one small GET per second, and only while the tab is on screen.
+
+---
+
+## 7. Phases
+
+### Phase 0: Verify contracts (≈1 day)
+
+Test against a real Hermes at the commit Conduit targets.
+
+* Confirm that request and stream hooks fire for Desktop sessions, API-server runs, cron
+  jobs and subagents.
+* Check whether MoA reference calls fire `pre_api_request` (`agent/moa_loop.py` has its
+  own stream path).
+* Confirm that a `tab.hidden` API-only dashboard plugin mounts, and that Conduit's existing
+  Desktop credentials reach `/api/plugins/*`.
+* Record `/slots`, `/metrics` and `/props` fixtures from the managed router runtime and from
+  a plain `llama-server`.
+* **Exit:** fixtures, plus notes appended here.
+
+### Phase 1: Hermes plugin (≈3–4 days)
+
+* Hooks and activity store, inventory, llama.cpp poller, Hub stats, the `node_stats.py`
+  helper, the snapshot API, and an install README.
+* pytest coverage: hook → record mapping, the content-free guarantee, multi-process
+  merge, router-mode polling, rate derivation, and the snapshot schema.
+* A small CI job in `.github/workflows/ci.yml` runs the plugin tests.
+
+### Phase 2: App data layer (≈1–2 days)
+
+* Snapshot models and parsing (fixtures from Phase 1), the client, providers, and polling
+  lifecycle.
+* Unit tests in `packages/conduit_core/test/features/compute_monitor/` use
+  `package:checks`, `mocktail`, and `fake_async`.
+
+### Phase 3: Tab and node detail (≈3 days)
+
+* Tab registration and gating, layout, node and Hub cards, summary strip, the **node
+  detail sheet** and **Hub sheet**, the list view, setup, empty, offline and old-plugin
+  states, and l10n.
+* Widget tests in `test/features/compute_monitor/` cover layout stability, highlight
+  states, that detail sheets open on tap and update live, semantics, and that the tab is
+  hidden off Android.
+
+### Phase 4: Live animation (≈2 days)
+
+* Particles, interpolation, glow, the reduce-motion path, the idle stop, and a
+  profile-mode performance pass on device.
+
+### Later (only if wanted)
+
+* An SSE `/stream` endpoint in place of polling.
+* Support for Responses API connections (question 1 in §10).
+* An upstream Hermes PR so auxiliary calls fire the request hooks.
+
+---
+
+## 8. Testing
+
+* **Plugin:** pytest with recorded hook payloads and llama.cpp fixtures.
+* **App:** unit and widget tests as above. Run `flutter analyze`,
+  `dart run tool/run_test_shards.dart`, `dart tool/platform_ui_lint.dart`,
+  `dart run tool/check_package_boundaries.dart`, and the ARB validators.
+* **Manual matrix:**
+  * Android ARM emulator plus one physical phone.
+  * A Hub with the managed local runtime, a second llama.cpp machine with
+    `node_stats.py`, and one with no helper and no `--metrics`.
+  * One cloud provider.
+  * A delegated task with two subagents, a cron job running alongside it, Hub restart,
+    and Wi-Fi loss.
+  * Light/dark, TalkBack, and reduce motion.
+
+---
+
+## 9. Security, privacy, and limits
+
+* **Read-only end to end.** The plugin exposes only GET routes and makes only GET requests
+  to engines and helpers. The app makes only GET requests to the plugin.
+* **No content leaves the hooks.** Prompts, history, responses and delta text are ignored
+  and never stored (§5.1), and tests enforce this. Engine `/slots` bodies may contain
+  sampling params or prompt text, so only numeric and state fields are read.
+* **Secrets stay on the Hub.** Engine API keys and provider keys are read through Hermes's
+  own config resolution and are never returned in the snapshot. Base URLs of local
+  engines are reduced to host labels.
+* **Plugin trust:** it is a user plugin, so it runs only after being added to
+  `plugins.enabled`, which is Hermes's own gate.
+* **Known limits:**
+  * Auxiliary calls (vision, compression, titles) do not fire the request hooks. On local
+    nodes they show as "Untracked"; on cloud providers they are not visible.
+  * Cloud nodes have no resource figures.
+  * Live tok/s for cloud calls is estimated from stream length until the exact usage
+    arrives at the end of each call.
+
+---
+
+## 10. Open questions
+
+1. **Connection mode:** which Hermes connection mode do you use? The plugin's API is served
+   by the **Hermes dashboard**, which is what a **Desktop Gateway** connection talks to.
+   A **Responses API** connection talks to the API server on port 8642, which has no
+   plugin routes. If you use Responses API, the plan adds an optional "Dashboard URL" to
+   that connection just for this tab.
+2. **Remote machines:** are your remote llama.cpp machines NVIDIA? That decides whether
+   `node_stats.py` needs `rocm-smi` or Apple Silicon support in Phase 1.
+3. **Hub numbers:** should the Hub card show its own CPU/RAM figures, or only connect the
+   nodes?
