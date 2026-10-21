@@ -61,7 +61,7 @@ starts nothing, stops nothing and changes nothing.
 ```
  ┌──────────────────────────────────────────────────────────────┐
  │ 3 of 5 nodes busy · 142 tok/s · 2 sessions · updated 0.4 s    │  summary strip
- │ "Refactor the billing module" (Desktop) · Daily digest (cron) │  what the collective is on
+ │ "Refactor the billing module" (dashboard) · Daily digest (cron) │  what the collective is on
  └──────────────────────────────────────────────────────────────┘
                      ┌──────────────────────┐
                      │  HERMES HUB  hermes-1 │  CPU 22% · RAM 41%
@@ -117,7 +117,7 @@ updating live while open.
   and how recently the data was updated (for example "0.6 s ago").
 * **Doing now:** every work item on this node. Each shows:
   * its label, for example "Subagent: write unit tests", "Scheduled job: Daily digest",
-    "Desktop: Refactor billing", or "Telegram";
+    "Dashboard chat: Refactor billing", or "Telegram";
   * the session title, the model, and elapsed time;
   * live tok/s, tokens generated so far, and time to first token.
 * **Speed:** generation and prompt tok/s now, plus a 60-second sparkline of each.
@@ -174,11 +174,12 @@ machines or providers directly. There are two reasons:
 ```
  Hermes host
  ┌──────────────────────────────────────────────────────────────────────────┐
- │  Agent processes (gateway: API server, cron, messaging; dashboard:       │
- │  Desktop sessions)                                                       │
+ │  Agent processes: the dashboard server (chats from the browser and from  │
+ │  Conduit) and, if it runs, `hermes gateway` (cron, messaging, API server)│
  │    └─ conduit-compute hooks ── content-free activity records ──┐         │
  │                                     ~/.hermes/conduit-compute/activity/  │
- │  Dashboard process                                              │        │
+ │  Dashboard server (`hermes dashboard`, the one you open in a    │        │
+ │  browser; port 9119 by default)                                 │        │
  │    └─ conduit-compute API  ◀────────────────────────────────────┘        │
  │         ├─ inventory from Hermes config (main, providers, managed        │
  │         │   runtime, auxiliary, MoA, delegation)                         │
@@ -197,16 +198,35 @@ Two pieces get built:
    samples and serves one snapshot (§5).
 2. The **Compute tab** in the Android app. It polls the snapshot and renders it (§6).
 
-### 4.1 Network access (Desktop Gateway, IP allowlist)
+### 4.1 Connecting to the Hermes dashboard (Desktop Gateway), behind an IP allowlist
 
-The setup is a **Desktop Gateway** connection with access limited to specific IPs. Hermes
-has no client-IP allowlist of its own (it has only `dashboard.trusted_proxies`, for
-forwarded headers), so the allowlist is enforced in front of it by a firewall, reverse
-proxy or VPN ACL. The design keeps that allowlist as it is:
+**"Desktop Gateway" is Conduit's name for connecting to the Hermes dashboard server.**
+That is the same server (`hermes dashboard`, port 9119 by default) that you open in a
+browser. It serves the web UI, the REST API (`/api/*`) and the chat WebSocket (`/api/ws`,
+`hermes_cli/web_routers/chat_ws.py:561`). The name comes from Hermes's desktop-app
+contract (`DESKTOP_BACKEND_CONTRACT` in `tui_gateway/server.py`), which the dashboard
+implements.
+
+**Setup in Conduit:**
+
+1. Settings → Hermes → add a connection.
+2. Mode: **Desktop Gateway**.
+3. URL: the **same dashboard URL you use in the browser**.
+4. Authentication: **Dashboard**. This opens the dashboard's own sign-in page in a
+   WebView, the same login as the browser.
+
+Separately, Conduit warns "Desktop Gateway is stopped" when the dashboard reports
+`gateway_running: false`. That flag is about Hermes's **other** process, `hermes gateway`
+(messaging platforms, cron, API server). The dashboard and the tab work without it. Cron
+and messaging work simply won't appear unless that process runs.
+
+**Access:** Hermes has no client-IP allowlist of its own (it has only
+`dashboard.trusted_proxies`, for forwarded headers), so the allowlist is enforced in front
+of it by a firewall, reverse proxy or VPN ACL.
 
 | Path | Who connects | Allowlist change |
 | --- | --- | --- |
-| Phone → Hub dashboard | The app, to `/api/plugins/conduit-compute/*` on the **same origin and port** as the existing Desktop Gateway connection, with the same credentials and access headers | **None.** Plugin routes are not in `PUBLIC_API_PATHS` (`hermes_cli/dashboard_auth/public_paths.py`), so they sit behind the same dashboard auth gate as everything else. |
+| Phone → Hub dashboard | The app, to `/api/plugins/conduit-compute/*` on the **same origin and port** as the browser dashboard, with the same login and access headers | **Same rule as your browsers.** If the phone can already open the dashboard, nothing changes. If not, the phone needs the access your browsers have: its IP added to the allowlist, or the phone joined to a network or VPN that is already allowed. Plugin routes are not in `PUBLIC_API_PATHS` (`hermes_cli/dashboard_auth/public_paths.py`), so they sit behind the dashboard sign-in like everything else. |
 | Hub → llama.cpp machines | The plugin, from the Hub's IP | Each `llama-server` port only needs to accept the **Hub's IP**. The phone never needs access to a node. |
 | Hub → `node_stats.py` helpers | The plugin, from the Hub's IP | The helper has its own `allow_ips` (default: only the Hub's IP) plus a shared token, and binds to one chosen interface. |
 | Hub → cloud providers | Unchanged | None |
@@ -275,9 +295,13 @@ messaging platforms, other clients and subagents, not only the phone's own chats
     the same way `tui_gateway/server.py` does it.
 * **Label:**
   * A `child_session_id` that has been seen in `subagent_start` gets "Subagent: <goal>".
-  * Otherwise the label comes from the platform: cron gives "Scheduled job: <name>",
-    telegram/discord/etc. give the platform name, api_server/desktop give "Session:
-    <title>".
+  * Otherwise the label comes from the platform:
+    * `tui` is a dashboard chat, from the browser or from Conduit, and gets
+      "Dashboard chat: <title>". The dashboard tags its sessions `platform="tui"` in
+      `tui_gateway`.
+    * cron gives "Scheduled job: <name>".
+    * telegram, discord and the other messaging platforms give the platform name.
+    * `api_server` gives "API: <title>".
   * Session titles are looked up in the Hermes session DB (`hermes_state`), read-only and
     cached.
 * **Live tok/s:** an EWMA of streamed characters ÷ ~4 per token, replaced by exact
@@ -365,7 +389,7 @@ one cloud node.
   "schema": 1,
   "generated_at": 1761040000.4,
   "hub": {"name": "hermes-1", "version": "…", "resources": {"cpu_percent": 22, "ram_used": 0, "ram_total": 0, "gpus": []},
-          "sessions": [{"title": "Refactor the billing module", "surface": "desktop", "running_for_s": 134}]},
+          "sessions": [{"title": "Refactor the billing module", "surface": "dashboard", "running_for_s": 134}]},
   "nodes": [
     {"id": "local:192.168.1.20", "kind": "local", "label": "gpu-box-1", "status": "active", "last_seen": 1761040000.1,
      "speed": {"gen_tps": 51.2, "prompt_tps": 812.0, "gen_tps_60s": [0, 12.1, 48.0], "prompt_tps_60s": []},
@@ -374,7 +398,7 @@ one cloud node.
      "engines": [{"id": "e1", "models": [{"id": "qwen3-coder-30b", "size_bytes": 0, "n_ctx": 32768, "state": "ready"}],
                   "slots_busy": 2, "slots_total": 4, "queue": 0, "metrics": true, "build": "b6xxx"}],
      "work": [{"kind": "subagent", "label": "Subagent: write unit tests", "session_title": "Refactor the billing module",
-               "surface": "desktop", "model": "qwen3-coder-30b", "elapsed_s": 41, "gen_tps": 38.0,
+               "surface": "dashboard", "model": "qwen3-coder-30b", "elapsed_s": 41, "gen_tps": 38.0,
                "tokens_out": 1203, "ttfb_ms": 420}],
      "last_hour": {"requests": 57, "tokens_in": 0, "tokens_out": 0, "errors": 0},
      "hints": []},
@@ -470,12 +494,15 @@ in CI.
 
 Test against a real Hermes at the commit Conduit targets.
 
-* Confirm that request and stream hooks fire for Desktop sessions, API-server runs, cron
-  jobs and subagents.
+* Confirm that request and stream hooks fire for dashboard chats (started from the browser
+  and from Conduit), cron jobs and messaging (only when `hermes gateway` runs), and
+  subagents. Check this also with `dashboard.turn_isolation` on, where agents run in the
+  compute-host child process (`tui_gateway/compute_host.py`).
 * Check whether MoA reference calls fire `pre_api_request` (`agent/moa_loop.py` has its
   own stream path).
-* Confirm that a `tab.hidden` API-only dashboard plugin mounts, and that Conduit's existing
-  Desktop credentials reach `/api/plugins/*`.
+* Confirm that a `tab.hidden` API-only dashboard plugin mounts, and that Conduit's
+  Dashboard sign-in (the same login as the browser) reaches `/api/plugins/*` through your
+  IP allowlist.
 * Record `/slots`, `/metrics` and `/props` fixtures from the managed router runtime and from
   a plain `llama-server`.
 * **Exit:** fixtures, plus notes appended here.
@@ -564,8 +591,10 @@ Test against a real Hermes at the commit Conduit targets.
 
 **Decided**
 
-* **Connection:** Desktop Gateway, with access restricted to specific IPs. The tab uses
-  that connection as it is (§4.1).
+* **Connection:** you use the Hermes dashboard in a browser. In Conduit that is the
+  **Desktop Gateway** mode, pointed at the same dashboard URL and signed in with
+  **Dashboard** auth. Access is restricted to specific IPs, so the phone needs the same
+  access as your browsers (§4.1).
 
 **Open**
 
