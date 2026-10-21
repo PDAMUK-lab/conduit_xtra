@@ -197,6 +197,30 @@ Two pieces get built:
    samples and serves one snapshot (§5).
 2. The **Compute tab** in the Android app. It polls the snapshot and renders it (§6).
 
+### 4.1 Network access (Desktop Gateway, IP allowlist)
+
+The setup is a **Desktop Gateway** connection with access limited to specific IPs. Hermes
+has no client-IP allowlist of its own (it has only `dashboard.trusted_proxies`, for
+forwarded headers), so the allowlist is enforced in front of it by a firewall, reverse
+proxy or VPN ACL. The design keeps that allowlist as it is:
+
+| Path | Who connects | Allowlist change |
+| --- | --- | --- |
+| Phone → Hub dashboard | The app, to `/api/plugins/conduit-compute/*` on the **same origin and port** as the existing Desktop Gateway connection, with the same credentials and access headers | **None.** Plugin routes are not in `PUBLIC_API_PATHS` (`hermes_cli/dashboard_auth/public_paths.py`), so they sit behind the same dashboard auth gate as everything else. |
+| Hub → llama.cpp machines | The plugin, from the Hub's IP | Each `llama-server` port only needs to accept the **Hub's IP**. The phone never needs access to a node. |
+| Hub → `node_stats.py` helpers | The plugin, from the Hub's IP | The helper has its own `allow_ips` (default: only the Hub's IP) plus a shared token, and binds to one chosen interface. |
+| Hub → cloud providers | Unchanged | None |
+
+* **No new ports are opened on the Hub.**
+* **When the phone is on a network outside the allowlist** (for example mobile data with
+  no VPN), the tab behaves like the rest of the Hermes features in the app. It keeps the
+  last snapshot with its age and shows why it can't refresh:
+  * timeout or refused connection → "Hermes is not reachable from this network";
+  * 401 → "Sign in to Hermes again";
+  * 403 → "This device is not allowed";
+  * 404 on the plugin → setup card;
+  * unknown schema → "Update the plugin".
+
 ---
 
 ## 5. Hermes side: the `conduit-compute` plugin
@@ -222,7 +246,8 @@ hermes-plugin/conduit-compute/
   host_stats.py            psutil + nvidia-smi for the Hub (same facts as
                            /api/local-models/hardware and /api/system/stats)
   node_stats/node_stats.py optional zero-dependency helper for remote llama.cpp machines
-  config.example.yaml      per-node display names, node-stats URLs/tokens, poll interval
+  config.example.yaml      per-node display names, node-stats URLs/tokens, poll interval;
+                           node_stats.py bind address + allow_ips (default: Hub IP only)
   tests/                   pytest
 ```
 
@@ -321,8 +346,10 @@ one cloud node.
   helper `node_stats.py` runs on each machine.
   * It is stdlib only, using psutil and nvidia-smi or rocm-smi when they are installed.
   * It serves `GET /stats` with the same field names as the Hub.
-  * It binds to the LAN or Tailscale interface and is protected by a shared token set in
-    the plugin config.
+  * It binds to one configured interface (LAN or VPN).
+  * It accepts requests only from `allow_ips`, which defaults to the Hub's IP, and only
+    with a shared token set in the plugin config. This matches the IP-allowlist policy in
+    §4.1.
   * The plugin scrapes it at 1 s alongside the engine polls.
 * **Without the helper,** the node's card shows speed and work only, and its detail sheet
   explains how to add the helper.
@@ -382,6 +409,8 @@ providers/compute_monitor_providers.dart
                                  autoDispose stream provider: polls at 1 Hz only while
                                  watched and the app is resumed; backs off from 1 s to
                                  15 s on failure; keeps the last good snapshot with an age
+                                 and a typed failure (unreachable / unauthorised /
+                                 forbidden / plugin missing / schema too new; see §4.1)
 ```
 
 Small Hermes service change: expose a typed `getPluginJson(name, path)` on
@@ -413,8 +442,9 @@ in CI.
   with a Material icon such as `Icons.hub_outlined` / `Icons.hub`. The required SF Symbol
   fields get placeholder names, because they never render on Android.
 * Visible when `defaultTargetPlatform == TargetPlatform.android` **and** Hermes is enabled
-  **and** the Hermes connection is in Desktop Gateway mode. See question 1 in §10 for
-  Responses API connections.
+  **and** the active Hermes connection is in Desktop Gateway mode
+  (`HermesBackendMode.desktopGateway`, the mode in use). Responses API connections are out
+  of scope.
 * Add localised strings to `lib/l10n/app_en.arb`, each with an `@key` description, and
   mirror them in all 14 locales (checked by `tool/validate_arb_locales.dart` and
   `tool/verify_arb_descriptions.dart`).
@@ -482,7 +512,6 @@ Test against a real Hermes at the commit Conduit targets.
 ### Later (only if wanted)
 
 * An SSE `/stream` endpoint in place of polling.
-* Support for Responses API connections (question 1 in §10).
 * An upstream Hermes PR so auxiliary calls fire the request hooks.
 
 ---
@@ -500,6 +529,10 @@ Test against a real Hermes at the commit Conduit targets.
   * One cloud provider.
   * A delegated task with two subagents, a cron job running alongside it, Hub restart,
     and Wi-Fi loss.
+  * The phone on an allowed IP, and on a network outside the allowlist (expect the
+    "not reachable" state, with the last snapshot kept).
+  * llama.cpp machines and `node_stats.py` firewalled to the Hub's IP only (the phone
+    can't reach them, and the tab still shows full data).
   * Light/dark, TalkBack, and reduce motion.
 
 ---
@@ -516,6 +549,8 @@ Test against a real Hermes at the commit Conduit targets.
   engines are reduced to host labels.
 * **Plugin trust:** it is a user plugin, so it runs only after being added to
   `plugins.enabled`, which is Hermes's own gate.
+* **Access:** the snapshot is behind dashboard auth and the existing IP allowlist, and it
+  adds no public paths. Nodes and helpers accept only the Hub (§4.1).
 * **Known limits:**
   * Auxiliary calls (vision, compression, titles) do not fire the request hooks. On local
     nodes they show as "Untracked"; on cloud providers they are not visible.
@@ -525,14 +560,20 @@ Test against a real Hermes at the commit Conduit targets.
 
 ---
 
-## 10. Open questions
+## 10. Decisions and open questions
 
-1. **Connection mode:** which Hermes connection mode do you use? The plugin's API is served
-   by the **Hermes dashboard**, which is what a **Desktop Gateway** connection talks to.
-   A **Responses API** connection talks to the API server on port 8642, which has no
-   plugin routes. If you use Responses API, the plan adds an optional "Dashboard URL" to
-   that connection just for this tab.
-2. **Remote machines:** are your remote llama.cpp machines NVIDIA? That decides whether
+**Decided**
+
+* **Connection:** Desktop Gateway, with access restricted to specific IPs. The tab uses
+  that connection as it is (§4.1).
+
+**Open**
+
+1. **Remote machines:** are your remote llama.cpp machines NVIDIA? That decides whether
    `node_stats.py` needs `rocm-smi` or Apple Silicon support in Phase 1.
-3. **Hub numbers:** should the Hub card show its own CPU/RAM figures, or only connect the
+2. **Hub numbers:** should the Hub card show its own CPU/RAM figures, or only connect the
    nodes?
+3. **Where the allowlist lives:** is it a firewall, reverse proxy, or VPN ACL? If a
+   reverse proxy sits in front of the dashboard, its address belongs in
+   `dashboard.trusted_proxies` so Hermes records real client IPs. The tab works either
+   way.
