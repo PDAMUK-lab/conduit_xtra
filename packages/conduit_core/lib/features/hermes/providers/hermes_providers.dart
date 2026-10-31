@@ -2565,6 +2565,50 @@ final hermesDesktopContractProvider = StreamProvider<int>((ref) {
       : const Stream<int>.empty();
 });
 
+/// Approvals and questions waiting across every session of the active
+/// connection, soonest expiry first.
+///
+/// Backed by the restart-safe local store: Hermes stays authoritative for
+/// whether a request is still open, so an entry answered on another device
+/// lingers until the next live event clears it. The stream repaints when the
+/// store changes, which is what lets a decision answered inside one chat
+/// disappear from the inbox without polling.
+final hermesPendingDecisionsProvider =
+    StreamProvider<List<HermesPendingDesktopDecision>>((ref) async* {
+      final config = ref.watch(
+        hermesConfigProvider.select(
+          (config) => (
+            config.enabled,
+            config.mode,
+            config.connectionId,
+            config.baseUrl,
+          ),
+        ),
+      );
+      if (!config.$1 || config.$2 != HermesBackendMode.desktopGateway) {
+        yield const <HermesPendingDesktopDecision>[];
+        return;
+      }
+      final connectionId = config.$3;
+      final origin = HermesConfig.connectionOrigin(config.$4);
+      yield await HermesPendingDecisionStore.all(
+        connectionId: connectionId,
+        origin: origin,
+      );
+      await for (final _ in HermesPendingDecisionStore.changes) {
+        yield await HermesPendingDecisionStore.all(
+          connectionId: connectionId,
+          origin: origin,
+        );
+      }
+    });
+
+/// Number of approvals waiting, for badges that must not rebuild the list.
+final hermesPendingDecisionCountProvider = Provider<int>(
+  (ref) =>
+      ref.watch(hermesPendingDecisionsProvider).asData?.value.length ?? 0,
+);
+
 /// Synchronous best-effort view of capabilities for gating UI (optimistic
 /// default while loading / on error).
 HermesCapabilities hermesCapabilitiesNow(Ref ref) =>

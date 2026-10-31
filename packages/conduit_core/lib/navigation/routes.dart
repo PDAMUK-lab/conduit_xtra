@@ -50,6 +50,7 @@ class Routes {
       '/profile/hermes/connections/:id';
   static const String hermesNewConnectionId = 'new';
   static const String hermesJobs = '/profile/hermes/jobs';
+  static const String hermesApprovals = '/profile/hermes/approvals';
   static const String hermesMcp = '/profile/hermes/mcp';
   static const String about = '/profile/about';
   static const String notes = '/notes';
@@ -105,6 +106,7 @@ class RouteNames {
   static const String hermesSettings = 'hermes-settings';
   static const String hermesConnectionEditor = 'hermes-connection-editor';
   static const String hermesJobs = 'hermes-jobs';
+  static const String hermesApprovals = 'hermes-approvals';
   static const String hermesMcp = 'hermes-mcp';
   static const String about = 'about';
   static const String notes = 'notes';

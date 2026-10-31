@@ -18,6 +18,7 @@ import 'package:conduit_core/features/direct_connections/providers/direct_connec
 import '../../../l10n/app_localizations.dart';
 import '../../../shared/theme/theme_extensions.dart';
 import '../../../shared/widgets/platform_ui/platform_ui.dart';
+import '../../../shared/widgets/conduit_components.dart';
 import '../../../shared/widgets/utility_components.dart';
 import '../../direct_connections/providers/apple_pcc_providers.dart';
 
@@ -87,7 +88,39 @@ class BackendChooserPage extends ConsumerWidget {
             title: l10n.backendChooserSelfHostedSectionTitle,
             dividerIndent: _providerDividerIndent,
             children: [
+              // Hermes leads: this build is Hermes-first, and an agent that
+              // runs tools and schedules work is what the home screen is for.
+              // Open WebUI stays one row below for synced chats and notes.
               UtilitySelectionRow(
+                key: const ValueKey<String>('backend-chooser-hermes'),
+                leading: const _ProviderLogo(
+                  assetName: 'assets/icons/hermes_agent.png',
+                  kind: _ProviderLogoKind.hermes,
+                ),
+                title: l10n.backendChooserHermesTitle,
+                subtitle: l10n.backendChooserHermesSubtitle,
+                selected: false,
+                showSelectionIndicator: false,
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // A badge, not prose: clamp its scaling so a 3x text
+                    // setting cannot push the row past the viewport.
+                    MediaQuery.withClampedTextScaling(
+                      maxScaleFactor: 1.3,
+                      child: ConduitBadge(
+                        text: l10n.backendChooserRecommended,
+                        isCompact: true,
+                      ),
+                    ),
+                    const SizedBox(width: Spacing.xs),
+                    _chooserChevron(context),
+                  ],
+                ),
+                onTap: () => context.go(Routes.hermesSettings, extra: true),
+              ),
+              UtilitySelectionRow(
+                key: const ValueKey<String>('backend-chooser-openwebui'),
                 leading: const _ProviderLogo(
                   assetName: 'assets/icons/open_webui.png',
                   kind: _ProviderLogoKind.openWebUI,
@@ -98,18 +131,6 @@ class BackendChooserPage extends ConsumerWidget {
                 showSelectionIndicator: false,
                 trailing: _chooserChevron(context),
                 onTap: () => context.go(Routes.serverConnection),
-              ),
-              UtilitySelectionRow(
-                leading: const _ProviderLogo(
-                  assetName: 'assets/icons/hermes_agent.png',
-                  kind: _ProviderLogoKind.hermes,
-                ),
-                title: l10n.backendChooserHermesTitle,
-                subtitle: l10n.backendChooserHermesSubtitle,
-                selected: false,
-                showSelectionIndicator: false,
-                trailing: _chooserChevron(context),
-                onTap: () => context.go(Routes.hermesSettings, extra: true),
               ),
             ],
           ),

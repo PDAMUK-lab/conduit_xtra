@@ -6442,6 +6442,7 @@
   "@backendChooserOpenWebUISubtitle": {
     "description": "Description of the Open WebUI option on the backend chooser."
   },
+  "backendChooserRecommended": "Polecane",
   "backendChooserHermesTitle": "Hermes Agent",
   "@backendChooserHermesTitle": {
     "description": "Title of the Hermes Agent option on the backend chooser."
@@ -6450,6 +6451,14 @@
   "@backendChooserHermesSubtitle": {
     "description": "Description of the Hermes Agent option on the backend chooser."
   },
+  "hermesApprovalsTitle": "Zatwierdzenia",
+  "hermesApprovalsSubtitle": "Kroki, na które agent czeka we wszystkich rozmowach.",
+  "hermesApprovalsEmpty": "Nic nie czeka na zatwierdzenie.",
+  "hermesApprovalsOpenConversation": "Otwórz rozmowę",
+  "hermesApprovalsLoadFailed": "Nie udało się wczytać zatwierdzeń.",
+  "hermesApprovalResolveFailed": "Nie udało się wysłać decyzji. Spróbuj ponownie.",
+  "hermesApprovalsExpiresInHours": "{count, plural, =1{Wygaśnie za 1 godzinę} other{Wygaśnie za {count} godzin}}",
+  "hermesApprovalsExpiresInMinutes": "{count, plural, =1{Wygaśnie za 1 minutę} other{Wygaśnie za {count} minut}}",
   "hermesApprovalRequired": "Wymagana zgoda",
   "@hermesApprovalRequired": {
     "description": "Title of a Hermes human-approval request card."

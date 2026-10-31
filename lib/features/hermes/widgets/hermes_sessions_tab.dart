@@ -1,6 +1,7 @@
 import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/services/haptic_service.dart';
 import '../../../l10n/app_localizations.dart';
@@ -11,6 +12,7 @@ import '../../../shared/widgets/sidebar_layout_contract.dart';
 import '../../navigation/providers/sidebar_tab_scroll_registry.dart';
 
 import 'package:conduit_core/features/navigation/models/sidebar_navigation_model.dart';
+import 'package:conduit_core/navigation/routes.dart';
 
 import '../../navigation/widgets/chats_drawer.dart'
     show sidebarSectionDisclosureIcon;
@@ -20,6 +22,7 @@ import 'package:conduit_core/features/navigation/providers/drawer_section_notifi
 import 'package:conduit_core/features/hermes/models/hermes_bot.dart';
 import 'package:conduit_core/features/hermes/models/hermes_session.dart';
 import 'package:conduit_core/features/hermes/providers/hermes_providers.dart';
+import 'package:conduit_core/features/hermes/services/hermes_pending_decision_store.dart';
 
 import 'hermes_bot_tile.dart';
 import 'hermes_connection_switcher.dart';
@@ -73,6 +76,7 @@ class _HermesSessionsTabState extends ConsumerState<HermesSessionsTab>
         ),
         // Names the active connection; switches when several are saved.
         const SliverToBoxAdapter(child: HermesConnectionSwitcherTile()),
+        const SliverToBoxAdapter(child: _ApprovalsTile()),
         ..._botSlivers(context, ref.watch(hermesBotsProvider).asData?.value),
         if (showJobs) const SliverToBoxAdapter(child: _ScheduledAgentsTile()),
         ..._sessionSlivers(context, sessionsAsync),
@@ -318,6 +322,115 @@ class _ScheduledAgentsTile extends ConsumerWidget {
                   ),
                 ),
               ],
+              const SizedBox(width: Spacing.xs),
+              Icon(
+                Icons.chevron_right_rounded,
+                size: IconSize.listItem,
+                color: theme.iconSecondary,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Approvals waiting across every conversation of this connection.
+///
+/// Hidden entirely when nothing is waiting: an empty inbox is not a place, it
+/// is the absence of one. The count is the same store the inbox page reads, so
+/// answering a decision anywhere makes this row disappear.
+class _ApprovalsTile extends ConsumerWidget {
+  const _ApprovalsTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final pending =
+        ref.watch(hermesPendingDecisionsProvider).asData?.value ??
+        const <HermesPendingDesktopDecision>[];
+    if (pending.isEmpty) return const SizedBox.shrink();
+    final theme = context.conduitTheme;
+    final l10n = AppLocalizations.of(context)!;
+    final firstPrompt = pending.first.prompt?.trim();
+    final subtitle = firstPrompt == null || firstPrompt.isEmpty
+        ? l10n.hermesApprovalsSubtitle
+        : firstPrompt;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        Spacing.sm,
+        Spacing.md,
+        Spacing.sm,
+        Spacing.xs,
+      ),
+      child: InkWell(
+        key: const ValueKey<String>('hermes-approvals-tile'),
+        onTap: () => context.push(Routes.hermesApprovals),
+        borderRadius: BorderRadius.circular(AppBorderRadius.card),
+        child: Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: Spacing.md,
+            vertical: Spacing.sm,
+          ),
+          decoration: BoxDecoration(
+            color: theme.surfaceBackground,
+            borderRadius: BorderRadius.circular(AppBorderRadius.card),
+            border: Border.all(color: theme.cardBorder),
+          ),
+          child: Row(
+            children: [
+              SizedBox(
+                width: IconSize.xl,
+                height: IconSize.xl,
+                child: Icon(
+                  Icons.verified_user_outlined,
+                  size: IconSize.medium,
+                  color: theme.buttonPrimary,
+                ),
+              ),
+              const SizedBox(width: Spacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.hermesApprovalsTitle,
+                      style: AppTypography.bodyMediumStyle.copyWith(
+                        color: theme.textPrimary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: Spacing.xxs),
+                    Text(
+                      subtitle,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTypography.bodySmallStyle.copyWith(
+                        color: theme.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: Spacing.sm),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: Spacing.sm,
+                  vertical: Spacing.xxs,
+                ),
+                decoration: BoxDecoration(
+                  color: theme.buttonPrimary.withValues(alpha: Alpha.badgeBackground),
+                  borderRadius: BorderRadius.circular(AppBorderRadius.pill),
+                ),
+                child: Text(
+                  '${pending.length}',
+                  style: AppTypography.labelMediumStyle.copyWith(
+                    color: theme.buttonPrimary,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
               const SizedBox(width: Spacing.xs),
               Icon(
                 Icons.chevron_right_rounded,

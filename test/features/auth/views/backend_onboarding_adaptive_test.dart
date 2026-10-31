@@ -66,6 +66,13 @@ void main() {
       expect(find.text('Apple On-Device'), findsOneWidget);
       expect(find.text('Apple Private Cloud Compute'), findsOneWidget);
       expect(find.text('Hermes Agent'), findsOneWidget);
+      // Hermes leads this build: it sits above Open WebUI and carries the
+      // recommended badge.
+      expect(find.text('Recommended'), findsOneWidget);
+      expect(
+        tester.getTopLeft(find.text('Hermes Agent')).dy,
+        lessThan(tester.getTopLeft(find.text('Open WebUI')).dy),
+      );
       expect(find.byIcon(CupertinoIcons.link), findsOneWidget);
       expect(find.byIcon(CupertinoIcons.device_phone_portrait), findsOneWidget);
       expect(find.byIcon(CupertinoIcons.cloud_fill), findsOneWidget);

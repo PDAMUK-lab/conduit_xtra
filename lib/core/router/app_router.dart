@@ -37,6 +37,7 @@ import '../../features/profile/views/voice_provider_settings_page.dart';
 import '../../features/hermes/views/hermes_connections_page.dart';
 import '../../features/hermes/views/hermes_settings_page.dart';
 import '../../features/hermes/views/hermes_jobs_page.dart';
+import '../../features/hermes/views/hermes_approvals_page.dart';
 import '../../features/hermes/views/hermes_mcp_page.dart';
 import '../../features/profile/views/personalization_page.dart';
 import '../../features/profile/views/profile_page.dart';
@@ -529,6 +530,12 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       name: RouteNames.hermesJobs,
       pageBuilder: (context, state) =>
           _buildPlatformPage(state: state, child: const HermesJobsPage()),
+    ),
+    GoRoute(
+      path: Routes.hermesApprovals,
+      name: RouteNames.hermesApprovals,
+      pageBuilder: (context, state) =>
+          _buildPlatformPage(state: state, child: const HermesApprovalsPage()),
     ),
     GoRoute(
       path: Routes.hermesMcp,

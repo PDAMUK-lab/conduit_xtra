@@ -6016,6 +6016,10 @@
   "@backendChooserOpenWebUISubtitle": {
     "description": "Description of the Open WebUI option on the backend chooser."
   },
+  "backendChooserRecommended": "Recommended",
+  "@backendChooserRecommended": {
+    "description": "Badge marking the default, recommended backend on the first-run chooser."
+  },
   "backendChooserHermesTitle": "Hermes Agent",
   "@backendChooserHermesTitle": {
     "description": "Title of the Hermes Agent option on the backend chooser."
@@ -6023,6 +6027,40 @@
   "backendChooserHermesSubtitle": "Connect a self-hosted Hermes agent.",
   "@backendChooserHermesSubtitle": {
     "description": "Description of the Hermes Agent option on the backend chooser."
+  },
+  "hermesApprovalsTitle": "Approvals",
+  "@hermesApprovalsTitle": {
+    "description": "Hermes approvals inbox copy."
+  },
+  "hermesApprovalsSubtitle": "Steps your agent is waiting on, across every conversation.",
+  "@hermesApprovalsSubtitle": {
+    "description": "Hermes approvals inbox copy."
+  },
+  "hermesApprovalsEmpty": "Nothing is waiting for approval.",
+  "@hermesApprovalsEmpty": {
+    "description": "Hermes approvals inbox copy."
+  },
+  "hermesApprovalsOpenConversation": "Open conversation",
+  "@hermesApprovalsOpenConversation": {
+    "description": "Hermes approvals inbox copy."
+  },
+  "hermesApprovalsLoadFailed": "Could not load approvals.",
+  "@hermesApprovalsLoadFailed": {
+    "description": "Hermes approvals inbox copy."
+  },
+  "hermesApprovalResolveFailed": "Could not send that decision. Try again.",
+  "@hermesApprovalResolveFailed": {
+    "description": "Hermes approvals inbox copy."
+  },
+  "hermesApprovalsExpiresInHours": "{count, plural, =1{Expires in 1 hour} other{Expires in {count} hours}}",
+  "@hermesApprovalsExpiresInHours": {
+    "description": "How long a Hermes approval stays answerable.",
+    "placeholders": {"count": {"type": "int"}}
+  },
+  "hermesApprovalsExpiresInMinutes": "{count, plural, =1{Expires in 1 minute} other{Expires in {count} minutes}}",
+  "@hermesApprovalsExpiresInMinutes": {
+    "description": "How long a Hermes approval stays answerable.",
+    "placeholders": {"count": {"type": "int"}}
   },
   "hermesApprovalRequired": "Approval required",
   "@hermesApprovalRequired": {

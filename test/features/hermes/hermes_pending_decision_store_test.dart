@@ -295,4 +295,71 @@ void main() {
     check(records.single.choices).deepEquals(const ['alpha', 'beta']);
     check(records.single.multiSelect).isTrue();
   });
+
+  test('lists every session for one connection, soonest expiry first', () async {
+    const origin = 'https://hermes.example:443';
+    const connection = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
+    for (final id in const ['stored-1', 'stored-2']) {
+      await HermesPendingDecisionStore.upsert(
+        origin: origin,
+        storedSessionId: id,
+        runtimeId: 'runtime-$id',
+        requestId: 'request-$id',
+        kind: HermesPendingDesktopDecisionKind.approval,
+        connectionId: connection,
+      );
+    }
+    await HermesPendingDecisionStore.upsert(
+      origin: 'https://other.example:443',
+      storedSessionId: 'stored-3',
+      runtimeId: 'runtime-3',
+      requestId: 'request-3',
+      kind: HermesPendingDesktopDecisionKind.approval,
+    );
+
+    final scoped = await HermesPendingDecisionStore.all(
+      connectionId: connection,
+      origin: origin,
+    );
+    // Records with no connection id still match this connection, but only on
+    // its own origin: the third request came from another server.
+    check(
+      scoped.map((record) => record.requestId),
+    ).unorderedEquals(['request-stored-1', 'request-stored-2']);
+
+    final every = await HermesPendingDecisionStore.all();
+    check(every).length.equals(3);
+    for (var i = 1; i < every.length; i++) {
+      check(
+        every[i].expiresAt.isBefore(every[i - 1].expiresAt),
+      ).isFalse();
+    }
+  });
+
+  test('wakes watchers only when the stored set moves', () async {
+    const origin = 'https://hermes.example:443';
+    final events = <void>[];
+    final subscription = HermesPendingDecisionStore.changes.listen(events.add);
+    addTearDown(subscription.cancel);
+
+    await HermesPendingDecisionStore.upsert(
+      origin: origin,
+      storedSessionId: 'stored-1',
+      runtimeId: 'runtime-1',
+      requestId: 'request-1',
+      kind: HermesPendingDesktopDecisionKind.approval,
+    );
+    // A read that prunes nothing must not look like a change.
+    await HermesPendingDecisionStore.all();
+    await Future<void>.delayed(Duration.zero);
+    check(events).length.equals(1);
+
+    await HermesPendingDecisionStore.resolve(
+      origin: origin,
+      runtimeId: 'runtime-1',
+      requestId: 'request-1',
+    );
+    await Future<void>.delayed(Duration.zero);
+    check(events).length.equals(2);
+  });
 }

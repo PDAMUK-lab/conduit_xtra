@@ -90,6 +90,22 @@ list is dominated by `ops` (28), `git` (21), `files` (19), `dashboard_ui` (18),
 `local_models` (18), `status` extras (18), `profiles` CRUD (12), `tools` (12),
 `messaging` (11).
 
+## Build environment on `ai-node`
+
+Measured 2026-10-31, unprivileged user `hermes` (no sudo):
+
+| Component | Version | Path |
+| --- | --- | --- |
+| Flutter | 3.47.9 stable (Dart 3.13.7) | `~/sdk/flutter` |
+| Android SDK | platform 37.0, build-tools 37.0.0 | `~/sdk/android` |
+| NDK | 29.0.14206865 | `~/sdk/android/ndk` |
+| JDK | OpenJDK 21.0.12 | `/usr/lib/jvm/java-21-openjdk-amd64` |
+| Repo | clone of the fork, branch `hermes-first` | `~/repos/conduit_xtra` |
+
+`flutter doctor` reports the Android toolchain green (licenses accepted). The
+repo needs `git submodule update --init third_party/mermaid third_party/katex`
+before `flutter pub get`.
+
 ## Milestones
 
 **M0 — build pipeline (this session).** Flutter 3.47.9 + Android SDK 37 + NDK

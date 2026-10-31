@@ -131,18 +131,9 @@ bool _channelsVisible(SidebarTabAvailability availability) =>
     availability.channelsEnabled;
 
 const sidebarTabRegistry = <SidebarTabDescriptor>[
-  SidebarTabDescriptor(
-    id: SidebarTabId.chats,
-    labelBuilder: _chatsLabel,
-    searchHintBuilder: _conversationSearchHint,
-    bodyBuilder: _chatsBody,
-    materialIcon: Icons.chat_bubble_outline,
-    selectedMaterialIcon: Icons.chat_bubble,
-    sfSymbol: 'bubble.left',
-    selectedSfSymbol: 'bubble.left.fill',
-    isVisible: _chatsVisible,
-    createAction: chatSidebarCreateAction,
-  ),
+  // Hermes leads this build: a Hermes-first install lands on the agent tab,
+  // and an install without Hermes hides this descriptor, so Chats becomes
+  // first again naturally.
   SidebarTabDescriptor(
     id: SidebarTabId.hermes,
     labelBuilder: _hermesLabel,
@@ -158,6 +149,18 @@ const sidebarTabRegistry = <SidebarTabDescriptor>[
     assetIconSize: kHermesTabIconSize,
     nativeAssetIconSize: kHermesNativeTabIconSize,
     createAction: hermesChatSidebarCreateAction,
+  ),
+  SidebarTabDescriptor(
+    id: SidebarTabId.chats,
+    labelBuilder: _chatsLabel,
+    searchHintBuilder: _conversationSearchHint,
+    bodyBuilder: _chatsBody,
+    materialIcon: Icons.chat_bubble_outline,
+    selectedMaterialIcon: Icons.chat_bubble,
+    sfSymbol: 'bubble.left',
+    selectedSfSymbol: 'bubble.left.fill',
+    isVisible: _chatsVisible,
+    createAction: chatSidebarCreateAction,
   ),
   SidebarTabDescriptor(
     id: SidebarTabId.notes,

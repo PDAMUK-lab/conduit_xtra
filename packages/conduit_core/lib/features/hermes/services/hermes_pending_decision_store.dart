@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:conduit_core/persistence/persistence_keys.dart';
@@ -169,6 +170,13 @@ final class HermesPendingDecisionStore {
   // Released once drained so a completed chain does not keep its creating
   // zone alive (see SecureCredentialStorage).
   static Future<void>? _writes;
+
+  /// Fires after the stored set actually changes. An approvals inbox watches
+  /// this so a decision answered in one session disappears everywhere at once,
+  /// without polling the store.
+  static Stream<void> get changes => _changes.stream;
+  static final StreamController<void> _changes =
+      StreamController<void>.broadcast();
 
   static Future<void> upsert({
     required String origin,
@@ -356,6 +364,35 @@ final class HermesPendingDecisionStore {
     );
   }
 
+  /// Every unexpired record, soonest expiry first, scoped to [connectionId]
+  /// and [origin] when given.
+  ///
+  /// Both filters matter: records written before saved connections existed
+  /// carry no connection id and would otherwise match every connection. The
+  /// store is presentation state only: Hermes remains authoritative for
+  /// whether a request is still open, so a stale record is one answered
+  /// elsewhere, not an error.
+  static Future<List<HermesPendingDesktopDecision>> all({
+    String? connectionId,
+    String? origin,
+  }) async {
+    var records = const <HermesPendingDesktopDecision>[];
+    await _serialize(() async {
+      records = _read();
+      await _write(records);
+    });
+    final scoped =
+        records
+            .where(
+              (record) =>
+                  record.belongsTo(connectionId) &&
+                  (origin == null || record.origin == origin),
+            )
+            .toList(growable: false)
+          ..sort((a, b) => a.expiresAt.compareTo(b.expiresAt));
+    return List.unmodifiable(scoped);
+  }
+
   static Future<void> _remove(
     bool Function(HermesPendingDesktopDecision record) predicate,
   ) => _serialize(() async {
@@ -378,14 +415,35 @@ final class HermesPendingDecisionStore {
     ];
   }
 
-  static Future<void> _write(List<HermesPendingDesktopDecision> records) {
+  static Future<void> _write(List<HermesPendingDesktopDecision> records) async {
     final bounded = records.length <= maxRecords
         ? records
         : records.sublist(records.length - maxRecords);
-    return PreferencesStore.putChecked(
+    final encoded = bounded
+        .map((record) => record.toStorage())
+        .toList(growable: false);
+    // Reads call through here to prune expired records. Only touch storage
+    // (and wake watchers) when the encoded set really moved.
+    final existing =
+        PreferencesStore.getStringList(
+          PreferenceKeys.hermesPendingDesktopDecisions,
+        ) ??
+        const <String>[];
+    var unchanged = existing.length == encoded.length;
+    if (unchanged) {
+      for (var i = 0; i < encoded.length; i++) {
+        if (existing[i] != encoded[i]) {
+          unchanged = false;
+          break;
+        }
+      }
+    }
+    if (unchanged) return;
+    await PreferencesStore.putChecked(
       PreferenceKeys.hermesPendingDesktopDecisions,
-      bounded.map((record) => record.toStorage()).toList(growable: false),
+      encoded,
     );
+    if (!_changes.isClosed) _changes.add(null);
   }
 
   static Future<void> _serialize(Future<void> Function() operation) {
