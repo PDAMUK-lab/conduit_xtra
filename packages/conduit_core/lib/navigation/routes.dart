@@ -52,6 +52,7 @@ class Routes {
   static const String hermesJobs = '/profile/hermes/jobs';
   static const String hermesApprovals = '/profile/hermes/approvals';
   static const String hermesSkills = '/profile/hermes/skills';
+  static const String hermesMemory = '/profile/hermes/memory';
   static const String hermesSkillEditor = '/profile/hermes/skills/new';
   static const String hermesMcp = '/profile/hermes/mcp';
   static const String about = '/profile/about';
@@ -112,6 +113,7 @@ class RouteNames {
   static const String hermesJobs = 'hermes-jobs';
   static const String hermesApprovals = 'hermes-approvals';
   static const String hermesSkills = 'hermes-skills';
+  static const String hermesMemory = 'hermes-memory';
   static const String hermesSkillEditor = 'hermes-skill-editor';
   static const String hermesMcp = 'hermes-mcp';
   static const String about = 'about';

@@ -6477,6 +6477,17 @@
   "hermesSkillSaveFailed": "Nie udało się zapisać umiejętności.",
   "hermesSkillToggleFailed": "Nie udało się zmienić umiejętności.",
   "hermesSkillsSubtitle": "Włączaj, edytuj i dodawaj umiejętności agenta.",
+  "hermesMemoryTitle": "Pamięć",
+  "hermesMemorySubtitle": "Jak agent pamięta to, co ważne, między sesjami.",
+  "hermesMemoryActive": "Aktywny",
+  "hermesMemoryProviders": "Dostawcy",
+  "hermesMemoryReady": "Gotowy",
+  "hermesMemoryUnavailable": "Niedostępny",
+  "hermesMemoryUse": "Użyj",
+  "hermesMemorySwitchFailed": "Nie udało się zmienić dostawcy pamięci.",
+  "hermesMemoryFiles": "Pliki wbudowane",
+  "hermesMemoryLoadFailed": "Nie udało się wczytać ustawień pamięci.",
+  "hermesMemoryNone": "Żaden dostawca pamięci nie jest aktywny.",
   "hermesApprovalRequired": "Wymagana zgoda",
   "@hermesApprovalRequired": {
     "description": "Title of a Hermes human-approval request card."

@@ -37,6 +37,7 @@ import 'package:conduit_core/features/hermes/models/hermes_capabilities.dart';
 import 'package:conduit_core/features/hermes/models/hermes_config.dart';
 import 'package:conduit_core/features/hermes/models/hermes_connection_profile.dart';
 import 'package:conduit_core/features/hermes/models/hermes_job.dart';
+import 'package:conduit_core/features/hermes/models/hermes_memory.dart';
 import 'package:conduit_core/features/hermes/models/hermes_model.dart';
 import 'package:conduit_core/features/hermes/models/hermes_session.dart';
 import 'package:conduit_core/features/hermes/models/hermes_skill.dart';
@@ -2624,13 +2625,13 @@ final hermesDashboardSkillsProvider = FutureProvider<List<HermesSkill>>((
 });
 
 /// `GET /api/memory`: active provider, discovered providers, built-in file
-/// sizes. Empty when the connection is not a dashboard gateway.
-final hermesMemoryStatusProvider = FutureProvider<Map<String, dynamic>>((
+/// sizes. Null when the connection is not a dashboard gateway.
+final hermesMemoryStatusProvider = FutureProvider<HermesMemoryStatus?>((
   ref,
 ) async {
   final service = ref.watch(hermesApiServiceProvider);
-  if (service is! HermesDesktopApiService) return const {};
-  return service.memoryStatus();
+  if (service is! HermesDesktopApiService) return null;
+  return HermesMemoryStatus.fromJson(await service.memoryStatus());
 });
 
 /// Synchronous best-effort view of capabilities for gating UI (optimistic

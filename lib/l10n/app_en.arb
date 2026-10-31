@@ -6134,6 +6134,50 @@
   "@hermesSkillsSubtitle": {
     "description": "Subtitle for the Skills tile in the Hermes tab."
   },
+  "hermesMemoryTitle": "Memory",
+  "@hermesMemoryTitle": {
+    "description": "Hermes memory settings copy."
+  },
+  "hermesMemorySubtitle": "How the agent remembers what matters between sessions.",
+  "@hermesMemorySubtitle": {
+    "description": "Hermes memory settings copy."
+  },
+  "hermesMemoryActive": "Active",
+  "@hermesMemoryActive": {
+    "description": "Hermes memory settings copy."
+  },
+  "hermesMemoryProviders": "Providers",
+  "@hermesMemoryProviders": {
+    "description": "Hermes memory settings copy."
+  },
+  "hermesMemoryReady": "Ready",
+  "@hermesMemoryReady": {
+    "description": "Hermes memory settings copy."
+  },
+  "hermesMemoryUnavailable": "Unavailable",
+  "@hermesMemoryUnavailable": {
+    "description": "Hermes memory settings copy."
+  },
+  "hermesMemoryUse": "Use",
+  "@hermesMemoryUse": {
+    "description": "Hermes memory settings copy."
+  },
+  "hermesMemorySwitchFailed": "Could not switch memory provider.",
+  "@hermesMemorySwitchFailed": {
+    "description": "Hermes memory settings copy."
+  },
+  "hermesMemoryFiles": "Built-in files",
+  "@hermesMemoryFiles": {
+    "description": "Hermes memory settings copy."
+  },
+  "hermesMemoryLoadFailed": "Could not load memory settings.",
+  "@hermesMemoryLoadFailed": {
+    "description": "Hermes memory settings copy."
+  },
+  "hermesMemoryNone": "No memory provider is active.",
+  "@hermesMemoryNone": {
+    "description": "Hermes memory settings copy."
+  },
   "hermesApprovalRequired": "Approval required",
   "@hermesApprovalRequired": {
     "description": "Title of a Hermes human-approval request card."

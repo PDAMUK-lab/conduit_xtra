@@ -39,6 +39,7 @@ import '../../features/hermes/views/hermes_settings_page.dart';
 import '../../features/hermes/views/hermes_jobs_page.dart';
 import '../../features/hermes/views/hermes_approvals_page.dart';
 import '../../features/hermes/views/hermes_skills_page.dart';
+import '../../features/hermes/views/hermes_memory_page.dart';
 import '../../features/hermes/views/hermes_skill_editor_page.dart';
 import '../../features/hermes/views/hermes_mcp_page.dart';
 import '../../features/profile/views/personalization_page.dart';
@@ -544,6 +545,12 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       name: RouteNames.hermesSkills,
       pageBuilder: (context, state) =>
           _buildPlatformPage(state: state, child: const HermesSkillsPage()),
+    ),
+    GoRoute(
+      path: Routes.hermesMemory,
+      name: RouteNames.hermesMemory,
+      pageBuilder: (context, state) =>
+          _buildPlatformPage(state: state, child: const HermesMemoryPage()),
     ),
     // Declared before the name route: `new` would otherwise be read as a skill
     // called "new".
