@@ -106,6 +106,20 @@ Measured 2026-10-31, unprivileged user `hermes` (no sudo):
 repo needs `git submodule update --init third_party/mermaid third_party/katex`
 before `flutter pub get`.
 
+## Current status (2026-10-31)
+
+- **M0 verified.** `flutter build apk --debug --target-platform android-arm64`
+  completed in 710 s (Gradle `assembleDebug`), producing
+  `build/app/outputs/flutter-apk/app-debug.apk` — 213,263,672 bytes,
+  sha256 `ba1d88ff8629360d54a49d28713ad32bb1278e1a01a65df72d35f11f3b7c8887`,
+  package `app.cogwheel.conduit.debug` (installs beside a Play build),
+  versionName 4.2.1, compileSdk 37, targetSdk 36.
+- **M1 shipped** in `ef8f9203` on `hermes-first`: Hermes-first chooser,
+  Hermes tab leads the sidebar, Approvals inbox across sessions, pending-store
+  listing + change stream. `flutter analyze`: no issues; the new store and page
+  tests plus the chooser accessibility/order tests pass.
+- Not yet: local notifications, run control outside the chat, M2/M3 parity.
+
 ## Milestones
 
 **M0 — build pipeline (this session).** Flutter 3.47.9 + Android SDK 37 + NDK
