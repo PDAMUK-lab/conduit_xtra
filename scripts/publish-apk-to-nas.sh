@@ -28,6 +28,7 @@ flock -n 9 || exit 0
 log() { printf '%s %s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$*" | tee -a "$LOG_FILE"; }
 
 VERSION="$(sed -n 's/^version: *\([^+ ]*\).*/\1/p' "$REPO_DIR/pubspec.yaml" | head -1)"
+VERSION="${VERSION:-unknown}"
 GITSHORT="$(git -C "$REPO_DIR" rev-parse --short HEAD 2>/dev/null || echo nogit)"
 
 # state: "<path>\t<mtime>\t<size>\t<sha>"
@@ -71,7 +72,12 @@ for apk in "$APK_DIR"/*.apk; do
 
   # Content is the identity: a rebuild after a commit-only change produces the
   # same bytes and must not leave a second 213 MB copy under a new label.
-  same_content="$(ls -1 "$DEST"/conduit-hermes-"$VERSION"-*-"$sha8".apk 2>/dev/null | head -1 || true)"
+  #
+  # find, not ls: with nullglob an unmatched pattern disappears, and `ls` with
+  # no operand lists the *current directory* — which once wrote a repo file name
+  # into latest.txt. find prints nothing when nothing matches.
+  same_content="$(find "$DEST" -maxdepth 1 -type f \
+    -name "conduit-hermes-${VERSION}-*-${sha8}.apk" -print -quit 2>/dev/null || true)"
   if [ -n "$same_content" ]; then
     name="$(basename "$same_content")"
     target="$same_content"
@@ -110,12 +116,22 @@ EOF
   state_put "$apk" "$mtime" "$size" "$sha"
 done
 
-# Retention: only ever delete this publisher's own content-named builds.
-mapfile -t built < <(ls -1t "$DEST"/conduit-hermes-*.apk 2>/dev/null || true)
+# Retention: only ever delete this publisher's own content-named builds, and
+# only paths that live directly in DEST. find also keeps an unmatched pattern
+# from collapsing into a listing of the working directory.
+mapfile -t built < <(find "$DEST" -maxdepth 1 -type f -name 'conduit-hermes-*.apk' \
+  -printf '%T@ %p\n' 2>/dev/null | sort -rn | cut -d' ' -f2-)
 if [ "${#built[@]}" -gt "$RETAIN" ]; then
   for old in "${built[@]:$RETAIN}"; do
-    log "retiring $(basename "$old")"
-    rm -f "$old" "$old.sha256"
+    case "$old" in
+      "$DEST"/conduit-hermes-*.apk)
+        log "retiring $(basename "$old")"
+        rm -f -- "$old" "$old.sha256"
+        ;;
+      *)
+        log "refusing to delete outside the publish directory: $old"
+        ;;
+    esac
   done
 fi
 
