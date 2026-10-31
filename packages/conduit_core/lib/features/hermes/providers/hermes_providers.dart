@@ -39,6 +39,7 @@ import 'package:conduit_core/features/hermes/models/hermes_connection_profile.da
 import 'package:conduit_core/features/hermes/models/hermes_job.dart';
 import 'package:conduit_core/features/hermes/models/hermes_model.dart';
 import 'package:conduit_core/features/hermes/models/hermes_session.dart';
+import 'package:conduit_core/features/hermes/models/hermes_skill.dart';
 import 'package:conduit_core/features/hermes/models/hermes_toolset.dart';
 import 'package:conduit_core/features/hermes/services/hermes_api_service.dart';
 import 'package:conduit_core/features/hermes/services/hermes_backend_service.dart';
@@ -2608,6 +2609,29 @@ final hermesPendingDecisionCountProvider = Provider<int>(
   (ref) =>
       ref.watch(hermesPendingDecisionsProvider).asData?.value.length ?? 0,
 );
+
+/// Installed skills from the dashboard's own `GET /api/skills`.
+///
+/// The RPC list the chat uses omits the enabled flag, the category and the
+/// usage count; this is the surface an editor needs. Only the desktop gateway
+/// exposes it, so other backends get an empty list rather than an error.
+final hermesDashboardSkillsProvider = FutureProvider<List<HermesSkill>>((
+  ref,
+) async {
+  final service = ref.watch(hermesApiServiceProvider);
+  if (service is! HermesDesktopApiService) return const [];
+  return service.dashboardSkills();
+});
+
+/// `GET /api/memory`: active provider, discovered providers, built-in file
+/// sizes. Empty when the connection is not a dashboard gateway.
+final hermesMemoryStatusProvider = FutureProvider<Map<String, dynamic>>((
+  ref,
+) async {
+  final service = ref.watch(hermesApiServiceProvider);
+  if (service is! HermesDesktopApiService) return const {};
+  return service.memoryStatus();
+});
 
 /// Synchronous best-effort view of capabilities for gating UI (optimistic
 /// default while loading / on error).

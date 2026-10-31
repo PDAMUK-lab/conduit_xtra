@@ -38,6 +38,8 @@ import '../../features/hermes/views/hermes_connections_page.dart';
 import '../../features/hermes/views/hermes_settings_page.dart';
 import '../../features/hermes/views/hermes_jobs_page.dart';
 import '../../features/hermes/views/hermes_approvals_page.dart';
+import '../../features/hermes/views/hermes_skills_page.dart';
+import '../../features/hermes/views/hermes_skill_editor_page.dart';
 import '../../features/hermes/views/hermes_mcp_page.dart';
 import '../../features/profile/views/personalization_page.dart';
 import '../../features/profile/views/profile_page.dart';
@@ -536,6 +538,32 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       name: RouteNames.hermesApprovals,
       pageBuilder: (context, state) =>
           _buildPlatformPage(state: state, child: const HermesApprovalsPage()),
+    ),
+    GoRoute(
+      path: Routes.hermesSkills,
+      name: RouteNames.hermesSkills,
+      pageBuilder: (context, state) =>
+          _buildPlatformPage(state: state, child: const HermesSkillsPage()),
+    ),
+    // Declared before the name route: `new` would otherwise be read as a skill
+    // called "new".
+    GoRoute(
+      path: Routes.hermesSkillEditor,
+      name: RouteNames.hermesSkillEditor,
+      pageBuilder: (context, state) => _buildPlatformPage(
+        state: state,
+        child: const HermesSkillEditorPage(),
+      ),
+    ),
+    GoRoute(
+      path: '${Routes.hermesSkills}/:name',
+      pageBuilder: (context, state) => _buildPlatformPage(
+        state: state,
+        child: HermesSkillEditorPage(
+          key: ValueKey<String>('hermes-skill-editor-${state.pathParameters['name']}'),
+          skillName: state.pathParameters['name'],
+        ),
+      ),
     ),
     GoRoute(
       path: Routes.hermesMcp,

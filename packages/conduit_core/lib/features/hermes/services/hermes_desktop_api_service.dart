@@ -20,6 +20,7 @@ import 'package:conduit_core/features/hermes/models/hermes_config.dart';
 import 'package:conduit_core/features/hermes/models/hermes_mcp.dart';
 import 'package:conduit_core/features/hermes/models/hermes_model.dart';
 import 'package:conduit_core/features/hermes/models/hermes_run_event.dart';
+import 'package:conduit_core/features/hermes/models/hermes_skill.dart';
 import 'package:conduit_core/features/hermes/services/hermes_backend_service.dart';
 import 'package:conduit_core/features/hermes/services/hermes_http_transport.dart';
 import 'package:conduit_core/features/hermes/services/hermes_dashboard_bridge.dart';
@@ -363,6 +364,8 @@ final class HermesDesktopApiService
       path.startsWith('/api/sessions') ||
       path.startsWith('/api/cron') ||
       path.startsWith('/api/mcp') ||
+      path.startsWith('/api/skills') ||
+      path.startsWith('/api/memory') ||
       path.startsWith('/api/audio');
 
   @override
@@ -449,6 +452,33 @@ final class HermesDesktopApiService
       _administration.listCommands();
 
   Future<Map<String, dynamic>> reloadSkills() => _administration.reloadSkills();
+
+  // Dashboard skills/memory (web UI contract, richer than the RPC list).
+  Future<List<HermesSkill>> dashboardSkills() =>
+      _administration.dashboardSkills();
+  Future<String> skillContent(String name) =>
+      _administration.skillContent(name);
+  Future<void> updateSkillContent({
+    required String name,
+    required String content,
+  }) => _administration.updateSkillContent(name: name, content: content);
+  Future<void> setSkillEnabled({
+    required String name,
+    required bool enabled,
+  }) => _administration.setSkillEnabled(name: name, enabled: enabled);
+  Future<void> createSkill({
+    required String name,
+    required String content,
+    String? category,
+  }) => _administration.createSkill(
+    name: name,
+    content: content,
+    category: category,
+  );
+  Future<Map<String, dynamic>> memoryStatus() =>
+      _administration.memoryStatus();
+  Future<void> setMemoryProvider(String provider) =>
+      _administration.setMemoryProvider(provider);
 
   @override
   Future<List<Map<String, dynamic>>> listToolsets() =>

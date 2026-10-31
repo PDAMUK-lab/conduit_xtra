@@ -22,6 +22,7 @@ import 'package:conduit_core/features/navigation/providers/drawer_section_notifi
 import 'package:conduit_core/features/hermes/models/hermes_bot.dart';
 import 'package:conduit_core/features/hermes/models/hermes_session.dart';
 import 'package:conduit_core/features/hermes/providers/hermes_providers.dart';
+import 'package:conduit_core/features/hermes/services/hermes_desktop_api_service.dart';
 import 'package:conduit_core/features/hermes/services/hermes_pending_decision_store.dart';
 
 import 'hermes_bot_tile.dart';
@@ -79,6 +80,8 @@ class _HermesSessionsTabState extends ConsumerState<HermesSessionsTab>
         const SliverToBoxAdapter(child: _ApprovalsTile()),
         ..._botSlivers(context, ref.watch(hermesBotsProvider).asData?.value),
         if (showJobs) const SliverToBoxAdapter(child: _ScheduledAgentsTile()),
+        if (ref.watch(hermesApiServiceProvider) is HermesDesktopApiService)
+          const SliverToBoxAdapter(child: _SkillsTile()),
         ..._sessionSlivers(context, sessionsAsync),
         SliverToBoxAdapter(
           child: SizedBox(
@@ -429,6 +432,89 @@ class _ApprovalsTile extends ConsumerWidget {
                     color: theme.buttonPrimary,
                     fontWeight: FontWeight.w700,
                   ),
+                ),
+              ),
+              const SizedBox(width: Spacing.xs),
+              Icon(
+                Icons.chevron_right_rounded,
+                size: IconSize.listItem,
+                color: theme.iconSecondary,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SkillsTile extends ConsumerWidget {
+  const _SkillsTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final skills = ref.watch(hermesDashboardSkillsProvider).asData?.value;
+    final enabled = skills?.where((skill) => skill.enabled).length;
+    final theme = context.conduitTheme;
+    final l10n = AppLocalizations.of(context)!;
+    final subtitle = skills == null || enabled == null
+        ? l10n.hermesSkillsSubtitle
+        : '$enabled/${skills.length}';
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        Spacing.sm,
+        Spacing.md,
+        Spacing.sm,
+        Spacing.xs,
+      ),
+      child: InkWell(
+        key: const ValueKey<String>('hermes-skills-tile'),
+        onTap: () => context.push(Routes.hermesSkills),
+        borderRadius: BorderRadius.circular(AppBorderRadius.card),
+        child: Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: Spacing.md,
+            vertical: Spacing.sm,
+          ),
+          decoration: BoxDecoration(
+            color: theme.surfaceBackground,
+            borderRadius: BorderRadius.circular(AppBorderRadius.card),
+            border: Border.all(color: theme.cardBorder),
+          ),
+          child: Row(
+            children: [
+              SizedBox(
+                width: IconSize.xl,
+                height: IconSize.xl,
+                child: Icon(
+                  Icons.auto_awesome_outlined,
+                  size: IconSize.medium,
+                  color: theme.textPrimary,
+                ),
+              ),
+              const SizedBox(width: Spacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.hermesSkillsTitle,
+                      style: AppTypography.bodyMediumStyle.copyWith(
+                        color: theme.textPrimary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: Spacing.xxs),
+                    Text(
+                      subtitle,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTypography.bodySmallStyle.copyWith(
+                        color: theme.textSecondary,
+                      ),
+                    ),
+                  ],
                 ),
               ),
               const SizedBox(width: Spacing.xs),

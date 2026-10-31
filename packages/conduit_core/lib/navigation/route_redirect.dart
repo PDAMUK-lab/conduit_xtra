@@ -64,6 +64,7 @@ bool _isAccountlessBackendLocation(String location) {
       isHermesSettingsLocation(location) ||
       location == Routes.hermesJobs ||
       location == Routes.hermesApprovals ||
+      isHermesSkillsLocation(location) ||
       location == Routes.about;
 }
 
@@ -71,6 +72,11 @@ bool _isAccountlessBackendLocation(String location) {
 bool isHermesSettingsLocation(String location) =>
     location == Routes.hermesSettings ||
     location.startsWith('${Routes.hermesSettings}/connections/');
+
+/// The skills browser and one skill's editor.
+bool isHermesSkillsLocation(String location) =>
+    location == Routes.hermesSkills ||
+    location.startsWith('${Routes.hermesSkills}/');
 
 bool isDirectConnectionsLocation(String location) {
   return location == Routes.directConnections ||

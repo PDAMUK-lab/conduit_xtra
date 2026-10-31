@@ -51,6 +51,8 @@ class Routes {
   static const String hermesNewConnectionId = 'new';
   static const String hermesJobs = '/profile/hermes/jobs';
   static const String hermesApprovals = '/profile/hermes/approvals';
+  static const String hermesSkills = '/profile/hermes/skills';
+  static const String hermesSkillEditor = '/profile/hermes/skills/new';
   static const String hermesMcp = '/profile/hermes/mcp';
   static const String about = '/profile/about';
   static const String notes = '/notes';
@@ -65,6 +67,8 @@ class Routes {
       '/profile/direct-connections/mcp/${Uri.encodeComponent(id)}';
   static String hermesConnectionEditorPath(String id) =>
       '/profile/hermes/connections/${Uri.encodeComponent(id)}';
+  static String hermesSkillEditorPath(String name) =>
+      '/profile/hermes/skills/${Uri.encodeComponent(name)}';
 }
 
 /// Friendly names for GoRouter routes to support context.pushNamed.
@@ -107,6 +111,8 @@ class RouteNames {
   static const String hermesConnectionEditor = 'hermes-connection-editor';
   static const String hermesJobs = 'hermes-jobs';
   static const String hermesApprovals = 'hermes-approvals';
+  static const String hermesSkills = 'hermes-skills';
+  static const String hermesSkillEditor = 'hermes-skill-editor';
   static const String hermesMcp = 'hermes-mcp';
   static const String about = 'about';
   static const String notes = 'notes';

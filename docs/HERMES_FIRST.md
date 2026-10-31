@@ -125,6 +125,13 @@ before `flutter pub get`.
   confirmation. Router tests cover system/banner/suppressed/replay paths.
 - Still a local listener: it only sees events while the app process is alive.
   Runs that raise an approval while the app is killed need the push stack.
+- **M2.1 (Skills):** browse (search, category, enabled state), enable/disable,
+  rewrite SKILL.md, and create a skill — through the dashboard's own
+  `/api/skills*` contract, verified with recorded-request tests plus a live
+  curl probe against Hermes 0.22.5 (88 skills, 33 disabled). Skills tile sits
+  in the Hermes tab; editor routes under `/profile/hermes/skills`.
+- Memory (`/api/memory`, `/api/memory/provider`) has measured contracts and
+  service methods; its UI is the next slice.
 
 ## Milestones
 

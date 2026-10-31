@@ -6070,6 +6070,70 @@
   "@hermesApprovalsStopped": {
     "description": "Hermes approvals inbox action copy."
   },
+  "hermesSkillsTitle": "Skills",
+  "@hermesSkillsTitle": {
+    "description": "Hermes skills browser and editor copy."
+  },
+  "hermesSkillsSearchHint": "Search skills",
+  "@hermesSkillsSearchHint": {
+    "description": "Hermes skills browser and editor copy."
+  },
+  "hermesSkillsEmpty": "No skills installed.",
+  "@hermesSkillsEmpty": {
+    "description": "Hermes skills browser and editor copy."
+  },
+  "hermesSkillsNoMatch": "No skills match your search.",
+  "@hermesSkillsNoMatch": {
+    "description": "Hermes skills browser and editor copy."
+  },
+  "hermesSkillsLoadFailed": "Could not load skills.",
+  "@hermesSkillsLoadFailed": {
+    "description": "Hermes skills browser and editor copy."
+  },
+  "hermesSkillsNew": "New skill",
+  "@hermesSkillsNew": {
+    "description": "Hermes skills browser and editor copy."
+  },
+  "hermesSkillCreateTitle": "New skill",
+  "@hermesSkillCreateTitle": {
+    "description": "Hermes skills browser and editor copy."
+  },
+  "hermesSkillEditTitle": "Edit skill",
+  "@hermesSkillEditTitle": {
+    "description": "Hermes skills browser and editor copy."
+  },
+  "hermesSkillNameLabel": "Name",
+  "@hermesSkillNameLabel": {
+    "description": "Hermes skills browser and editor copy."
+  },
+  "hermesSkillCategoryLabel": "Category (optional)",
+  "@hermesSkillCategoryLabel": {
+    "description": "Hermes skills browser and editor copy."
+  },
+  "hermesSkillContentLabel": "SKILL.md",
+  "@hermesSkillContentLabel": {
+    "description": "Hermes skills browser and editor copy."
+  },
+  "hermesSkillSave": "Save",
+  "@hermesSkillSave": {
+    "description": "Hermes skills browser and editor copy."
+  },
+  "hermesSkillSaved": "Skill saved.",
+  "@hermesSkillSaved": {
+    "description": "Hermes skills browser and editor copy."
+  },
+  "hermesSkillSaveFailed": "Could not save the skill.",
+  "@hermesSkillSaveFailed": {
+    "description": "Hermes skills browser and editor copy."
+  },
+  "hermesSkillToggleFailed": "Could not change that skill.",
+  "@hermesSkillToggleFailed": {
+    "description": "Hermes skills browser and editor copy."
+  },
+  "hermesSkillsSubtitle": "Enable, edit, and add the agent's skills.",
+  "@hermesSkillsSubtitle": {
+    "description": "Subtitle for the Skills tile in the Hermes tab."
+  },
   "hermesApprovalRequired": "Approval required",
   "@hermesApprovalRequired": {
     "description": "Title of a Hermes human-approval request card."

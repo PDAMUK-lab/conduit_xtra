@@ -503,4 +503,75 @@ final class _HermesDesktopAdministration {
       requestId: requestId,
     );
   }
+
+  // --- Dashboard skills and memory -----------------------------------------
+  //
+  // The dashboard's own REST surface, not the RPC gateway: `GET /api/skills`
+  // and friends are the contract the web UI uses, and they carry the enabled
+  // flag, usage counts and raw SKILL.md text that the chat-facing RPC list
+  // does not expose. Shapes measured against Hermes 0.22.5.
+
+  Future<List<HermesSkill>> dashboardSkills() async {
+    final data = await _owner._requestJson('GET', '/api/skills');
+    return HermesSkill.listFromJson(data);
+  }
+
+  Future<String> skillContent(String name) async {
+    final data = _owner._object(
+      await _owner._requestJson(
+        'GET',
+        '/api/skills/content',
+        query: {'name': name},
+      ),
+    );
+    final content = data['content'];
+    if (content is! String) {
+      throw const FormatException('Invalid Hermes skill content.');
+    }
+    return content;
+  }
+
+  Future<void> updateSkillContent({
+    required String name,
+    required String content,
+  }) => _owner._requestJson(
+    'PUT',
+    '/api/skills/content',
+    body: {'name': name, 'content': content},
+  );
+
+  Future<void> setSkillEnabled({
+    required String name,
+    required bool enabled,
+  }) => _owner._requestJson(
+    'PUT',
+    '/api/skills/toggle',
+    body: {'name': name, 'enabled': enabled},
+  );
+
+  Future<void> createSkill({
+    required String name,
+    required String content,
+    String? category,
+  }) => _owner._requestJson(
+    'POST',
+    '/api/skills',
+    body: {
+      'name': name,
+      'content': content,
+      if (category != null && category.trim().isNotEmpty)
+        'category': category.trim(),
+    },
+  );
+
+  /// `GET /api/memory`: the active provider, every discovered provider with
+  /// its readiness, and the built-in files' sizes.
+  Future<Map<String, dynamic>> memoryStatus() async =>
+      _owner._object(await _owner._requestJson('GET', '/api/memory'));
+
+  Future<void> setMemoryProvider(String provider) => _owner._requestJson(
+    'PUT',
+    '/api/memory/provider',
+    body: {'provider': provider},
+  );
 }
