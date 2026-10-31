@@ -310,6 +310,28 @@ void main() {
   );
 
   test(
+    'a failed probe names the leg that failed when it can',
+    () async {
+      final controller = _configuredController(
+        _FakeHermesConnectionGateway(
+          probeResult: false,
+          probeError: 'model.options: model skew',
+        ),
+      );
+      addTearDown(controller.dispose);
+
+      final reachable = await controller.testConnection(
+        saved: const HermesConfig(),
+        messages: _messages,
+      );
+
+      check(reachable).isFalse();
+      expect(controller.attempt.message, contains('model.options: model skew'));
+      expect(controller.attempt.message, contains(_messages.unreachable));
+    },
+  );
+
+  test(
     'an in-flight probe can finish after the controller is disposed',
     () async {
       final probe = Completer<bool>();
@@ -658,6 +680,7 @@ HermesConnectionController _configuredController(
 final class _FakeHermesConnectionGateway implements HermesConnectionGateway {
   _FakeHermesConnectionGateway({
     this.probeResult = true,
+    this.probeError,
     this.onProbe,
     this.onPersist,
     this.onActivate,
@@ -668,6 +691,10 @@ final class _FakeHermesConnectionGateway implements HermesConnectionGateway {
 
   final bool probeResult;
   final String? suggestedName;
+  final String? probeError;
+
+  @override
+  String? get lastProbeError => probeResult ? null : probeError;
   final String? persistedId;
   final List<HermesConfig> suggestedFor = [];
   final Future<bool> Function(HermesConfig draft)? onProbe;

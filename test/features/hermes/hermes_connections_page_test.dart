@@ -753,6 +753,9 @@ final class _RecordingGateway implements HermesConnectionGateway {
   final List<HermesConfig> probed = <HermesConfig>[];
 
   @override
+  String? get lastProbeError => null;
+
+  @override
   Future<bool> probe(HermesConfig draft) async {
     probed.add(draft);
     return false;

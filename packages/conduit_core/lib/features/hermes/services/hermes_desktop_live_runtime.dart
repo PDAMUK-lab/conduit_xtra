@@ -123,10 +123,18 @@ extension _HermesDesktopLiveRuntime on HermesDesktopApiService {
       if (_closed) return;
       if (_rpc.isReady) {
         if (storedIds.isEmpty) {
-          await _rpc.request<Object?>(
-            'model.options',
-            timeout: const Duration(seconds: 10),
-          );
+          try {
+            await _rpc.request<Object?>(
+              'model.options',
+              timeout: const Duration(seconds: 10),
+            );
+          } on HermesDesktopRpcException catch (error) {
+            // A refusal with a JSON-RPC code means the gateway is answering:
+            // it may refuse model inventory while running stale code after an
+            // update, but the socket is healthy. Reconnecting on that would
+            // mint tickets forever and never fix it.
+            if (error.code == null || error.timedOut) rethrow;
+          }
         } else {
           for (final storedId in storedIds) {
             await _resume(storedId, refresh: true);

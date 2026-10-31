@@ -251,6 +251,12 @@ final class HermesDesktopApiService
   final Dio _dio;
   final HermesDesktopRpcClient _rpc;
   late final _HermesDesktopAdministration _administration;
+
+  /// Why the last [health] answered false, when the cause is known: the leg
+  /// that broke (status, WebSocket, token) and its error type. Cleared on each
+  /// call. Safe to show: it carries no credentials.
+  String? _lastHealthError;
+  String? get lastHealthError => _lastHealthError;
   HermesDashboardBridge? _dashboardBridge;
   final HermesDesktopCredentialsWriter? onCredentialsChanged;
   HermesDesktopTokenSet? _nativeTokens;

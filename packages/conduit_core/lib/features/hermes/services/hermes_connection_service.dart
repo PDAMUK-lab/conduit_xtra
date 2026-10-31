@@ -18,9 +18,14 @@ final hermesConnectionGatewayProvider = Provider<HermesConnectionGateway>(
 
 final class _RiverpodHermesConnectionGateway
     implements HermesConnectionGateway {
-  const _RiverpodHermesConnectionGateway(this._ref);
+  _RiverpodHermesConnectionGateway(this._ref);
 
   final Ref _ref;
+
+  String? _lastProbeError;
+
+  @override
+  String? get lastProbeError => _lastProbeError;
 
   /// The live service when [draft] is exactly the active Desktop connection.
   HermesDesktopApiService? _liveDesktopServiceFor(HermesConfig draft) {
@@ -71,14 +76,21 @@ final class _RiverpodHermesConnectionGateway
 
   @override
   Future<bool> probe(HermesConfig draft) async {
+    _lastProbeError = null;
     if (draft.mode != HermesBackendMode.desktopGateway) {
       return testHermesDraftConnection(draft);
     }
     final live = _liveDesktopServiceFor(draft);
-    if (live != null) return live.health();
+    if (live != null) {
+      final reachable = await live.health();
+      if (!reachable) _lastProbeError = live.lastHealthError;
+      return reachable;
+    }
     final service = _temporaryDesktopService(draft);
     try {
-      return await service.health();
+      final reachable = await service.health();
+      if (!reachable) _lastProbeError = service.lastHealthError;
+      return reachable;
     } finally {
       service.close();
     }

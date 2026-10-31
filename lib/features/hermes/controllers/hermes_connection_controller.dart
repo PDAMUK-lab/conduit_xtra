@@ -328,7 +328,7 @@ final class HermesConnectionController extends ChangeNotifier {
         operation: HermesConnectionOperation.idle,
         attempt: reachable
             ? ConnectionAttemptState.connected(messages.connected)
-            : ConnectionAttemptState.failed(messages.unreachable),
+            : ConnectionAttemptState.failed(_unreachableMessage(messages)),
       ),
     );
     return reachable;
@@ -357,6 +357,17 @@ final class HermesConnectionController extends ChangeNotifier {
   bool get _acceptsNameSuggestion =>
       name.text.trim().isEmpty ||
       _nameSource != HermesConnectionNameSource.user;
+
+  /// "Couldn't connect", plus the leg that failed when the gateway can name
+  /// it. Bounded so a server-controlled string cannot flood the UI.
+  String _unreachableMessage(HermesConnectionMessages messages) {
+    final detail = _gateway.lastProbeError?.trim();
+    if (detail == null || detail.isEmpty) return messages.unreachable;
+    final bounded = detail.length > 300
+        ? '${detail.substring(0, 300)}…'
+        : detail;
+    return '${messages.unreachable} ($bounded)';
+  }
 
   Future<bool> save(
     HermesConfig saved, {
@@ -421,7 +432,7 @@ final class HermesConnectionController extends ChangeNotifier {
         _publish(
           _state.copyWith(
             operation: HermesConnectionOperation.idle,
-            attempt: ConnectionAttemptState.failed(messages.unreachable),
+            attempt: ConnectionAttemptState.failed(_unreachableMessage(messages)),
           ),
         );
         return const HermesConnectionResult(
@@ -435,7 +446,7 @@ final class HermesConnectionController extends ChangeNotifier {
       _publish(
         _state.copyWith(
           operation: HermesConnectionOperation.idle,
-          attempt: ConnectionAttemptState.failed(messages.unreachable),
+          attempt: ConnectionAttemptState.failed(_unreachableMessage(messages)),
         ),
       );
       return HermesConnectionResult(HermesConnectionOutcome.unreachable, error);

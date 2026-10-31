@@ -2,15 +2,26 @@ part of 'hermes_desktop_api_service.dart';
 
 extension _HermesDesktopAuthRest on HermesDesktopApiService {
   Future<bool> _authHealth() async {
+    _lastHealthError = null;
     try {
       await statusProbe(refresh: true);
       await _ensureConnected();
-      await _rpc.request<Object?>(
-        'model.options',
-        timeout: const Duration(seconds: 10),
-      );
+      try {
+        await _rpc.request<Object?>(
+          'model.options',
+          timeout: const Duration(seconds: 10),
+        );
+      } on HermesDesktopRpcException catch (error) {
+        if (error.code == null || error.timedOut) rethrow;
+        // The gateway answered — with an error (a model-skew guard, a
+        // profile-scoped refusal, an inventory fault). The transport and the
+        // credentials are fine; only the inventory call failed, and that is
+        // not what "unreachable" means. Keep the reason for the UI.
+        _lastHealthError = 'model.options: ${error.message}';
+      }
       return _rpc.isReady;
     } catch (error) {
+      _lastHealthError = '${error.runtimeType}: $error';
       DebugLogger.warning(
         'desktop-health-probe-failed',
         scope: 'hermes/desktop',

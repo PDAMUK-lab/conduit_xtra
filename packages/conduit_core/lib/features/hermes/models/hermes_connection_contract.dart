@@ -46,6 +46,12 @@ final class HermesConnectionCommitCancelled implements Exception {
 abstract interface class HermesConnectionGateway {
   Future<bool> probe(HermesConfig draft);
 
+  /// Why the last [probe] answered false, when the cause is known and safe to
+  /// show. Null after a successful probe, and on gateways that cannot explain
+  /// themselves. The UI appends it to "Couldn't connect" so a failure names
+  /// its leg instead of asking the user to guess.
+  String? get lastProbeError;
+
   /// Persists [draft] and returns the id of the saved connection it wrote.
   Future<String?> persist(HermesConnectionDraft draft);
 

@@ -44,6 +44,9 @@ final class _ReachableGateway implements HermesConnectionGateway {
   int probes = 0;
 
   @override
+  String? get lastProbeError => null;
+
+  @override
   Future<bool> probe(HermesConfig draft) async {
     probes++;
     return true;
