@@ -3081,6 +3081,8 @@
   "hermesApprovalResolveFailed": "De beslissing kon niet worden verzonden. Probeer het opnieuw.",
   "hermesApprovalsExpiresInHours": "{count, plural, =1{Verloopt over 1 uur} other{Verloopt over {count} uur}}",
   "hermesApprovalsExpiresInMinutes": "{count, plural, =1{Verloopt over 1 minuut} other{Verloopt over {count} minuten}}",
+  "hermesApprovalsStopConfirm": "De run in dit gesprek stoppen?",
+  "hermesApprovalsStopped": "Run gestopt.",
   "hermesApprovalRequired": "Approval required",
   "hermesApprovalFallback": "The agent is requesting permission to continue.",
   "openWebUiPromptOther": "Anders",

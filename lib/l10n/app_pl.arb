@@ -6459,6 +6459,8 @@
   "hermesApprovalResolveFailed": "Nie udało się wysłać decyzji. Spróbuj ponownie.",
   "hermesApprovalsExpiresInHours": "{count, plural, =1{Wygaśnie za 1 godzinę} other{Wygaśnie za {count} godzin}}",
   "hermesApprovalsExpiresInMinutes": "{count, plural, =1{Wygaśnie za 1 minutę} other{Wygaśnie za {count} minut}}",
+  "hermesApprovalsStopConfirm": "Zatrzymać uruchomienie w tej rozmowie?",
+  "hermesApprovalsStopped": "Uruchomienie zatrzymane.",
   "hermesApprovalRequired": "Wymagana zgoda",
   "@hermesApprovalRequired": {
     "description": "Title of a Hermes human-approval request card."

@@ -132,6 +132,10 @@ class NotificationRouter {
         return settings.notificationChatEnabled;
       case NotificationKind.channelMessage:
         return settings.notificationChannelEnabled;
+      case NotificationKind.hermesApproval:
+        // An approval blocks a running agent; it has no separate opt-out and
+        // rides the master notifications toggle.
+        return true;
     }
   }
 
@@ -142,6 +146,10 @@ class NotificationRouter {
         return view.isViewingChat(notification.sourceId);
       case NotificationKind.channelMessage:
         return view.isViewingChannel(notification.sourceId);
+      case NotificationKind.hermesApproval:
+        // No Hermes view tracker today: an approval banner is never suppressed
+        // by what is on screen, only by lifecycle and the master toggle.
+        return false;
     }
   }
 

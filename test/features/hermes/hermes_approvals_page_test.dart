@@ -59,6 +59,15 @@ void main() {
     expect(find.text('Allow once'), findsOneWidget);
     expect(find.text('Deny'), findsOneWidget);
     expect(find.text('Open conversation'), findsNWidgets(2));
+    // Every waiting decision comes from a live run, so each card can stop it.
+    expect(
+      find.byKey(const ValueKey<String>('hermes-approval-stop-request-1')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey<String>('hermes-approval-stop-request-2')),
+      findsOneWidget,
+    );
   });
 
   testWidgets('says so when nothing is waiting', (tester) async {

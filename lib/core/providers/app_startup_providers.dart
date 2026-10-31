@@ -68,6 +68,7 @@ import 'package:conduit_core/features/direct_connections/direct_connections.dart
 import 'package:conduit_core/features/hermes/models/hermes_model.dart';
 
 import '../../features/notifications/providers/notification_socket_listener.dart';
+import '../../features/notifications/providers/hermes_approval_notification_listener.dart';
 import '../../features/notifications/services/local_notification_service.dart';
 import '../../shared/theme/theme_providers.dart';
 
@@ -1185,6 +1186,10 @@ class AppStartupFlow extends _$AppStartupFlow {
     // the NotificationRouter). The router gates on the master toggle, so this is
     // safe to run unconditionally. Then drain any cold-launch notification tap.
     ref.read(notificationSocketListenerProvider);
+    // Hermes decisions travel the same router: a run that stops for approval
+    // while the app is backgrounded posts an OS notification whose tap opens
+    // the inbox. Primed, so an old approval does not alert on launch.
+    ref.read(hermesApprovalNotificationListenerProvider);
     unawaited(
       ref.read(notificationSocketListenerProvider.notifier).handleLaunchTap(),
     );

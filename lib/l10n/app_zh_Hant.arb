@@ -3081,6 +3081,8 @@
   "hermesApprovalResolveFailed": "無法傳送該決定，請重試。",
   "hermesApprovalsExpiresInHours": "{count, plural, other{{count} 小時後過期}}",
   "hermesApprovalsExpiresInMinutes": "{count, plural, other{{count} 分鐘後過期}}",
+  "hermesApprovalsStopConfirm": "停止此對話中的執行？",
+  "hermesApprovalsStopped": "執行已停止。",
   "hermesApprovalRequired": "Approval required",
   "hermesApprovalFallback": "The agent is requesting permission to continue.",
   "openWebUiPromptOther": "其他",

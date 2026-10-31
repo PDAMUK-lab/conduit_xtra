@@ -3081,6 +3081,8 @@
   "hermesApprovalResolveFailed": "Die Entscheidung konnte nicht gesendet werden. Versuche es erneut.",
   "hermesApprovalsExpiresInHours": "{count, plural, =1{Läuft in 1 Stunde ab} other{Läuft in {count} Stunden ab}}",
   "hermesApprovalsExpiresInMinutes": "{count, plural, =1{Läuft in 1 Minute ab} other{Läuft in {count} Minuten ab}}",
+  "hermesApprovalsStopConfirm": "Den Lauf in dieser Unterhaltung stoppen?",
+  "hermesApprovalsStopped": "Lauf gestoppt.",
   "hermesApprovalRequired": "Approval required",
   "hermesApprovalFallback": "The agent is requesting permission to continue.",
   "openWebUiPromptOther": "Sonstiges",

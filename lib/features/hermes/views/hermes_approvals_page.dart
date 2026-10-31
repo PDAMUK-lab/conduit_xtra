@@ -6,6 +6,7 @@ import '../../../l10n/app_localizations_en.dart';
 import '../../../shared/theme/theme_extensions.dart';
 import '../../../shared/utils/ui_utils.dart';
 import '../../../shared/widgets/conduit_components.dart';
+import '../../../shared/widgets/themed_dialogs.dart';
 import '../../../shared/widgets/utility_components.dart';
 
 import 'package:conduit_core/features/hermes/models/hermes_session.dart';
@@ -122,6 +123,7 @@ class _ApprovalCard extends ConsumerStatefulWidget {
 
 class _ApprovalCardState extends ConsumerState<_ApprovalCard> {
   bool _resolving = false;
+  bool _stopping = false;
 
   HermesPendingDesktopDecision get decision => widget.decision;
 
@@ -198,6 +200,17 @@ class _ApprovalCardState extends ConsumerState<_ApprovalCard> {
                   width: 16,
                   height: 16,
                   child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              else
+                ConduitIconButton(
+                  key: ValueKey<String>(
+                    'hermes-approval-stop-${decision.requestId}',
+                  ),
+                  icon: Icons.stop_circle_outlined,
+                  iconColor: theme.error,
+                  tooltip: l10n.stopGenerating,
+                  isCompact: true,
+                  onPressed: _stopping ? null : _stopRun,
                 ),
             ],
           ),
@@ -312,6 +325,33 @@ class _ApprovalCardState extends ConsumerState<_ApprovalCard> {
           isError: true,
         );
       }
+    }
+  }
+
+  Future<void> _stopRun() async {
+    final l10n = _l10n(context);
+    final confirmed = await ThemedDialogs.confirm(
+      context,
+      title: l10n.stopGenerating,
+      message: l10n.hermesApprovalsStopConfirm,
+      confirmText: l10n.stopGenerating,
+      cancelText: l10n.cancel,
+      isDestructive: true,
+    );
+    if (!confirmed || !mounted) return;
+    final service = ref.read(hermesApiServiceProvider);
+    if (service is! HermesDesktopApiService) return;
+    setState(() => _stopping = true);
+    try {
+      await service.interrupt(decision.storedSessionId);
+      if (!mounted) return;
+      UiUtils.showMessage(context, l10n.hermesApprovalsStopped);
+    } catch (_) {
+      if (mounted) {
+        UiUtils.showMessage(context, l10n.chatStopResponseFailed, isError: true);
+      }
+    } finally {
+      if (mounted) setState(() => _stopping = false);
     }
   }
 

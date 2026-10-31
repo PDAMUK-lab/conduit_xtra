@@ -27,6 +27,13 @@ enum NotificationKind {
   /// upstream channel event with `type == 'message'`.
   @JsonValue('channel_message')
   channelMessage,
+
+  /// A Hermes run is waiting on a human decision (approval, clarification,
+  /// sudo, secret, or MCP setup). Raised by the app's own Hermes listener, not
+  /// by an Open WebUI socket event, but it travels the same router so the same
+  /// master toggle, lifecycle gate, and tap handling apply.
+  @JsonValue('hermes_approval')
+  hermesApproval,
 }
 
 /// An immutable, transport-agnostic description of a notification to surface.

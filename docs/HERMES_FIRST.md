@@ -118,7 +118,13 @@ before `flutter pub get`.
   Hermes tab leads the sidebar, Approvals inbox across sessions, pending-store
   listing + change stream. `flutter analyze`: no issues; the new store and page
   tests plus the chooser accessibility/order tests pass.
-- Not yet: local notifications, run control outside the chat, M2/M3 parity.
+- **M1.5 (local notifications + inbox stop):** a backgrounded approval posts an
+  OS notification through the shared router (new `NotificationKind.hermesApproval`,
+  tap opens the inbox), primed so an old approval does not alert on launch, and
+  each inbox card can stop the waiting run (`session.interrupt`) behind a
+  confirmation. Router tests cover system/banner/suppressed/replay paths.
+- Still a local listener: it only sees events while the app process is alive.
+  Runs that raise an approval while the app is killed need the push stack.
 
 ## Milestones
 

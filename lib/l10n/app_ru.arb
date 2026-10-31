@@ -3101,6 +3101,8 @@
   "hermesApprovalResolveFailed": "Не удалось отправить решение. Повторите попытку.",
   "hermesApprovalsExpiresInHours": "{count, plural, =1{Истекает через 1 час} other{Истекает через {count} ч.}}",
   "hermesApprovalsExpiresInMinutes": "{count, plural, =1{Истекает через 1 минуту} other{Истекает через {count} мин.}}",
+  "hermesApprovalsStopConfirm": "Остановить запуск в этой беседе?",
+  "hermesApprovalsStopped": "Запуск остановлен.",
   "hermesApprovalRequired": "Требуется подтверждение",
   "hermesApprovalFallback": "Агент запрашивает разрешение на продолжение.",
   "openWebUiPromptOther": "Другое",

@@ -4684,6 +4684,8 @@
   "hermesApprovalResolveFailed": "決定を送信できませんでした。もう一度お試しください。",
   "hermesApprovalsExpiresInHours": "{count, plural, other{{count} 時間後に期限切れ}}",
   "hermesApprovalsExpiresInMinutes": "{count, plural, other{{count} 分後に期限切れ}}",
+  "hermesApprovalsStopConfirm": "この会話の実行を停止しますか？",
+  "hermesApprovalsStopped": "実行を停止しました。",
   "hermesApprovalRequired": "Approval required",
   "hermesApprovalFallback": "The agent is requesting permission to continue.",
   "openWebUiPromptOther": "その他",

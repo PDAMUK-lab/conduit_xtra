@@ -6062,6 +6062,14 @@
     "description": "How long a Hermes approval stays answerable.",
     "placeholders": {"count": {"type": "int"}}
   },
+  "hermesApprovalsStopConfirm": "Stop the run in this conversation?",
+  "@hermesApprovalsStopConfirm": {
+    "description": "Hermes approvals inbox action copy."
+  },
+  "hermesApprovalsStopped": "Run stopped.",
+  "@hermesApprovalsStopped": {
+    "description": "Hermes approvals inbox action copy."
+  },
   "hermesApprovalRequired": "Approval required",
   "@hermesApprovalRequired": {
     "description": "Title of a Hermes human-approval request card."

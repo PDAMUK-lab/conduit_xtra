@@ -4990,6 +4990,8 @@
   "hermesApprovalResolveFailed": "Rozhodnutie sa nepodarilo odoslať. Skúste to znova.",
   "hermesApprovalsExpiresInHours": "{count, plural, =1{Vyprší za 1 hodinu} other{Vyprší za {count} hodín}}",
   "hermesApprovalsExpiresInMinutes": "{count, plural, =1{Vyprší za 1 minútu} other{Vyprší za {count} minút}}",
+  "hermesApprovalsStopConfirm": "Zastaviť beh v tejto konverzácii?",
+  "hermesApprovalsStopped": "Beh zastavený.",
   "hermesApprovalRequired": "Approval required",
   "hermesApprovalFallback": "The agent is requesting permission to continue.",
   "openWebUiPromptOther": "Iné",

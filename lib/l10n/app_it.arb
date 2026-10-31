@@ -3081,6 +3081,8 @@
   "hermesApprovalResolveFailed": "Impossibile inviare la decisione. Riprova.",
   "hermesApprovalsExpiresInHours": "{count, plural, =1{Scade tra 1 ora} other{Scade tra {count} ore}}",
   "hermesApprovalsExpiresInMinutes": "{count, plural, =1{Scade tra 1 minuto} other{Scade tra {count} minuti}}",
+  "hermesApprovalsStopConfirm": "Interrompere l’esecuzione in questa conversazione?",
+  "hermesApprovalsStopped": "Esecuzione interrotta.",
   "hermesApprovalRequired": "Approval required",
   "hermesApprovalFallback": "The agent is requesting permission to continue.",
   "openWebUiPromptOther": "Altro",

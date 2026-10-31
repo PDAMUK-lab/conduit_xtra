@@ -2859,6 +2859,8 @@
   "hermesApprovalResolveFailed": "결정을 보내지 못했습니다. 다시 시도하세요.",
   "hermesApprovalsExpiresInHours": "{count, plural, other{{count}시간 후 만료}}",
   "hermesApprovalsExpiresInMinutes": "{count, plural, other{{count}분 후 만료}}",
+  "hermesApprovalsStopConfirm": "이 대화의 실행을 중지할까요?",
+  "hermesApprovalsStopped": "실행을 중지했습니다.",
   "hermesApprovalRequired": "승인 필요",
   "hermesApprovalFallback": "에이전트가 계속 진행할 권한을 요청하고 있습니다.",
   "openWebUiPromptOther": "기타",

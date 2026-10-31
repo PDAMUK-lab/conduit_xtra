@@ -243,4 +243,52 @@ void main() {
       });
     }
   });
+
+  group('Hermes approvals', () {
+    AppNotification approval({String request = 'req-1'}) => AppNotification(
+      kind: NotificationKind.hermesApproval,
+      title: 'Approval required',
+      body: 'rm -rf build/',
+      sourceId: request,
+      dedupKey: 'hermes-approval:https://hermes.example:443\u0000$request',
+    );
+
+    test('a backgrounded approval posts a system notification', () async {
+      final router = build(foreground: false);
+      check(await router.route(approval())).equals(NotificationSurface.system);
+      verify(
+        () => local.show(any(), playSound: any(named: 'playSound')),
+      ).called(1);
+      check(unreads).isEmpty();
+    });
+
+    test('a foregrounded approval shows the in-app banner', () async {
+      final router = build();
+      check(await router.route(approval())).equals(NotificationSurface.banner);
+      check(banners).length.equals(1);
+      check(banners.single.kind).equals(NotificationKind.hermesApproval);
+    });
+
+    test('the master toggle still governs approvals', () async {
+      final router = build(
+        foreground: false,
+        settings: allOn.copyWith(notificationsEnabled: false),
+      );
+      check(await router.route(approval())).equals(
+        NotificationSurface.suppressed,
+      );
+      verifyNever(
+        () => local.show(any(), playSound: any(named: 'playSound')),
+      );
+    });
+
+    test('a replayed request is announced once', () async {
+      final router = build(foreground: false);
+      await router.route(approval());
+      await router.route(approval());
+      verify(
+        () => local.show(any(), playSound: any(named: 'playSound')),
+      ).called(1);
+    });
+  });
 }

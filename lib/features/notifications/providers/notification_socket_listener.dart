@@ -96,6 +96,10 @@ Future<void> _handleTap(Ref ref, NotificationTap tap) async {
     switch (tap.kind) {
       case NotificationKind.channelMessage:
         NavigationService.navigateToChannel(tap.sourceId);
+      case NotificationKind.hermesApproval:
+        // The inbox lists every waiting decision; the tapped request is not
+        // necessarily alone, so open the inbox rather than guess a session.
+        NavigationService.navigateTo(Routes.hermesApprovals);
       case NotificationKind.chatCompletion:
         final ownership = captureOpenWebUiConversationRead(ref);
         if (ownership == null) return;
