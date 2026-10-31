@@ -133,6 +133,28 @@ before `flutter pub get`.
 - Memory (`/api/memory`, `/api/memory/provider`) has measured contracts and
   service methods; its UI is the next slice.
 
+## APK delivery to the NAS
+
+Every file that lands in `build/app/outputs/flutter-apk/` is mirrored to the
+NAS `hermes` share by a user service, so a build is installable from the phone
+without touching this node.
+
+- Source: `scripts/publish-apk-to-nas.sh` (manual runs are safe and idempotent);
+  watcher: `scripts/watch-apks.sh`, run by `~/.config/systemd/user/apk-publish-watcher.service`
+  (enabled, linger on, 5 s poll, `NRestarts=0`).
+- Destination: `//20.20.0.10/hermes` → `conduit/apks` (mounted at `/srv/share`).
+- Each build: `conduit-hermes-<version>-<commit>-<sha8>.apk` plus `.sha256`.
+- `latest.txt` names the newest build and carries its sha256, size, version,
+  commit and build/publish timestamps — a pointer, not a second copy.
+- Retention: the newest 10 content builds; only files matching this
+  publisher's own `conduit-hermes-*.apk` pattern are ever deleted.
+- Log: `~/.hermes/logs/apk-publish.log`. State: `~/.hermes/state/apk-publish.state`
+  (mtime+size per APK, so an unchanged build costs a `stat` and nothing else).
+
+Verified 2026-10-31: build #3 (286,413,184 bytes, sha256 `41b530b7…`) published,
+checksum re-read from the NAS matched, deleting the NAS copy and touching the
+APK republished it in 7 s, and an idle watcher added no log lines.
+
 ## Milestones
 
 **M0 — build pipeline (this session).** Flutter 3.47.9 + Android SDK 37 + NDK
