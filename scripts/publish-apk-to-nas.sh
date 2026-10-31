@@ -69,7 +69,14 @@ for apk in "$APK_DIR"/*.apk; do
   name="conduit-hermes-${VERSION}-${GITSHORT}-${sha8}.apk"
   target="$DEST/$name"
 
-  if [ -f "$target" ] && [ "$(stat -c %s "$target")" = "$size" ] && \
+  # Content is the identity: a rebuild after a commit-only change produces the
+  # same bytes and must not leave a second 213 MB copy under a new label.
+  same_content="$(ls -1 "$DEST"/conduit-hermes-"$VERSION"-*-"$sha8".apk 2>/dev/null | head -1 || true)"
+  if [ -n "$same_content" ]; then
+    name="$(basename "$same_content")"
+    target="$same_content"
+    log "already published $name (same content)"
+  elif [ -f "$target" ] && [ "$(stat -c %s "$target")" = "$size" ] && \
      [ "$(sha256sum "$target" | awk '{print $1}')" = "$sha" ]; then
     log "already published $name"
   else
