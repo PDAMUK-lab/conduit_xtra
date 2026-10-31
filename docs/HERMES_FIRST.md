@@ -1,0 +1,137 @@
+# Hermes-first Android
+
+Status: draft plan, 2026-10-31. Owner: Hermes node (`ai-node`).
+
+## Goal
+
+Make Conduit's Android build Hermes-first: Hermes is the default backend and the
+primary home, and the app can drive a Hermes agent end to end from a phone —
+watch a run, approve or deny what it asks, steer or stop it, and manage the
+agent's workspace (sessions, schedules, skills, tools, files, memory, config).
+
+Open WebUI, Direct and Ollama stay as secondary backends. The fork tracks
+`PDAMUK-lab/conduit_xtra` (upstream `cogwheel0/conduit`, GPL-3.0); changes aim to
+stay upstream-friendly.
+
+## Decisions (operator, 2026-10-31)
+
+| Question | Decision |
+| --- | --- |
+| Other backends | Keep, but Hermes is the default and the primary home |
+| First milestone | Control-first: Hermes home/onboarding, approvals inbox, run control, sessions/jobs polish |
+| Notifications | Local notifications now; the unmerged upstream push stack is revisited later |
+| Device verification | Operator sideloads the APK this node builds and reports back |
+
+## Contract baseline
+
+- App pins `hermes-src` at `939e45c9` (Hermes **v0.21.2**, 2026-09-11).
+- Node runs Hermes **v0.22.5** (2026.9.24), commit `8c698125`; the app's pin is
+  an ancestor, so the node's dashboard is a superset of the pinned contract.
+- Contract source of truth at runtime: `GET /api/status`, `GET /v1/capabilities`,
+  and the dashboard routers under `hermes_cli/web_routers/` (**270 routes**,
+  33 routers at v0.22.5).
+
+## How the app talks to Hermes today
+
+Measured from `packages/conduit_core/lib/features/hermes/` (~25k LOC, 40 service
+files) and `lib/features/hermes/` (UI):
+
+- Two modes (`HermesBackendMode`): `responsesApi` (OpenAI Responses gateway at
+  `/v1`, API key) and `desktopGateway` (dashboard/desktop surface, auth kinds
+  `legacyToken` / `nativePkce` / `dashboardCookie`).
+- `desktopGateway` carries a JSON-RPC client plus REST calls to `/api/sessions`,
+  `/api/cron`, `/api/mcp`, `/api/profiles`, `/api/audio`, `/api/status`.
+- Dashboard-cookie auth is carried by a hidden WebView bridge
+  (`hermes_dashboard_rest_session.dart`); native PKCE
+  (`/auth/native/authorize|token|refresh`) and `X-Hermes-Session-Token` are
+  already implemented in `hermes_desktop_auth_rest.dart`.
+- Capability gates are parsed from `/v1/capabilities` (`HermesCapabilities`).
+- Existing UI: Hermes tab (server sessions + scheduled-agents entry), settings
+  and connection editor, jobs page/editor, MCP page, approval/decision cards,
+  sessions tab.
+
+## Coverage against the dashboard (v0.22.5)
+
+Literal endpoint matching across the Dart sources is a lower bound only: many
+calls are built dynamically or go over JSON-RPC. Feature-level status below is
+the useful view.
+
+| Dashboard surface | App today |
+| --- | --- |
+| Chat + streaming runs, tool activity | Yes |
+| Approvals / decisions (per session) | Yes (cards in chat) |
+| Sessions list, messages, rename, delete, fork | Yes |
+| Scheduled jobs (list, create, edit, pause, resume, trigger, delete) | Yes |
+| MCP servers (list, add, test, auth, enable, install) | Yes |
+| Skills | List only |
+| Toolsets | List + limited config |
+| Profiles | List only |
+| Models | List only |
+| Health / status probe | Yes |
+| Audio (transcribe, speak, voice-live) | Yes |
+| Bots | Yes |
+| Memory (read, provider, reset) | No |
+| Files / filesystem browser | No |
+| Config editor (raw), env/secrets | No |
+| Analytics (usage, models) | No |
+| Logs | No |
+| Plugins (agent + dashboard) | No |
+| Channels (WhatsApp/Telegram onboarding) | No |
+| Pairing, webhooks | No |
+| Ops (doctor, backup/import, checkpoints, hooks) | No |
+| Git review (status, diff, stage, commit, push, PR) | No |
+| Local models (status, catalog, download, server) | No |
+| Delegation routing | No |
+| Cron run history, delivery targets, blueprints | No |
+| Workspaces, ui-preferences, curator/learning | No |
+
+Counts: 24 of 270 dashboard routes appear verbatim in app sources; the absent
+list is dominated by `ops` (28), `git` (21), `files` (19), `dashboard_ui` (18),
+`local_models` (18), `status` extras (18), `profiles` CRUD (12), `tools` (12),
+`messaging` (11).
+
+## Milestones
+
+**M0 — build pipeline (this session).** Flutter 3.47.9 + Android SDK 37 + NDK
+29.0.14206865 provisioned under `~/sdk`; `flutter pub get`, codegen, analyze,
+test shards, `flutter build apk --debug --target-platform android-arm64`.
+Artifact handed to the operator. No source changes.
+
+**M1 — Hermes-first control surface.** Hermes first in onboarding and as the
+landing tab; approvals inbox across sessions with inline approve/deny and
+tap-through; run control (stop/interrupt, open to steer/resume); local
+notification when an approval is waiting while the app is backgrounded.
+Sessions/jobs polish.
+
+**M2 — workspace parity pack.** Memory, files browser (list/read/write/download),
+skills content/toggle/create, toolsets config (model/provider/env), profiles
+CRUD + soul, models (set/MoA/auxiliary), analytics (usage/models), logs tail,
+cron run history + delivery targets + blueprints.
+
+**M3 — admin parity pack.** Config raw editor, env/secrets, plugins, pairing,
+webhooks, ops (doctor/backup/checkpoints/hooks), git review, local models,
+delegation routing, channels/workspaces/ui-preferences that make sense on a
+phone.
+
+**M4 — release.** Signed APK, branding for the Hermes-first build, docs,
+upstream-compatible PR series.
+
+## Verification
+
+- `dart run build_runner build` (app + `packages/conduit_core`)
+- `flutter analyze --no-fatal-warnings --no-fatal-infos`
+- `dart run tool/run_test_shards.dart` (Hermes tests: 373 files)
+- `flutter build apk --debug --target-platform android-arm64`
+- Per feature: widget/unit tests plus a live probe against a throwaway Hermes
+  dashboard on `127.0.0.1:9120` with a known session token.
+- On device: operator installs the APK, reports what works.
+
+## Constraints and gotchas
+
+- New UI strings must exist in all 14 `lib/l10n/app_*.arb` locales
+  (`tool/validate_arb_locales.dart` fails otherwise); add English text to every
+  locale until translations land.
+- The workspace uses a single lockfile; members stay `resolution: workspace`.
+- `android/app/build.gradle.kts` pins `compileSdk = 37`, `ndkVersion
+  29.0.14206865`, and ships `armeabi-v7a` + `arm64-v8a` only.
+- Reports must name the artifact a number came from; no unverified claims.
