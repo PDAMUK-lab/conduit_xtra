@@ -402,3 +402,33 @@ upstream-compatible PR series.
 - `android/app/build.gradle.kts` pins `compileSdk = 37`, `ndkVersion
   29.0.14206865`, and ships `armeabi-v7a` + `arm64-v8a` only.
 - Reports must name the artifact a number came from; no unverified claims.
+
+## Status — complete for personal use (2026-11-01)
+
+Surfaces reachable from the phone, all exercised against this node:
+
+chats and sessions (with full-text search), approvals (inbox + notification,
+narrowest scope), files, skills, memory and Memory Wiki, toolsets, profiles,
+analytics, logs, config (raw edit with diff + typed confirm, env edit/remove),
+ops (doctor, audit, backup, checkpoint inventory/prune, hooks, backup list and
+restore with gateway drain), git (status, diff, stage/commit/push, branches,
+worktrees), scheduled agents (jobs, delivery targets, blueprints, run now),
+messaging (32 channels, enable/disable, connection check), local models
+(manager state, external router, fleet peers with raise/release and
+self-reported hardware), a health strip and pull-to-refresh throughout.
+
+Known limits, each deliberate and visible in the UI:
+
+- The local-model **manager** is read-only here: both workers are started
+  outside it, so it reports rather than controls. A larger primary node
+  resolves this.
+- `hermes import` only works with the gateway drained; the app does that via
+  `--stop-gateway`, and messaging is offline while it runs.
+- Telegram/WhatsApp onboarding flows are not wired; channels are managed, not
+  pairings.
+- Git revert, branch switching *off* a dirty tree and worktree add are not
+  exposed.
+
+Delivery: `//20.20.0.10/hermes/conduit/apks`, `latest.txt` points at the current
+build. Server-side fixes the app needs are archived in
+`hermesprojects/patches/hermes-conduit` with verify/reapply scripts.
