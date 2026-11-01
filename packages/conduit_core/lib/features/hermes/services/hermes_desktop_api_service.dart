@@ -50,6 +50,7 @@ part 'hermes_desktop_auth_rest.dart';
 part 'hermes_desktop_bots.dart';
 part 'hermes_desktop_event_projection.dart';
 part 'hermes_desktop_live_runtime.dart';
+part 'hermes_desktop_live_watch.dart';
 part 'hermes_desktop_turn_runtime.dart';
 
 typedef HermesDesktopCredentialsWriter = Future<void> Function(
@@ -224,6 +225,7 @@ final class HermesDesktopApiService
     OpenExternalUrlPort? openExternalUrl,
     HermesDashboardBridgeFactory? dashboardBridgeFactory,
     this.onCredentialsChanged,
+    this.liveWatchInterval = const Duration(seconds: 8),
   }) : _openExternalUrl = openExternalUrl ?? const NullOpenExternalUrlPort(),
        _dashboardBridgeFactory = dashboardBridgeFactory,
        _nativeTokens = config.desktopCredentials?.nativeTokens,
@@ -257,6 +259,10 @@ final class HermesDesktopApiService
 
   /// Supplies the WebView-backed dashboard bridge, when the host has one.
   final HermesDashboardBridgeFactory? _dashboardBridgeFactory;
+
+  /// How often an open chat asks the gateway whether its turn is still
+  /// running, so a missed terminal event cannot leave the typing indicator up.
+  final Duration liveWatchInterval;
 
   final String _origin;
   final Uri _root;
@@ -296,10 +302,28 @@ final class HermesDesktopApiService
   Future<HermesDesktopTokenSet?>? _refreshing;
   Future<void>? _foregroundReconciliation;
   StreamSubscription<HermesDesktopEvent>? _stateSubscription;
+  StreamSubscription<void>? _disconnectSubscription;
   bool _authoritativeRunning = true;
   bool _supportsMcpRpcLifecycle = true;
   bool _reconciliationStale = false;
   StreamSubscription<AppLifecyclePhase>? _lifecycleSubscription;
+
+  /// The open chat the live watch keeps current, its timer, and the state a
+  /// lost terminal event must not strand (see `hermes_desktop_live_watch`).
+  String? _liveSessionId;
+  Timer? _liveWatchTimer;
+  bool _liveWatchInFlight = false;
+  int _liveWatchFailures = 0;
+  bool _foreground = true;
+
+  /// Transcript reloads are coalesced: one turn ends with several frames
+  /// (`message.complete`, `session.info`), and one reload answers all of them.
+  Timer? _transcriptChangeDebounce;
+  final Set<String> _queuedTranscriptChanges = {};
+
+  bool _recoveringLiveTransport = false;
+  DateTime? _lastRecoveryAt;
+  Duration _recoveryBackoff = Duration.zero;
   int _desktopContract = 0;
 
   /// Starts reconciling the desktop transport across foreground changes.
@@ -907,9 +931,15 @@ final class HermesDesktopApiService
     if (_closed) return;
     _closed = true;
     unawaited(_lifecycleSubscription?.cancel());
+    _liveWatchTimer?.cancel();
+    _liveWatchTimer = null;
+    _transcriptChangeDebounce?.cancel();
+    _transcriptChangeDebounce = null;
+    _queuedTranscriptChanges.clear();
     _dio.close(force: true);
     unawaited(_dashboardBridge?.close());
     unawaited(_stateSubscription?.cancel());
+    unawaited(_disconnectSubscription?.cancel());
     unawaited(_rpc.close());
     unawaited(_turnStates.close());
     unawaited(_sessionTurnStateChanges.close());
@@ -934,6 +964,20 @@ final class HermesDesktopApiService
 
   void _emitTranscriptChange(String id) {
     if (!_closed) _transcriptChanges.add(id);
+  }
+
+  /// Emits [id]'s transcript change once the burst that asked for it settles.
+  void _queueTranscriptChange(String id) {
+    if (_closed || id.isEmpty) return;
+    _queuedTranscriptChanges.add(id);
+    _transcriptChangeDebounce ??= Timer(const Duration(milliseconds: 120), () {
+      _transcriptChangeDebounce = null;
+      final ids = _queuedTranscriptChanges.toList(growable: false);
+      _queuedTranscriptChanges.clear();
+      for (final queued in ids) {
+        _emitTranscriptChange(queued);
+      }
+    });
   }
 
   void _emitDesktopContract(int value) {

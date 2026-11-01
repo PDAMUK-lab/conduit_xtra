@@ -42,18 +42,29 @@ extension _HermesDesktopLiveRuntime on HermesDesktopApiService {
       await _rpc.disconnect();
       return;
     }
+    _disconnectSubscription ??= _rpc.disconnects.listen(
+      (_) => _liveTransportDisconnected(),
+    );
     _stateSubscription ??= _rpc.events.listen((event) {
-      final startedBuffering = _eventBuffer.add(event);
+      _eventBuffer.add(event);
+      final eventStoredId = _storedIdForRuntime(event.sessionId);
       if (event.type == 'session.info') {
         // Update BOTH keys. `session.create` can omit `running`, which parks
         // the stored id at unsupportedGateway; a runtime-only update never
         // clears that, so the second turn onward fails the safety gate with
         // "Hermes run failed." until a resume repairs the state.
-        _applyAuthoritativeRunning(
+        final changed = _applyAuthoritativeRunning(
           event.payload['running'],
-          storedId: _storedIdForRuntime(event.sessionId),
+          storedId: eventStoredId,
           runtimeId: event.sessionId,
         );
+        // A turn that just ended left a reply behind. Reload even when a
+        // local stream is not running: the chat may be following a turn this
+        // client did not start (dashboard, TUI, another phone), which is the
+        // case that used to sit stale until the page was reopened.
+        if (changed && eventStoredId != null) {
+          _queueTranscriptChange(eventStoredId);
+        }
       }
       if (event.type == 'approval.request' ||
           event.type == 'clarify.request' ||
@@ -70,13 +81,14 @@ extension _HermesDesktopLiveRuntime on HermesDesktopApiService {
           event.type == 'mcp.setup.expire') {
         unawaited(_resolvePendingDecisionEvent(event));
       }
-      if (startedBuffering &&
-          (event.type == 'message.complete' ||
-              event.type.endsWith('.request') ||
-              (event.type == 'session.info' &&
-                  event.payload['running'] == false))) {
-        final storedId = _storedIdForRuntime(event.sessionId);
-        if (storedId != null) _emitTranscriptChange(storedId);
+      // Every completion is a reason to reload, not only the first frame of a
+      // burst: a viewer that is not streaming locally sees `message.start`
+      // first, so keying the reload off the burst's opening frame dropped the
+      // completion that followed it and the transcript never refreshed.
+      if ((event.type == 'message.complete' ||
+              event.type.endsWith('.request')) &&
+          eventStoredId != null) {
+        _queueTranscriptChange(eventStoredId);
       }
     });
     _emitTurnState(HermesDesktopTurnState.idle);
@@ -104,11 +116,16 @@ extension _HermesDesktopLiveRuntime on HermesDesktopApiService {
       case AppLifecyclePhase.detached:
         // The OS may keep the socket alive. Reconcile on return instead of
         // closing a valid transport merely because the app backgrounded.
+        _foreground = false;
         _reconciliationStale = true;
       case AppLifecyclePhase.resumed:
-        _foregroundReconciliation ??= _reconcileForeground().whenComplete(
-          () => _foregroundReconciliation = null,
-        );
+        _foreground = true;
+        _foregroundReconciliation ??= _reconcileForeground().whenComplete(() {
+          _foregroundReconciliation = null;
+          // Coming back is also the moment to ask whether the turn this phone
+          // was watching finished while it was away.
+          unawaited(_liveWatchTick());
+        });
       case AppLifecyclePhase.inactive:
         break;
     }
@@ -161,7 +178,10 @@ extension _HermesDesktopLiveRuntime on HermesDesktopApiService {
     }
   }
 
-  void _applyAuthoritativeRunning(
+  /// Applies the gateway's own `running` flag to [storedId] and/or
+  /// [runtimeId]; returns whether any of them actually changed, so callers can
+  /// reload exactly once per real transition instead of once per frame.
+  bool _applyAuthoritativeRunning(
     Object? running, {
     String? storedId,
     String? runtimeId,
@@ -176,12 +196,15 @@ extension _HermesDesktopLiveRuntime on HermesDesktopApiService {
     } else {
       _authoritativeRunning = true;
     }
+    var changed = false;
     for (final id in <String?>{storedId, runtimeId}) {
       if (id == null || id.isEmpty) continue;
+      if (_sessionTurnStates[id] != state) changed = true;
       _sessionTurnStates[id] = state;
       _emitSessionTurnState(id);
     }
     _emitTurnState(state);
+    return changed;
   }
 
   Map<String, dynamic> _object(Object? value) =>
@@ -255,6 +278,9 @@ extension _HermesDesktopLiveRuntime on HermesDesktopApiService {
     _bindingSocketGenerations[storedId] = _rpc.socketGeneration;
     _bindingSocketGenerations[stored] = _rpc.socketGeneration;
     _applyAuthoritativeRunning(running, storedId: storedId, runtimeId: runtime);
+    // The chat the user opened is the one the live watch has to keep honest
+    // from here on, whether or not a local stream ever starts.
+    _noteLiveSession(stored);
     if (stored != storedId) {
       _sessionTurnStates[stored] = turnStateFor(storedId);
       _emitSessionTurnState(stored);
@@ -480,7 +506,10 @@ extension _HermesDesktopLiveRuntime on HermesDesktopApiService {
           runtimeId != null && _eventBuffer.take(runtimeId).isNotEmpty;
       if (!forceReload && !arrivedDuringLoad) break;
       forceReload = false;
-      if (attempt == 2) _emitTranscriptChange(id);
+      // No re-emit here: a transcript change now comes from the event that
+      // caused it (`message.complete`, a terminal `session.info`). Asking for
+      // another reload from inside a reload looped forever while another
+      // client's turn streamed into this session.
     }
     // A failed resume left the connection state at "synchronizing"; the
     // transcript is loaded, and no turn is known to be running.

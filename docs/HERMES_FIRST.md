@@ -335,6 +335,28 @@ before `flutter pub get`.
   offers the repos directly inside it when that cwd is not one (measured 12
   under `/home/hermes/repos`), and keeps the path editable.
 
+- **Live follow: a chat stays current while another client runs the turn.**
+  Opening a session that the dashboard (or TUI, or another phone) is driving
+  used to stall: the app loaded the transcript once and never again, and could
+  sit on "thinking" after the reply had landed. Two causes, both measured on a
+  throwaway gateway. (1) The transcript reload was keyed to the *first* frame
+  of an event burst, so a viewer that was not streaming locally saw
+  `message.start` open the burst and `message.complete` — arriving second — was
+  dropped: the page never reloaded. Every completion and terminal
+  `session.info` now requests a (coalesced) reload. (2) Nothing asked the
+  gateway for the turn's state, so a terminal frame lost to a dead socket
+  stranded the typing indicator. The service now re-resumes the open session on
+  an interval while the app is foreground (`session.info` is an **event**, not
+  an RPC — asking for it as a method answers -32601; `session.resume` returns
+  `running` and re-attaches this client beside the other viewers). A resume
+  that times out or comes back disconnected also proves the socket dead and
+  triggers a reconnect with backoff. Verified: three tests against a fake
+  gateway that refuses unknown methods like the real one, plus two end-to-end
+  runs of the real service against a throwaway dashboard — an idle-opened chat
+  followed a dashboard turn (1 reload, transcript 2→4 messages, last role
+  assistant) and a chat opened mid-turn reported `running`, then `idle`, with
+  the 4,892-character reply loaded.
+
 ## APK delivery to the NAS
 
 Every file that lands in `build/app/outputs/flutter-apk/` is mirrored to the
