@@ -35,6 +35,7 @@ import 'package:conduit_core/utils/debug_logger.dart';
 import 'package:conduit_core/features/hermes/models/hermes_bot.dart';
 import 'package:conduit_core/features/hermes/models/hermes_capabilities.dart';
 import 'package:conduit_core/features/hermes/models/hermes_config.dart';
+import 'package:conduit_core/features/hermes/models/hermes_config_view.dart';
 import 'package:conduit_core/features/hermes/models/hermes_connection_profile.dart';
 import 'package:conduit_core/features/hermes/models/hermes_analytics.dart';
 import 'package:conduit_core/features/hermes/models/hermes_fs.dart';
@@ -2697,6 +2698,20 @@ final hermesFsTextProvider =
       if (service is! HermesDesktopApiService) return null;
       return service.fsReadText(path);
     });
+
+/// The server's raw config.yaml and its path.
+final hermesRawConfigProvider = FutureProvider<HermesRawConfig?>((ref) async {
+  final service = ref.watch(hermesApiServiceProvider);
+  if (service is! HermesDesktopApiService) return null;
+  return service.rawConfig();
+});
+
+/// Environment keys with redacted values.
+final hermesEnvVarsProvider = FutureProvider<List<HermesEnvVar>>((ref) async {
+  final service = ref.watch(hermesApiServiceProvider);
+  if (service is! HermesDesktopApiService) return const [];
+  return service.envVars();
+});
 
 /// Usage analytics for the last [days] (1–365; the server clamps).
 final hermesUsageAnalyticsProvider =

@@ -44,6 +44,7 @@ import '../../features/hermes/views/hermes_memory_wiki_page.dart';
 import '../../features/hermes/views/hermes_memory_subject_page.dart';
 import '../../features/hermes/views/hermes_memory_day_page.dart';
 import '../../features/hermes/views/hermes_skill_editor_page.dart';
+import '../../features/hermes/views/hermes_config_page.dart';
 import '../../features/hermes/views/hermes_analytics_page.dart';
 import '../../features/hermes/views/hermes_logs_page.dart';
 import '../../features/hermes/views/hermes_profiles_page.dart';
@@ -614,6 +615,12 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           skillName: state.pathParameters['name'],
         ),
       ),
+    ),
+    GoRoute(
+      path: Routes.hermesConfig,
+      name: RouteNames.hermesConfig,
+      pageBuilder: (context, state) =>
+          _buildPlatformPage(state: state, child: const HermesConfigPage()),
     ),
     GoRoute(
       path: Routes.hermesAnalytics,

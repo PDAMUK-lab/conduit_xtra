@@ -17,6 +17,7 @@ import 'package:conduit_core/network/external_link.dart';
 import 'package:conduit_core/features/hermes/models/hermes_bot.dart';
 import 'package:conduit_core/features/hermes/models/hermes_chat_input.dart';
 import 'package:conduit_core/features/hermes/models/hermes_config.dart';
+import 'package:conduit_core/features/hermes/models/hermes_config_view.dart';
 import 'package:conduit_core/features/hermes/models/hermes_analytics.dart';
 import 'package:conduit_core/features/hermes/models/hermes_fs.dart';
 import 'package:conduit_core/features/hermes/models/hermes_logs.dart';
@@ -381,6 +382,8 @@ final class HermesDesktopApiService
       path.startsWith('/api/fs') ||
       path.startsWith('/api/tools') ||
       path.startsWith('/api/analytics') ||
+      path.startsWith('/api/config') ||
+      path.startsWith('/api/env') ||
       path.startsWith('/api/logs') ||
       path.startsWith('/api/audio');
 
@@ -506,6 +509,10 @@ final class HermesDesktopApiService
     required String content,
   }) => _administration.fsWriteText(path: path, content: content);
   Future<String?> fsGitRoot(String path) => _administration.fsGitRoot(path);
+
+  // Config and env (read-only).
+  Future<HermesRawConfig?> rawConfig() => _administration.rawConfig();
+  Future<List<HermesEnvVar>> envVars() => _administration.envVars();
 
   // Analytics and logs (read-only).
   Future<HermesUsageAnalytics?> usageAnalytics({int days = 30}) =>

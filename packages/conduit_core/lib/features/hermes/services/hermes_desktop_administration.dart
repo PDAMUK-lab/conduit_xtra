@@ -575,6 +575,23 @@ final class _HermesDesktopAdministration {
     body: {'provider': provider},
   );
 
+  // --- Config and env -------------------------------------------------------
+  //
+  // `GET /api/config/raw` returns {yaml, path} (409 when the backend has no
+  // file); `GET /api/env` returns a NAME -> row map with redacted values. This
+  // slice reads only — the write path replaces the whole document and lands
+  // behind its own confirmation.
+
+  Future<HermesRawConfig?> rawConfig() async {
+    final data = await _owner._requestJson('GET', '/api/config/raw');
+    return HermesRawConfig.fromJson(data);
+  }
+
+  Future<List<HermesEnvVar>> envVars() async {
+    final data = await _owner._requestJson('GET', '/api/env');
+    return HermesEnvVar.listFromJson(data);
+  }
+
   // --- Analytics and logs ---------------------------------------------------
   //
   // `GET /api/analytics/usage|models?days=` (read-only aggregates) and

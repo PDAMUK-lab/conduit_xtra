@@ -6564,6 +6564,14 @@
   "hermesLogsLoadFailed": "Nie udało się wczytać logu.",
   "hermesLogsEmpty": "Brak wierszy.",
   "hermesLogsSearch": "Szukaj",
+  "hermesConfigTitle": "Konfiguracja",
+  "hermesConfigSubtitle": "config.yaml i zmienne środowiskowe serwera, tylko do odczytu.",
+  "hermesConfigLoadFailed": "Nie udało się wczytać konfiguracji serwera.",
+  "hermesEnvTitle": "Środowisko",
+  "hermesConfigSetOnly": "Tylko ustawione",
+  "hermesConfigSearch": "Szukaj kluczy",
+  "hermesConfigNoFile": "Ten backend konfiguracji nie ma pliku.",
+  "hermesConfigEmptyEnv": "Brak zmiennych środowiskowych.",
   "hermesApprovalRequired": "Wymagana zgoda",
   "@hermesApprovalRequired": {
     "description": "Title of a Hermes human-approval request card."

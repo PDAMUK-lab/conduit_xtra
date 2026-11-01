@@ -6486,6 +6486,38 @@
   "@hermesLogsSearch": {
     "description": "Analytics/logs copy."
   },
+  "hermesConfigTitle": "Config",
+  "@hermesConfigTitle": {
+    "description": "Config view copy."
+  },
+  "hermesConfigSubtitle": "The server's config.yaml and environment keys, read-only.",
+  "@hermesConfigSubtitle": {
+    "description": "Config view copy."
+  },
+  "hermesConfigLoadFailed": "Could not load the server configuration.",
+  "@hermesConfigLoadFailed": {
+    "description": "Config view copy."
+  },
+  "hermesEnvTitle": "Environment",
+  "@hermesEnvTitle": {
+    "description": "Config view copy."
+  },
+  "hermesConfigSetOnly": "Set only",
+  "@hermesConfigSetOnly": {
+    "description": "Config view copy."
+  },
+  "hermesConfigSearch": "Search keys",
+  "@hermesConfigSearch": {
+    "description": "Config view copy."
+  },
+  "hermesConfigNoFile": "This config backend has no file.",
+  "@hermesConfigNoFile": {
+    "description": "Config view copy."
+  },
+  "hermesConfigEmptyEnv": "No environment keys.",
+  "@hermesConfigEmptyEnv": {
+    "description": "Config view copy."
+  },
   "hermesApprovalRequired": "Approval required",
   "@hermesApprovalRequired": {
     "description": "Title of a Hermes human-approval request card."

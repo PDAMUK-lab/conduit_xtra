@@ -158,6 +158,13 @@ before `flutter pub get`.
   filters. Live shapes confirmed on a gated 0.22.5 dashboard
   (`{daily,by_model,by_task,totals,period_days,skills,tools}`,
   `{models,totals,period_days}`, `{file,lines}`, 400 on unknown file).
+- **M4.1 Stage A (Config + env, read-only):** the whole `config.yaml` with its
+  path, and every env key with its redacted value, description and
+  category — search plus a "set only" default. Measured live: config
+  `{yaml,path}`, env a 406-key map whose rows carry `is_set`,
+  `redacted_value`, `is_password`, `channel_managed`, `custom`.
+  Writes (`PUT /api/config/raw`) are deliberately not in this build:
+  the server replaces the whole document (`merge_existing=False`).
 
 ## APK delivery to the NAS
 
