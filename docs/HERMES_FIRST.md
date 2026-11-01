@@ -130,8 +130,15 @@ before `flutter pub get`.
   `/api/skills*` contract, verified with recorded-request tests plus a live
   curl probe against Hermes 0.22.5 (88 skills, 33 disabled). Skills tile sits
   in the Hermes tab; editor routes under `/profile/hermes/skills`.
-- Memory (`/api/memory`, `/api/memory/provider`) has measured contracts and
-  service methods; its UI is the next slice.
+- **M2.2 (Memory, corrected):** the Memory tab now opens the **Memory Wiki**
+  plugin surface (subjects, daily logs, persistent MEMORY.md/USER.md entries,
+  provider archive) from `/api/plugins/memory-wiki/*`; the provider form moved
+  to `/profile/hermes/memory/settings`. Validated against the live payload
+  (50 subjects, 22 days, 12/13 entries).
+- **M3.1 (Files):** browser over `/api/fs` (list, default-cwd, read-text,
+  write-text, git-root), text editor with a client-side stale check; binary
+  and truncated previews are read-only. Live contract probed on a gated
+  0.22.5 dashboard (30 entries, YAML/Dart reads, EACCES and 404 paths).
 
 ## APK delivery to the NAS
 
