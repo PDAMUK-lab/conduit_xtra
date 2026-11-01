@@ -225,17 +225,26 @@ void _logHermesJobToggleFailure({required bool enabled}) {
 }
 
 class HermesJobsSheet extends ConsumerWidget {
-  const HermesJobsSheet({super.key});
+  const HermesJobsSheet({super.key, this.maxHeight});
+
+  /// The height the sheet gives its list. A sheet surface lays its content out
+  /// in a shrink-wrapped column, which hands children an unbounded height; a
+  /// list that fills the surface then throws and the user sees only the dimmed
+  /// barrier. Sizing the body here keeps that from depending on the caller.
+  final double? maxHeight;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final height = maxHeight ?? MediaQuery.sizeOf(context).height * 0.70;
     final jobsAsync = ref.watch(hermesJobsProvider);
     final writable =
         ref.watch(hermesCapabilitiesProvider).asData?.value.jobsAdmin ?? true;
     final theme = context.conduitTheme;
     final l10n = AppLocalizations.of(context) ?? AppLocalizationsEn();
 
-    return Column(
+    return SizedBox(
+      height: height,
+      child: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Padding(
@@ -313,6 +322,7 @@ class HermesJobsSheet extends ConsumerWidget {
           ),
         ),
       ],
+      ),
     );
   }
 }

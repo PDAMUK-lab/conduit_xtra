@@ -171,6 +171,16 @@ before `flutter pub get`.
   destructive confirmation; hooks are listed with their approval state.
   There is **no restore route** in the dashboard — restore stays a CLI job
   (`hermes checkpoints`), documented rather than faked.
+- **Bug: Scheduled agents opened onto a dimmed barrier.** The jobs sheet body
+  grows into the space it is given (`Expanded` list), but the sheet surface
+  lays content out in a shrink-wrapped column, which hands children an
+  unbounded height: `RenderFlex children have non-zero flex but incoming
+  height constraints are unbounded`, so the modal route rendered only its
+  scrim. The sheet now sizes itself (70% of screen height, overridable), and
+  a widget test drives the real `showHermesJobsSheet` route and asserts the
+  content appears — it reproduced the exception before the fix. Other sheets
+  using `showSurface` with flexible children should be checked for the same
+  shape.
 - **M4.1 Stage B (config write):** full-document editor for `config.yaml`:
   local YAML parse (must be a mapping), a line diff against the file on disk,
   the file name typed to confirm, then `PUT /api/config/raw` and a read-back.
