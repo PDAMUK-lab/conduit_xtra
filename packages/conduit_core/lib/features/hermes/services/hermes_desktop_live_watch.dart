@@ -101,6 +101,17 @@ extension _HermesDesktopLiveWatch on HermesDesktopApiService {
         }
       }
     }
+    if (row == null) {
+      // Absent is not idle. A gateway-owned reply, a session the registry has
+      // not rebuilt yet, or an id that does not match all look the same from
+      // here, and reading that as "not running" flips the chat to Ready under a
+      // live turn (the operator saw exactly that). Only a sustained absence —
+      // three ticks — means the gateway really has no turn for this session.
+      _liveWatchAbsences++;
+      if (_liveWatchAbsences < 3) return;
+    } else {
+      _liveWatchAbsences = 0;
+    }
     final status = row?['status']?.toString() ?? '';
     final running =
         status == 'working' || status == 'starting' || status == 'waiting';

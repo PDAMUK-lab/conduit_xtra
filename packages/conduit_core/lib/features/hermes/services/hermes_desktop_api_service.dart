@@ -319,6 +319,7 @@ final class HermesDesktopApiService
   Timer? _liveWatchTimer;
   bool _liveWatchInFlight = false;
   int _liveWatchFailures = 0;
+  int _liveWatchAbsences = 0;
   bool _foreground = true;
 
   /// Transcript reloads are coalesced: one turn ends with several frames

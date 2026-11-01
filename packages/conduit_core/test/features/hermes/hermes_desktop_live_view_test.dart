@@ -110,6 +110,27 @@ void main() {
     );
   });
 
+  test('a session absent from active_list is not read as idle at once', () async {
+    gateway.running = true;
+    await service.getSessionMessages('st-1');
+    expect(service.turnStateFor('st-1'), HermesDesktopTurnState.running);
+
+    gateway.includeInActiveList = false;
+    await _settle(duration: const Duration(milliseconds: 70));
+    expect(
+      service.turnStateFor('st-1'),
+      HermesDesktopTurnState.running,
+      reason: 'one absent poll must not flip the chat to Ready under a live turn',
+    );
+
+    await _settle(duration: const Duration(milliseconds: 250));
+    expect(
+      service.turnStateFor('st-1'),
+      HermesDesktopTurnState.idle,
+      reason: 'a sustained absence is the gateway saying it has no turn',
+    );
+  });
+
   test('a refresh downloads the newest page, not the whole chat', () async {
     for (var i = 1; i <= 300; i++) {
       gateway.rows.add({'id': i, 'role': 'user', 'content': 'row $i'});
@@ -217,6 +238,9 @@ final class _LiveGateway {
   int resumeCalls = 0;
   bool running = false;
 
+  /// Whether `session.active_list` lists the session at all.
+  bool includeInActiveList = true;
+
   /// Rows `/api/sessions/st-1/messages` serves, in insertion order.
   final List<Map<String, Object?>> rows = [];
 
@@ -292,14 +316,16 @@ final class _LiveGateway {
             };
           case 'session.active_list':
             result = {
-              'sessions': [
+              'sessions': includeInActiveList
+                  ? [
                 {
                   'id': 'rt-1',
                   'session_key': 'st-1',
                   'status': running ? 'working' : 'idle',
                   'message_count': rows.length,
                 },
-              ],
+              ]
+                  : <Object?>[],
             };
           default:
             // The real gateway answers an unknown method with -32601; a fake
