@@ -179,16 +179,23 @@ before `flutter pub get`.
   runtime while the 9B worker serves on :8080 from outside it, so a start would
   spawn a second server and a stop could kill one the manager does not own.
   Measured: GTX 1070 Max-Q, 8.0 GB VRAM of which 7.2 GB in use, 5.6 GB RAM
-  available of 15.5 GB.
-- **Backups (ops import costed, not shipped as a button).** The Ops page now
+  available of 15.5 GB. After the server fix the status reports
+  `external_server: {base_url, model}` when a router this manager did not start
+  answers (here `ornith-1.5-9b-heretic` on :8080), and the page names it instead
+  of claiming the engine is stopped.
+- **Backups and restore (after the server fixes).** The Ops page now
   lists the server's own backup archives from `<profile home>/backups` through
   the files API (there is no listing route). Restoring is deliberately not a
   button: `hermes import` prompts "Continue? [y/N]" and dashboard children run
   with stdin at /dev/null, so without `--force` it always aborts; with
   `--force` it then refuses while the gateway owns the profile ("Exclusive
   maintenance refused … Drain and stop the gateway"). Both measured live.
-  The page states the terminal procedure instead of offering a tap that can
-  never succeed.
+  Both blockers were then fixed server-side (operator-approved): `hermes import
+  --stop-gateway` stops only the gateway this home owns and revives it via
+  atexit, and `POST /api/ops/import` accepts `stop_gateway`. The app now offers
+  the restore with the archive named, `import` typed to confirm, `force` always
+  on (the child has no stdin for the CLI's own prompt) and the drain note that
+  messaging is offline while it runs.
 - **Messaging.** A Messaging page lists every channel (`GET
   /api/messaging/platforms`, 32 on this node), enabled first, with a switch
   that enables/disables one (`PUT /api/messaging/platforms/{id}`) and a detail

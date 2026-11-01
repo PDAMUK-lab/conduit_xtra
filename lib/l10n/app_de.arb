@@ -3332,6 +3332,8 @@
   "hermesLocalUma": "einheitlicher Speicher",
   "hermesLocalOutsideNote": "Nur lesend: Ein außerhalb dieser Verwaltung laufendes Modell wird hier nicht gestartet oder gestoppt.",
   "hermesLocalLoadFailed": "Der Zustand der lokalen Modelle konnte nicht gelesen werden.",
+  "hermesRestoreDrainNote": "Der Gateway wird für die Wiederherstellung gestoppt und startet danach selbst; Messaging ist währenddessen offline.",
+  "hermesLocalServedElsewhere": "Ein Router, den diese Verwaltung nicht gestartet hat, bedient {url} ({model}). Die Seite meldet das nur; gestartet oder gestoppt wird er hier nicht.",
   "hermesApprovalRequired": "Approval required",
   "hermesApprovalFallback": "The agent is requesting permission to continue.",
   "openWebUiPromptOther": "Sonstiges",

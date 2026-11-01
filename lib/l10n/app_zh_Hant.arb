@@ -3332,6 +3332,8 @@
   "hermesLocalUma": "統一記憶體",
   "hermesLocalOutsideNote": "唯讀：由其他方式提供的模型不在此啟動或停止。",
   "hermesLocalLoadFailed": "無法讀取本機模型狀態。",
+  "hermesRestoreDrainNote": "還原期間閘道會停止並自行恢復；此期間訊息功能離線。",
+  "hermesLocalServedElsewhere": "一個不是由此管理器啟動的路由正在 {url} 提供服務（{model}）。此頁僅回報，不會啟動或停止它。",
   "hermesApprovalRequired": "Approval required",
   "hermesApprovalFallback": "The agent is requesting permission to continue.",
   "openWebUiPromptOther": "其他",

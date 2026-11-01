@@ -6710,6 +6710,8 @@
   "hermesLocalUma": "pamięć zunifikowana",
   "hermesLocalOutsideNote": "Tylko odczyt: model obsługiwany poza tym menedżerem nie jest tu uruchamiany ani zatrzymywany.",
   "hermesLocalLoadFailed": "Nie udało się odczytać stanu modeli lokalnych.",
+  "hermesRestoreDrainNote": "Gateway zatrzymuje się na czas przywracania i wraca sam; komunikacja jest wtedy offline.",
+  "hermesLocalServedElsewhere": "Router uruchomiony poza tym menedżerem obsługuje {url} ({model}). Strona tylko to zgłasza.",
   "hermesApprovalRequired": "Wymagana zgoda",
   "@hermesApprovalRequired": {
     "description": "Title of a Hermes human-approval request card."

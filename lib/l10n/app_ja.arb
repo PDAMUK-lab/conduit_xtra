@@ -4935,6 +4935,8 @@
   "hermesLocalUma": "ユニファイドメモリ",
   "hermesLocalOutsideNote": "読み取り専用：このマネージャー外で動くモデルはここから起動・停止しません。",
   "hermesLocalLoadFailed": "ローカルモデルの状態を読み込めませんでした。",
+  "hermesRestoreDrainNote": "復元中はゲートウェイが停止し、自動で戻ります。その間メッセージングはオフラインです。",
+  "hermesLocalServedElsewhere": "このマネージャーが起動していないルーターが {url} で稼働中（{model}）。表示のみで、起動・停止はしません。",
   "hermesApprovalRequired": "Approval required",
   "hermesApprovalFallback": "The agent is requesting permission to continue.",
   "openWebUiPromptOther": "その他",

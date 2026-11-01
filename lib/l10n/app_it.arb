@@ -3332,6 +3332,8 @@
   "hermesLocalUma": "memoria unificata",
   "hermesLocalOutsideNote": "Sola lettura: un modello servito fuori da questo gestore non viene avviato né fermato qui.",
   "hermesLocalLoadFailed": "Impossibile leggere lo stato dei modelli locali.",
+  "hermesRestoreDrainNote": "Il gateway si ferma per il ripristino e riparte da solo; la messaggistica è offline nel frattempo.",
+  "hermesLocalServedElsewhere": "Un router che questo gestore non ha avviato serve {url} ({model}). La pagina lo segnala, non lo avvia né ferma.",
   "hermesApprovalRequired": "Approval required",
   "hermesApprovalFallback": "The agent is requesting permission to continue.",
   "openWebUiPromptOther": "Altro",

@@ -5241,6 +5241,8 @@
   "hermesLocalUma": "unified memory",
   "hermesLocalOutsideNote": "Len na čítanie: model obsluhovaný mimo tohto správcu sa tu nespúšťa ani nezastavuje.",
   "hermesLocalLoadFailed": "Stav lokálnych modelov sa nepodarilo načítať.",
+  "hermesRestoreDrainNote": "Gateway sa kvôli obnove zastaví a sám sa vráti; správy sú dovtedy offline.",
+  "hermesLocalServedElsewhere": "Router, ktorý tento správca nespustil, obsluhuje {url} ({model}). Stránka to len hlási.",
   "hermesApprovalRequired": "Approval required",
   "hermesApprovalFallback": "The agent is requesting permission to continue.",
   "openWebUiPromptOther": "Iné",

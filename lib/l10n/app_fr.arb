@@ -3332,6 +3332,8 @@
   "hermesLocalUma": "mémoire unifiée",
   "hermesLocalOutsideNote": "Lecture seule : un modèle servi hors de ce gestionnaire n’est ni démarré ni arrêté ici.",
   "hermesLocalLoadFailed": "Impossible de lire l’état des modèles locaux.",
+  "hermesRestoreDrainNote": "La passerelle s’arrête pendant la restauration et redémarre seule ; la messagerie est hors ligne entre-temps.",
+  "hermesLocalServedElsewhere": "Un routeur que ce gestionnaire n’a pas démarré sert {url} ({model}). La page le signale, sans le démarrer ni l’arrêter.",
   "hermesApprovalRequired": "Approbation requise",
   "hermesApprovalFallback": "L’agent demande l’autorisation de continuer.",
   "openWebUiPromptOther": "Autre",

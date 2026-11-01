@@ -7084,6 +7084,15 @@
   "@hermesLocalLoadFailed": {
     "description": "Local models copy."
   },
+  "hermesRestoreDrainNote": "The gateway stops for the restore and comes back by itself; messaging is offline while it runs.",
+  "@hermesRestoreDrainNote": {
+    "description": "Restore drain warning."
+  },
+  "hermesLocalServedElsewhere": "A router this manager did not start is serving at {url} ({model}). This page reports it; it is not started or stopped here.",
+  "@hermesLocalServedElsewhere": {
+    "description": "External local router.",
+    "placeholders": {"url": {"type": "String"}, "model": {"type": "String"}}
+  },
   "hermesApprovalRequired": "Approval required",
   "@hermesApprovalRequired": {
     "description": "Title of a Hermes human-approval request card."

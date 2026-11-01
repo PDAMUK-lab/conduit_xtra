@@ -58,6 +58,25 @@ void main() {
     expect(find.textContaining('outside this manager'), findsOneWidget);
   });
 
+  testWidgets('an externally served router is named', (tester) async {
+    await tester.pumpWidget(
+      _host(
+        status: const HermesLocalModelStatus(
+          enabled: false,
+          externalServer: HermesExternalServer(
+            baseUrl: 'http://127.0.0.1:8080/v1',
+            model: 'ornith-1.5-9b-heretic',
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('did not start'), findsOneWidget);
+    expect(find.textContaining('127.0.0.1:8080'), findsWidgets);
+    expect(find.textContaining('ornith-1.5-9b-heretic'), findsWidgets);
+  });
+
   testWidgets('a running manager with models lists them', (tester) async {
     await tester.pumpWidget(
       _host(

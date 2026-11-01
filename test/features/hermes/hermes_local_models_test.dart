@@ -28,6 +28,27 @@ void main() {
     check(status.models.first.sizeBytes).equals(5800000000);
   });
 
+  test('an externally served router is reported, not claimed', () {
+    final status = HermesLocalModelStatus.fromJson({
+      'enabled': false,
+      'server_running': false,
+      'external_server': {
+        'base_url': 'http://127.0.0.1:8080/v1',
+        'model': 'ornith-1.5-9b-heretic',
+      },
+    });
+    check(status).isNotNull();
+    check(status!.servedElsewhere).isTrue();
+    check(status.externalServer!.baseUrl).equals('http://127.0.0.1:8080/v1');
+    check(status.externalServer!.model).equals('ornith-1.5-9b-heretic');
+
+    final managed = HermesLocalModelStatus.fromJson({
+      'server_running': true,
+      'external_server': null,
+    });
+    check(managed!.servedElsewhere).isFalse();
+  });
+
   test('a disabled manager with no models still parses', () {
     final status = HermesLocalModelStatus.fromJson({
       'enabled': false,

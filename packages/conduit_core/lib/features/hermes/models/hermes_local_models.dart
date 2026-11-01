@@ -15,6 +15,7 @@ final class HermesLocalModelStatus {
     this.activeModelId,
     this.models = const [],
     this.modelsDir = '',
+    this.externalServer,
   });
 
   final bool enabled;
@@ -27,6 +28,11 @@ final class HermesLocalModelStatus {
   final String? activeModelId;
   final List<HermesLocalModel> models;
   final String modelsDir;
+
+  /// A router this manager did not start, reported (never claimed as its own).
+  final HermesExternalServer? externalServer;
+
+  bool get servedElsewhere => !serverRunning && externalServer != null;
 
   int get modelCount => models.length;
 
@@ -49,6 +55,7 @@ final class HermesLocalModelStatus {
       activeModelId: json['active_model_id']?.toString(),
       models: List.unmodifiable(models),
       modelsDir: json['models_dir']?.toString() ?? '',
+      externalServer: HermesExternalServer.fromJson(json['external_server']),
     );
   }
 }
@@ -113,6 +120,25 @@ final class HermesLocalHardware {
       ramAvailableBytes: _int(json['ram_available_bytes']),
       uma: json['uma'] == true,
       vramLabel: json['vram_label']?.toString() ?? '',
+    );
+  }
+}
+
+/// A local router running outside the manager's supervision.
+final class HermesExternalServer {
+  const HermesExternalServer({required this.baseUrl, this.model});
+
+  final String baseUrl;
+  final String? model;
+
+  static HermesExternalServer? fromJson(Object? json) {
+    if (json is! Map) return null;
+    final baseUrl = json['base_url']?.toString().trim() ?? '';
+    if (baseUrl.isEmpty) return null;
+    final model = json['model']?.toString().trim();
+    return HermesExternalServer(
+      baseUrl: baseUrl,
+      model: model == null || model.isEmpty ? null : model,
     );
   }
 }

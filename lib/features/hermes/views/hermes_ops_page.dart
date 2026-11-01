@@ -11,6 +11,8 @@ import '../../../shared/widgets/conduit_components.dart';
 import '../../../shared/widgets/themed_dialogs.dart';
 import '../../../shared/widgets/utility_components.dart';
 
+import '../widgets/hermes_restore_sheet.dart';
+
 import 'package:conduit_core/features/hermes/models/hermes_fs.dart';
 import 'package:conduit_core/features/hermes/models/hermes_ops.dart';
 import 'package:conduit_core/features/hermes/providers/hermes_providers.dart';
@@ -282,27 +284,38 @@ class _HermesOpsPageState extends ConsumerState<HermesOpsPage> {
               color: theme.groupedSurface,
               borderRadius: BorderRadius.circular(AppBorderRadius.card),
             ),
-            padding: const EdgeInsets.all(Spacing.md),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.archive_outlined,
-                  size: IconSize.listItem,
-                  color: theme.iconSecondary,
-                ),
-                const SizedBox(width: Spacing.sm),
-                Expanded(
-                  child: Text(
-                    archive.name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppTypography.codeStyle.copyWith(
-                      color: theme.textPrimary,
-                      fontSize: 12,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(AppBorderRadius.card),
+              onTap: _busy ? null : () => _restore(archive.path),
+              child: Padding(
+                padding: const EdgeInsets.all(Spacing.md),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.settings_backup_restore,
+                      size: IconSize.listItem,
+                      color: theme.iconSecondary,
                     ),
-                  ),
+                const SizedBox(width: Spacing.sm),
+                    Expanded(
+                      child: Text(
+                        archive.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTypography.codeStyle.copyWith(
+                          color: theme.textPrimary,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                    Icon(
+                      Icons.chevron_right_rounded,
+                      size: IconSize.listItem,
+                      color: theme.iconSecondary,
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
           const SizedBox(height: Spacing.xs),
@@ -477,6 +490,35 @@ class _HermesOpsPageState extends ConsumerState<HermesOpsPage> {
       r'"detail"\s*:\s*"([^"]{1,300})"',
     ).firstMatch(error.toString());
     return match?.group(1) ?? _l10n(context).hermesOpsFailed;
+  }
+
+  Future<void> _restore(String archive) async {
+    final confirmed = await showHermesRestoreSheet(context, archive: archive);
+    if (confirmed != true || !mounted) return;
+    final service = ref.read(hermesApiServiceProvider);
+    if (service is! HermesDesktopApiService) return;
+    setState(() {
+      _action = 'import';
+      _status = null;
+      _error = null;
+      _starting = true;
+    });
+    try {
+      // force: the child has no stdin to answer the CLI's own prompt.
+      // stopGateway: the restore needs the profile to itself; the CLI stops
+      // this home's gateway and brings it back on exit.
+      await service.importArchive(archive: archive);
+      if (!mounted) return;
+      setState(() => _starting = false);
+      _pollUntilDone('import');
+    } catch (error) {
+      if (!mounted) return;
+      setState(() {
+        _starting = false;
+        _error = _errorText(error);
+      });
+      UiUtils.showMessage(context, _errorText(error), isError: true);
+    }
   }
 
   void _pollUntilDone(String action) {

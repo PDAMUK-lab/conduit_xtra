@@ -790,11 +790,16 @@ final class _HermesDesktopAdministration {
   /// server spawns `hermes import <archive>` and it replaces current state.
   Future<void> importArchive({
     required String archive,
-    bool force = false,
+    bool force = true,
+    bool stopGateway = true,
   }) => _owner._requestJson(
     'POST',
     '/api/ops/import',
-    body: {'archive': archive, 'force': force},
+    body: {
+      'archive': archive,
+      'force': force,
+      'stop_gateway': stopGateway,
+    },
   );
 
   Future<HermesActionStatus?> pruneCheckpoints() async {

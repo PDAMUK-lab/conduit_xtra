@@ -100,6 +100,19 @@ class HermesLocalModelsPage extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: Spacing.sm),
+                if (value.servedElsewhere)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: Spacing.sm),
+                    child: Text(
+                      l10n.hermesLocalServedElsewhere(
+                        value.externalServer!.baseUrl,
+                        value.externalServer!.model ?? '—',
+                      ),
+                      style: AppTypography.bodySmallStyle.copyWith(
+                        color: theme.textPrimary,
+                      ),
+                    ),
+                  ),
                 if (!value.enabled)
                   Padding(
                     padding: const EdgeInsets.only(bottom: Spacing.sm),
