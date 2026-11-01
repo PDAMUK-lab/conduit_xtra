@@ -165,6 +165,12 @@ before `flutter pub get`.
   `redacted_value`, `is_password`, `channel_managed`, `custom`.
   Writes (`PUT /api/config/raw`) are deliberately not in this build:
   the server replaces the whole document (`merge_existing=False`).
+- **M4.2 (Ops v1):** doctor, security audit and backup spawn background actions
+  and poll `/api/actions/{name}/status` ({name,running,exit_code,pid,lines});
+  the checkpoint inventory (sessions/files/bytes) can be pruned behind a
+  destructive confirmation; hooks are listed with their approval state.
+  There is **no restore route** in the dashboard — restore stays a CLI job
+  (`hermes checkpoints`), documented rather than faked.
 
 ## APK delivery to the NAS
 

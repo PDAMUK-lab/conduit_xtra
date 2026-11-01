@@ -6518,6 +6518,70 @@
   "@hermesConfigEmptyEnv": {
     "description": "Config view copy."
   },
+  "hermesOpsTitle": "Operations",
+  "@hermesOpsTitle": {
+    "description": "Operations copy."
+  },
+  "hermesOpsSubtitle": "Maintenance actions on the server, and what they would change.",
+  "@hermesOpsSubtitle": {
+    "description": "Operations copy."
+  },
+  "hermesOpsDoctor": "Doctor",
+  "@hermesOpsDoctor": {
+    "description": "Operations copy."
+  },
+  "hermesOpsSecurityAudit": "Security audit",
+  "@hermesOpsSecurityAudit": {
+    "description": "Operations copy."
+  },
+  "hermesOpsBackup": "Backup",
+  "@hermesOpsBackup": {
+    "description": "Operations copy."
+  },
+  "hermesOpsRunning": "Running…",
+  "@hermesOpsRunning": {
+    "description": "Operations copy."
+  },
+  "hermesOpsFailed": "The action could not be started.",
+  "@hermesOpsFailed": {
+    "description": "Operations copy."
+  },
+  "hermesOpsExit": "exit code",
+  "@hermesOpsExit": {
+    "description": "Operations copy."
+  },
+  "hermesOpsCheckpoints": "Checkpoints",
+  "@hermesOpsCheckpoints": {
+    "description": "Operations copy."
+  },
+  "hermesOpsCheckpointsEmpty": "No checkpoints.",
+  "@hermesOpsCheckpointsEmpty": {
+    "description": "Operations copy."
+  },
+  "hermesOpsPrune": "Prune checkpoints",
+  "@hermesOpsPrune": {
+    "description": "Operations copy."
+  },
+  "hermesOpsPruneConfirm": "Delete the checkpoint store? This cannot be undone.",
+  "@hermesOpsPruneConfirm": {
+    "description": "Operations copy."
+  },
+  "hermesOpsHooks": "Hooks",
+  "@hermesOpsHooks": {
+    "description": "Operations copy."
+  },
+  "hermesOpsHooksEmpty": "No hooks.",
+  "@hermesOpsHooksEmpty": {
+    "description": "Operations copy."
+  },
+  "hermesOpsHookAllowed": "allowed",
+  "@hermesOpsHookAllowed": {
+    "description": "Operations copy."
+  },
+  "hermesOpsHookBlocked": "not approved",
+  "@hermesOpsHookBlocked": {
+    "description": "Operations copy."
+  },
   "hermesApprovalRequired": "Approval required",
   "@hermesApprovalRequired": {
     "description": "Title of a Hermes human-approval request card."

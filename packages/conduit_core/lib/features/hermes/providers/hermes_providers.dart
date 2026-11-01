@@ -44,6 +44,7 @@ import 'package:conduit_core/features/hermes/models/hermes_job.dart';
 import 'package:conduit_core/features/hermes/models/hermes_memory.dart';
 import 'package:conduit_core/features/hermes/models/hermes_memory_wiki.dart';
 import 'package:conduit_core/features/hermes/models/hermes_model.dart';
+import 'package:conduit_core/features/hermes/models/hermes_ops.dart';
 import 'package:conduit_core/features/hermes/models/hermes_profile.dart';
 import 'package:conduit_core/features/hermes/models/hermes_session.dart';
 import 'package:conduit_core/features/hermes/models/hermes_skill.dart';
@@ -2698,6 +2699,20 @@ final hermesFsTextProvider =
       if (service is! HermesDesktopApiService) return null;
       return service.fsReadText(path);
     });
+
+/// Hooks the server would run, with whether each is allowed.
+final hermesHooksProvider = FutureProvider<List<HermesHook>>((ref) async {
+  final service = ref.watch(hermesApiServiceProvider);
+  if (service is! HermesDesktopApiService) return const [];
+  return service.hooks();
+});
+
+/// Checkpoint inventory (what a prune would reclaim).
+final hermesCheckpointsProvider = FutureProvider<HermesCheckpoints?>((ref) async {
+  final service = ref.watch(hermesApiServiceProvider);
+  if (service is! HermesDesktopApiService) return null;
+  return service.checkpoints();
+});
 
 /// The server's raw config.yaml and its path.
 final hermesRawConfigProvider = FutureProvider<HermesRawConfig?>((ref) async {

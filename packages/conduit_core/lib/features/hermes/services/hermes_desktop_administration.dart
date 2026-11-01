@@ -575,6 +575,55 @@ final class _HermesDesktopAdministration {
     body: {'provider': provider},
   );
 
+  // --- Operations -----------------------------------------------------------
+  //
+  // Long-running work is spawned (`{ok,pid,name}`) and polled through
+  // `/api/actions/{name}/status` ({name,running,exit_code,pid,lines}). Hooks and
+  // checkpoints are read directly; pruning is a spawned CLI action because the
+  // confirmation logic lives there. There is no checkpoint restore route.
+
+  Future<HermesActionStatus?> spawnDoctor() async {
+    await _owner._requestJson('POST', '/api/ops/doctor');
+    return actionStatus('doctor');
+  }
+
+  Future<HermesActionStatus?> spawnSecurityAudit() async {
+    await _owner._requestJson('POST', '/api/ops/security-audit');
+    return actionStatus('security-audit');
+  }
+
+  Future<HermesActionStatus?> spawnBackup() async {
+    await _owner._requestJson('POST', '/api/ops/backup', body: const {});
+    return actionStatus('backup');
+  }
+
+  Future<HermesActionStatus?> pruneCheckpoints() async {
+    await _owner._requestJson('POST', '/api/ops/checkpoints/prune');
+    return actionStatus('checkpoints-prune');
+  }
+
+  Future<HermesActionStatus?> actionStatus(
+    String name, {
+    int lines = 200,
+  }) async {
+    final data = await _owner._requestJson(
+      'GET',
+      '/api/actions/${Uri.encodeComponent(name)}/status',
+      query: {'lines': lines},
+    );
+    return HermesActionStatus.fromJson(data);
+  }
+
+  Future<List<HermesHook>> hooks() async {
+    final data = await _owner._requestJson('GET', '/api/ops/hooks');
+    return HermesHook.listFromJson(data);
+  }
+
+  Future<HermesCheckpoints?> checkpoints() async {
+    final data = await _owner._requestJson('GET', '/api/ops/checkpoints');
+    return HermesCheckpoints.fromJson(data);
+  }
+
   // --- Config and env -------------------------------------------------------
   //
   // `GET /api/config/raw` returns {yaml, path} (409 when the backend has no

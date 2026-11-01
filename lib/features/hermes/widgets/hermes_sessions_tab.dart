@@ -89,6 +89,7 @@ class _HermesSessionsTabState extends ConsumerState<HermesSessionsTab>
           const SliverToBoxAdapter(child: _AnalyticsTile()),
           const SliverToBoxAdapter(child: _LogsTile()),
           const SliverToBoxAdapter(child: _ConfigTile()),
+          const SliverToBoxAdapter(child: _OpsTile()),
         ],
         ..._sessionSlivers(context, sessionsAsync),
         SliverToBoxAdapter(
@@ -516,6 +517,83 @@ class _SkillsTile extends ConsumerWidget {
                     const SizedBox(height: Spacing.xxs),
                     Text(
                       subtitle,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTypography.bodySmallStyle.copyWith(
+                        color: theme.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: Spacing.xs),
+              Icon(
+                Icons.chevron_right_rounded,
+                size: IconSize.listItem,
+                color: theme.iconSecondary,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _OpsTile extends ConsumerWidget {
+  const _OpsTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = context.conduitTheme;
+    final l10n = AppLocalizations.of(context)!;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        Spacing.sm,
+        Spacing.md,
+        Spacing.sm,
+        Spacing.xs,
+      ),
+      child: InkWell(
+        key: const ValueKey<String>('hermes-ops-tile'),
+        onTap: () => context.push(Routes.hermesOps),
+        borderRadius: BorderRadius.circular(AppBorderRadius.card),
+        child: Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: Spacing.md,
+            vertical: Spacing.sm,
+          ),
+          decoration: BoxDecoration(
+            color: theme.surfaceBackground,
+            borderRadius: BorderRadius.circular(AppBorderRadius.card),
+            border: Border.all(color: theme.cardBorder),
+          ),
+          child: Row(
+            children: [
+              SizedBox(
+                width: IconSize.xl,
+                height: IconSize.xl,
+                child: Icon(
+                  Icons.build_circle_outlined,
+                  size: IconSize.medium,
+                  color: theme.textPrimary,
+                ),
+              ),
+              const SizedBox(width: Spacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.hermesOpsTitle,
+                      style: AppTypography.bodyMediumStyle.copyWith(
+                        color: theme.textPrimary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: Spacing.xxs),
+                    Text(
+                      l10n.hermesOpsSubtitle,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: AppTypography.bodySmallStyle.copyWith(

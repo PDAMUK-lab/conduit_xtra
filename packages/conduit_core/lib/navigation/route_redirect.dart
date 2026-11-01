@@ -69,6 +69,7 @@ bool _isAccountlessBackendLocation(String location) {
       isHermesFilesLocation(location) ||
       isHermesToolsetsLocation(location) ||
       isHermesProfilesLocation(location) ||
+      location == Routes.hermesOps ||
       location == Routes.hermesConfig ||
       location == Routes.hermesAnalytics ||
       location == Routes.hermesLogs ||

@@ -25,6 +25,7 @@ import 'package:conduit_core/features/hermes/models/hermes_mcp.dart';
 import 'package:conduit_core/features/hermes/models/hermes_memory_wiki.dart';
 import 'package:conduit_core/features/hermes/models/hermes_profile.dart';
 import 'package:conduit_core/features/hermes/models/hermes_model.dart';
+import 'package:conduit_core/features/hermes/models/hermes_ops.dart';
 import 'package:conduit_core/features/hermes/models/hermes_run_event.dart';
 import 'package:conduit_core/features/hermes/models/hermes_skill.dart';
 import 'package:conduit_core/features/hermes/models/hermes_toolsets.dart';
@@ -384,6 +385,7 @@ final class HermesDesktopApiService
       path.startsWith('/api/analytics') ||
       path.startsWith('/api/config') ||
       path.startsWith('/api/env') ||
+      path.startsWith('/api/ops') ||
       path.startsWith('/api/logs') ||
       path.startsWith('/api/audio');
 
@@ -509,6 +511,18 @@ final class HermesDesktopApiService
     required String content,
   }) => _administration.fsWriteText(path: path, content: content);
   Future<String?> fsGitRoot(String path) => _administration.fsGitRoot(path);
+
+  // Operations (doctor/audit/backup/checkpoints/hooks).
+  Future<HermesActionStatus?> spawnDoctor() => _administration.spawnDoctor();
+  Future<HermesActionStatus?> spawnSecurityAudit() =>
+      _administration.spawnSecurityAudit();
+  Future<HermesActionStatus?> spawnBackup() => _administration.spawnBackup();
+  Future<HermesActionStatus?> pruneCheckpoints() =>
+      _administration.pruneCheckpoints();
+  Future<HermesActionStatus?> actionStatus(String name, {int lines = 200}) =>
+      _administration.actionStatus(name, lines: lines);
+  Future<List<HermesHook>> hooks() => _administration.hooks();
+  Future<HermesCheckpoints?> checkpoints() => _administration.checkpoints();
 
   // Config and env (read-only).
   Future<HermesRawConfig?> rawConfig() => _administration.rawConfig();

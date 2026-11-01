@@ -58,6 +58,7 @@ class Routes {
   static const String hermesMemorySubject =
       '/profile/hermes/memory/subjects/:slug';
   static const String hermesMemoryDay = '/profile/hermes/memory/days/:date';
+  static const String hermesOps = '/profile/hermes/ops';
   static const String hermesConfig = '/profile/hermes/config';
   static const String hermesAnalytics = '/profile/hermes/analytics';
   static const String hermesLogs = '/profile/hermes/logs';
@@ -141,6 +142,7 @@ class RouteNames {
   static const String hermesMemorySettings = 'hermes-memory-settings';
   static const String hermesMemorySubject = 'hermes-memory-subject';
   static const String hermesMemoryDay = 'hermes-memory-day';
+  static const String hermesOps = 'hermes-ops';
   static const String hermesConfig = 'hermes-config';
   static const String hermesAnalytics = 'hermes-analytics';
   static const String hermesLogs = 'hermes-logs';
