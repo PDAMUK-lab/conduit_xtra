@@ -171,6 +171,12 @@ before `flutter pub get`.
   destructive confirmation; hooks are listed with their approval state.
   There is **no restore route** in the dashboard — restore stays a CLI job
   (`hermes checkpoints`), documented rather than faked.
+- **Pull-to-refresh on detail pages.** `UtilityPageScaffold.settings` had no
+  refresh indicator at all, so a pull did nothing on every settings page. The
+  scaffold takes an optional `onRefresh` and wraps its list; Local models,
+  Messaging, Ops, Blueprints, Config and Git now invalidate their providers on
+  a pull. A widget test asserts no indicator without the callback and that a
+  fling fires it once.
 - **Session search.** The hub gains a Search tile backed by the server's FTS
   endpoint (`/api/sessions/search`), which the app had never called: results
   reuse `HermesSessionSummary.fromJson` (id/session_id, title, preview, source)

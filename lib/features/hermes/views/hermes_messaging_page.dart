@@ -37,6 +37,9 @@ class _HermesMessagingPageState extends ConsumerState<HermesMessagingPage> {
 
     return UtilityPageScaffold.settings(
       title: l10n.hermesMessagingTitle,
+      onRefresh: () async {
+        ref.invalidate(hermesMessagingProvider);
+      },
       children: [
         Text(
           l10n.hermesMessagingSubtitle,

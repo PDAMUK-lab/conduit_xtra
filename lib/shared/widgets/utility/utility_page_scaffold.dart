@@ -1,6 +1,8 @@
 import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../conduit_loading.dart';
+
 import '../../theme/theme_extensions.dart';
 import '../adaptive_route_shell.dart';
 import '../adaptive_toolbar_components.dart';
@@ -40,6 +42,7 @@ class UtilityPageScaffold extends StatefulWidget {
     this.bottomActionPadding,
     this.onTitleLongPress,
     this.trailing,
+    this.onRefresh,
   }) : content = List<Widget>.unmodifiable(content);
 
   factory UtilityPageScaffold.auth({
@@ -84,6 +87,7 @@ class UtilityPageScaffold extends StatefulWidget {
     Color? backgroundColor,
     Widget? trailing,
     EdgeInsetsGeometry? contentPadding,
+    Future<void> Function()? onRefresh,
   }) => UtilityPageScaffold._(
     key: key,
     title: title,
@@ -93,6 +97,7 @@ class UtilityPageScaffold extends StatefulWidget {
     backgroundColor: backgroundColor,
     trailing: trailing,
     contentPadding: contentPadding,
+    onRefresh: onRefresh,
   );
 
   final String title;
@@ -107,6 +112,10 @@ class UtilityPageScaffold extends StatefulWidget {
   final EdgeInsets? bottomActionPadding;
   final VoidCallback? onTitleLongPress;
   final Widget? trailing;
+
+  /// Pull-to-refresh for pages whose data can go stale. Null leaves the page a
+  /// plain scroll view (the settings pages used to ignore a pull entirely).
+  final Future<void> Function()? onRefresh;
 
   @override
   State<UtilityPageScaffold> createState() => _UtilityPageScaffoldState();
@@ -166,13 +175,20 @@ class _UtilityPageScaffoldState extends State<UtilityPageScaffold> {
           ),
       ],
     );
-    final scrollable = context.usesCupertinoChrome
+    Widget scrollable = context.usesCupertinoChrome
         ? CupertinoScrollbar(controller: _controller, child: list)
         : Scrollbar(
             controller: _controller,
             interactive: widget.interactiveScrollbar,
             child: list,
           );
+    final onRefresh = widget.onRefresh;
+    if (onRefresh != null) {
+      scrollable = ConduitRefreshIndicator(
+        onRefresh: onRefresh,
+        child: scrollable,
+      );
+    }
 
     final backNavigation = widget.backNavigation;
     final canPop = Navigator.of(context).canPop();

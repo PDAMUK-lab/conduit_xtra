@@ -61,6 +61,11 @@ class _HermesGitPageState extends ConsumerState<HermesGitPage> {
 
     return UtilityPageScaffold.settings(
       title: l10n.hermesGitTitle,
+      onRefresh: () async {
+        ref.invalidate(hermesGitStatusProvider);
+        ref.invalidate(hermesGitRootProvider);
+        ref.invalidate(hermesGitWorktreesProvider);
+      },
       children: [
         Text(
           l10n.hermesGitSubtitle,

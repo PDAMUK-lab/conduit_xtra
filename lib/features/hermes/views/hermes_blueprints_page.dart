@@ -27,6 +27,9 @@ class HermesBlueprintsPage extends ConsumerWidget {
 
     return UtilityPageScaffold.settings(
       title: l10n.hermesBlueprintsTitle,
+      onRefresh: () async {
+        ref.invalidate(hermesBlueprintsProvider);
+      },
       children: [
         Text(
           l10n.hermesBlueprintsSubtitle,

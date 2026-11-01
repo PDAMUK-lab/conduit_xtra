@@ -43,6 +43,10 @@ class _HermesLocalModelsPageState extends ConsumerState<HermesLocalModelsPage> {
 
     return UtilityPageScaffold.settings(
       title: l10n.hermesLocalModelsTitle,
+      onRefresh: () async {
+        ref.invalidate(hermesLocalModelStatusProvider);
+        ref.invalidate(hermesLocalModelHardwareProvider);
+      },
       children: [
         Text(
           l10n.hermesLocalModelsSubtitle,

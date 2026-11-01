@@ -67,6 +67,11 @@ class _HermesOpsPageState extends ConsumerState<HermesOpsPage> {
 
     return UtilityPageScaffold.settings(
       title: l10n.hermesOpsTitle,
+      onRefresh: () async {
+        ref.invalidate(hermesCheckpointsProvider);
+        ref.invalidate(hermesHooksProvider);
+        ref.invalidate(hermesRawConfigProvider);
+      },
       children: [
         Text(
           l10n.hermesOpsSubtitle,

@@ -50,6 +50,10 @@ class _HermesConfigPageState extends ConsumerState<HermesConfigPage> {
 
     return UtilityPageScaffold.settings(
       title: l10n.hermesConfigTitle,
+      onRefresh: () async {
+        ref.invalidate(hermesRawConfigProvider);
+        ref.invalidate(hermesEnvVarsProvider);
+      },
       children: [
         Text(
           l10n.hermesConfigSubtitle,
