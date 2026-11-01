@@ -1998,6 +1998,17 @@ class _ChatPageState extends ConsumerState<ChatPage> {
   }
 
   Future<void> _refreshActiveConversation() async {
+    // A native Hermes chat is not an OpenWebUI conversation: the OWUI refresh
+    // below is a no-op for it, which is why the pull gesture did nothing on
+    // those chats. Re-read the server transcript instead.
+    final active = ref.read(activeConversationProvider);
+    if (isNativeHermesConversation(active)) {
+      final storedId = active?.metadata['hermesSessionId']?.toString();
+      if (storedId != null && storedId.isNotEmpty) {
+        await _refreshDesktopHermesTranscript(storedId);
+      }
+    }
+
     try {
       await refreshActiveOpenWebUiConversation(ref);
     } catch (error, stackTrace) {
