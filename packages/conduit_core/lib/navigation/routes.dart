@@ -49,6 +49,7 @@ class Routes {
   static const String hermesConnectionEditor =
       '/profile/hermes/connections/:id';
   static const String hermesNewConnectionId = 'new';
+  static const String hermesSessionSearch = '/profile/hermes/search';
   static const String hermesLocalModels = '/profile/hermes/local-models';
   static const String hermesMessaging = '/profile/hermes/messaging';
   static const String hermesBlueprints = '/profile/hermes/blueprints';
@@ -144,6 +145,7 @@ class RouteNames {
   static const String directMcpServerEditor = 'direct-mcp-server-editor';
   static const String hermesSettings = 'hermes-settings';
   static const String hermesConnectionEditor = 'hermes-connection-editor';
+  static const String hermesSessionSearch = 'hermes-session-search';
   static const String hermesLocalModels = 'hermes-local-models';
   static const String hermesMessaging = 'hermes-messaging';
   static const String hermesBlueprints = 'hermes-blueprints';

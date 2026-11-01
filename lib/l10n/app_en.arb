@@ -7106,6 +7106,48 @@
     "description": "Fleet copy.",
     "placeholders": {"model": {"type": "String"}}
   },
+  "hermesHealthGatewayUp": "Gateway up",
+  "@hermesHealthGatewayUp": {
+    "description": "Health strip and search copy."
+  },
+  "hermesHealthGatewayDown": "Gateway stopped",
+  "@hermesHealthGatewayDown": {
+    "description": "Health strip and search copy."
+  },
+  "hermesHealthDegraded": "degraded",
+  "@hermesHealthDegraded": {
+    "description": "Health strip and search copy."
+  },
+  "hermesSessionSearchTitle": "Search sessions",
+  "@hermesSessionSearchTitle": {
+    "description": "Health strip and search copy."
+  },
+  "hermesSessionSearchHint": "Search your sessions",
+  "@hermesSessionSearchHint": {
+    "description": "Health strip and search copy."
+  },
+  "hermesSessionSearchPrompt": "Type at least two characters.",
+  "@hermesSessionSearchPrompt": {
+    "description": "Health strip and search copy."
+  },
+  "hermesSessionSearchEmpty": "No matches.",
+  "@hermesSessionSearchEmpty": {
+    "description": "Health strip and search copy."
+  },
+  "hermesSessionSearchFailed": "Search failed.",
+  "@hermesSessionSearchFailed": {
+    "description": "Health strip and search copy."
+  },
+  "hermesHealthDisk": "{gb} GB free",
+  "@hermesHealthDisk": {
+    "description": "Health strip and search copy.",
+    "placeholders": {"gb": {"type": "String"}}
+  },
+  "hermesHealthActive": "{count, plural, =1{1 active} other{{count} active}}",
+  "@hermesHealthActive": {
+    "description": "Health strip and search copy.",
+    "placeholders": {"count": {"type": "int"}}
+  },
   "hermesApprovalRequired": "Approval required",
   "@hermesApprovalRequired": {
     "description": "Title of a Hermes human-approval request card."

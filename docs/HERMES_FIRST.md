@@ -171,6 +171,15 @@ before `flutter pub get`.
   destructive confirmation; hooks are listed with their approval state.
   There is **no restore route** in the dashboard — restore stays a CLI job
   (`hermes checkpoints`), documented rather than faked.
+- **Session search.** The hub gains a Search tile backed by the server's FTS
+  endpoint (`/api/sessions/search`), which the app had never called: results
+  reuse `HermesSessionSummary.fromJson` (id/session_id, title, preview, source)
+  and open straight into the conversation. Measured live: 20 rows for
+  "hermes" with titles and previews.
+- **Health strip.** One line at the top of the hub from `/api/status`:
+  gateway up/stopped, version, free disk, active sessions, and `degraded` when
+  the server says so. Measured: `degraded · v0.22.5 · 325 GB free` on the
+  throwaway instance, which has no gateway.
 - **Fleet peers.** `local_runtime.peers` (`{name, base_url, api_key?}`)
   declares other nodes' routers; status probes each once (1.2 s, max four,
   network only, nothing started or stopped) and returns `{name, base_url, up,

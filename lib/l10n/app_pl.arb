@@ -6715,6 +6715,16 @@
   "hermesLocalFleet": "Flota",
   "hermesLocalPeerDown": "uśpiony lub nieosiągalny",
   "hermesLocalPeerServing": "obsługuje {model}",
+  "hermesHealthGatewayUp": "Gateway działa",
+  "hermesHealthGatewayDown": "Gateway zatrzymany",
+  "hermesHealthDegraded": "obniżona",
+  "hermesSessionSearchTitle": "Szukaj sesji",
+  "hermesSessionSearchHint": "Przeszukaj sesje",
+  "hermesSessionSearchPrompt": "Wpisz co najmniej dwa znaki.",
+  "hermesSessionSearchEmpty": "Brak wyników.",
+  "hermesSessionSearchFailed": "Wyszukiwanie nie powiodło się.",
+  "hermesHealthDisk": "{gb} GB wolne",
+  "hermesHealthActive": "{count, plural, =1{1 aktywna} other{{count} aktywnych}}",
   "hermesApprovalRequired": "Wymagana zgoda",
   "@hermesApprovalRequired": {
     "description": "Title of a Hermes human-approval request card."

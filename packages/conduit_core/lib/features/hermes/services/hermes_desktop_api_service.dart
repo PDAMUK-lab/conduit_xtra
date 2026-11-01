@@ -24,6 +24,7 @@ import 'package:conduit_core/features/hermes/models/hermes_delivery_target.dart'
 import 'package:conduit_core/features/hermes/models/hermes_local_models.dart';
 import 'package:conduit_core/features/hermes/models/hermes_messaging.dart';
 import 'package:conduit_core/features/hermes/models/hermes_fs.dart';
+import 'package:conduit_core/features/hermes/models/hermes_health.dart';
 import 'package:conduit_core/features/hermes/models/hermes_git.dart';
 import 'package:conduit_core/features/hermes/models/hermes_logs.dart';
 import 'package:conduit_core/features/hermes/models/hermes_mcp.dart';
@@ -768,6 +769,11 @@ final class HermesDesktopApiService
       _administration.localModelStatus();
   Future<HermesLocalHardware?> localModelHardware() =>
       _administration.localModelHardware();
+  Future<HermesHealth?> statusOverview() => _administration.statusOverview();
+  Future<List<Map<String, dynamic>>> searchSessions(
+    String query, {
+    int limit = 20,
+  }) => _administration.searchSessions(query, limit: limit);
   Future<List<HermesMessagingPlatform>> messagingPlatforms() =>
       _administration.messagingPlatforms();
   Future<void> setMessagingPlatformEnabled(

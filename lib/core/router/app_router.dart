@@ -40,6 +40,7 @@ import '../../features/hermes/views/hermes_jobs_page.dart';
 import '../../features/hermes/views/hermes_blueprints_page.dart';
 import '../../features/hermes/views/hermes_messaging_page.dart';
 import '../../features/hermes/views/hermes_local_models_page.dart';
+import '../../features/hermes/views/hermes_session_search_page.dart';
 import '../../features/hermes/views/hermes_approvals_page.dart';
 import '../../features/hermes/views/hermes_skills_page.dart';
 import '../../features/hermes/views/hermes_memory_page.dart';
@@ -546,6 +547,14 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           ),
         );
       },
+    ),
+    GoRoute(
+      path: Routes.hermesSessionSearch,
+      name: RouteNames.hermesSessionSearch,
+      pageBuilder: (context, state) => _buildPlatformPage(
+        state: state,
+        child: const HermesSessionSearchPage(),
+      ),
     ),
     GoRoute(
       path: Routes.hermesLocalModels,

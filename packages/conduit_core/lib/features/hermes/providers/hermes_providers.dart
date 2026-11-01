@@ -43,6 +43,7 @@ import 'package:conduit_core/features/hermes/models/hermes_delivery_target.dart'
 import 'package:conduit_core/features/hermes/models/hermes_local_models.dart';
 import 'package:conduit_core/features/hermes/models/hermes_messaging.dart';
 import 'package:conduit_core/features/hermes/models/hermes_fs.dart';
+import 'package:conduit_core/features/hermes/models/hermes_health.dart';
 import 'package:conduit_core/features/hermes/models/hermes_git.dart';
 import 'package:conduit_core/features/hermes/models/hermes_logs.dart';
 import 'package:conduit_core/features/hermes/models/hermes_job.dart';
@@ -3032,6 +3033,28 @@ final hermesLocalModelHardwareProvider =
       final service = ref.watch(hermesApiServiceProvider);
       if (service is! HermesDesktopApiService) return null;
       return service.localModelHardware();
+    });
+
+/// One-line health for the hub header.
+final hermesHealthProvider = FutureProvider<HermesHealth?>((ref) async {
+  final service = ref.watch(hermesApiServiceProvider);
+  if (service is! HermesDesktopApiService) return null;
+  return service.statusOverview();
+});
+
+/// Full-text session search, keyed by the query (trimmed, min two characters).
+final hermesSessionSearchProvider =
+    FutureProvider.autoDispose.family<List<HermesSessionSummary>, String>((
+      ref,
+      query,
+    ) async {
+      final service = ref.watch(hermesApiServiceProvider);
+      if (service is! HermesDesktopApiService) return const [];
+      final rows = await service.searchSessions(query);
+      return rows
+          .map(HermesSessionSummary.fromJson)
+          .whereType<HermesSessionSummary>()
+          .toList(growable: false);
     });
 
 /// Messaging channels, enabled ones first.

@@ -384,6 +384,26 @@ final class _HermesDesktopAdministration {
         await _owner._requestJson('GET', '/api/local-models/hardware'),
       );
 
+  /// `/api/status` reduced to the strip fields (unauthenticated on the server,
+  /// sent with auth anyway).
+  Future<HermesHealth?> statusOverview() async =>
+      HermesHealth.fromJson(
+        await _owner._requestJson('GET', '/api/status'),
+      );
+
+  /// Full-text search over stored sessions (`{results: [...]}`).
+  Future<List<Map<String, dynamic>>> searchSessions(
+    String query, {
+    int limit = 20,
+  }) async => _owner._objects(
+    await _owner._requestJson(
+      'GET',
+      '/api/sessions/search',
+      query: {'q': query, 'limit': limit},
+    ),
+    'results',
+  );
+
   Future<List<HermesMessagingPlatform>> messagingPlatforms() async =>
       HermesMessagingPlatform.listFromJson(
         await _owner._requestJson('GET', '/api/messaging/platforms'),

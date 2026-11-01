@@ -77,6 +77,8 @@ class _HermesSessionsTabState extends ConsumerState<HermesSessionsTab>
         ),
         // Names the active connection; switches when several are saved.
         const SliverToBoxAdapter(child: HermesConnectionSwitcherTile()),
+        const SliverToBoxAdapter(child: _HealthStrip()),
+        const SliverToBoxAdapter(child: _SessionSearchTile()),
         const SliverToBoxAdapter(child: _ApprovalsTile()),
         ..._botSlivers(context, ref.watch(hermesBotsProvider).asData?.value),
         if (showJobs) const SliverToBoxAdapter(child: _ScheduledAgentsTile()),
@@ -530,6 +532,115 @@ class _SkillsTile extends ConsumerWidget {
                 ),
               ),
               const SizedBox(width: Spacing.xs),
+              Icon(
+                Icons.chevron_right_rounded,
+                size: IconSize.listItem,
+                color: theme.iconSecondary,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _HealthStrip extends ConsumerWidget {
+  const _HealthStrip();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = context.conduitTheme;
+    final l10n = AppLocalizations.of(context)!;
+    final health = ref.watch(hermesHealthProvider).asData?.value;
+    if (health == null) return const SizedBox.shrink();
+    final ok = health.healthy;
+    final colour = ok
+        ? theme.success
+        : (health.degraded ? theme.error : theme.textSecondary);
+    final parts = <String>[
+      health.gatewayRunning
+          ? l10n.hermesHealthGatewayUp
+          : l10n.hermesHealthGatewayDown,
+      if (health.version.isNotEmpty) 'v${health.version}',
+      if (health.diskFreeMb != null)
+        l10n.hermesHealthDisk(
+          (health.diskFreeMb! / 1024).toStringAsFixed(0),
+        ),
+      if (health.activeSessions > 0)
+        l10n.hermesHealthActive(health.activeSessions),
+      if (health.degraded) l10n.hermesHealthDegraded,
+    ];
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        Spacing.sm,
+        Spacing.md,
+        Spacing.sm,
+        0,
+      ),
+      child: Row(
+        key: const ValueKey<String>('hermes-health-strip'),
+        children: [
+          Icon(Icons.circle, size: 8, color: colour),
+          const SizedBox(width: Spacing.xs),
+          Expanded(
+            child: Text(
+              parts.join(' · '),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: AppTypography.captionStyle.copyWith(color: colour),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SessionSearchTile extends ConsumerWidget {
+  const _SessionSearchTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = context.conduitTheme;
+    final l10n = AppLocalizations.of(context)!;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        Spacing.sm,
+        Spacing.md,
+        Spacing.sm,
+        Spacing.xs,
+      ),
+      child: InkWell(
+        key: const ValueKey<String>('hermes-search-tile'),
+        onTap: () => context.push(Routes.hermesSessionSearch),
+        borderRadius: BorderRadius.circular(AppBorderRadius.card),
+        child: Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: Spacing.md,
+            vertical: Spacing.sm,
+          ),
+          decoration: BoxDecoration(
+            color: theme.surfaceBackground,
+            borderRadius: BorderRadius.circular(AppBorderRadius.card),
+            border: Border.all(color: theme.cardBorder),
+          ),
+          child: Row(
+            children: [
+              Icon(
+                Icons.search,
+                size: IconSize.listItem,
+                color: theme.textSecondary,
+              ),
+              const SizedBox(width: Spacing.md),
+              Expanded(
+                child: Text(
+                  l10n.hermesSessionSearchTitle,
+                  style: AppTypography.bodyMediumStyle.copyWith(
+                    color: theme.textPrimary,
+                  ),
+                ),
+              ),
               Icon(
                 Icons.chevron_right_rounded,
                 size: IconSize.listItem,
