@@ -1047,7 +1047,6 @@ class _ChatPageState extends ConsumerState<ChatPage> {
       // whole chat for that is pure cost.
       if (!mounted) return;
       if (identical(raw, _lastRawDesktopTranscript)) return;
-      _lastRawDesktopTranscript = raw;
       List<HermesPendingDesktopDecision> pending;
       try {
         pending = await service.pendingDecisionsForSession(storedId);
@@ -1063,6 +1062,19 @@ class _ChatPageState extends ConsumerState<ChatPage> {
           generation != _hermesTranscriptRefreshGeneration ||
           !identical(ref.read(hermesApiServiceProvider), service) ||
           ref.read(activeConversationProvider)?.id != active.id) {
+        // Superseded or the connection moved. The service has already advanced
+        // its own cache, so nothing will notice this chat is still behind:
+        // retry shortly, while the marker stays where it was.
+        _pendingHermesTranscriptRefresh = storedId;
+        _hermesTranscriptRefreshWatchdog?.cancel();
+        _hermesTranscriptRefreshWatchdog = Timer(
+          const Duration(seconds: 1),
+          () {
+            if (!mounted || _pendingHermesTranscriptRefresh != storedId) return;
+            _pendingHermesTranscriptRefresh = null;
+            unawaited(_refreshDesktopHermesTranscript(storedId));
+          },
+        );
         return;
       }
       final selected = ref.read(selectedModelProvider);
@@ -1121,6 +1133,11 @@ class _ChatPageState extends ConsumerState<ChatPage> {
           candidateAuthoritativeCount < currentAuthoritativeCount) {
         return;
       }
+      // Only now is this transcript the one on screen. Setting the marker any
+      // earlier let a refresh that the guards below discarded still count as
+      // applied: the service cache moved on, the page did not, and every later
+      // check compared against the service and concluded nothing had changed.
+      _lastRawDesktopTranscript = raw;
       ref.read(chatMessagesProvider.notifier).setMessages(messages);
       ref
           .read(activeConversationProvider.notifier)
