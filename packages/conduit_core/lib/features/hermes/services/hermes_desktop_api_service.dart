@@ -328,6 +328,7 @@ final class HermesDesktopApiService
   final Set<String> _queuedTranscriptChanges = {};
 
   bool _recoveringLiveTransport = false;
+  final Set<String> _resolvingRuntimes = {};
   DateTime? _lastRecoveryAt;
   Duration _recoveryBackoff = Duration.zero;
   int _desktopContract = 0;

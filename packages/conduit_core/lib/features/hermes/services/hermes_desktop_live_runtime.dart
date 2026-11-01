@@ -86,10 +86,19 @@ extension _HermesDesktopLiveRuntime on HermesDesktopApiService {
       // burst: a viewer that is not streaming locally sees `message.start`
       // first, so keying the reload off the burst's opening frame dropped the
       // completion that followed it and the transcript never refreshed.
-      if ((event.type == 'message.complete' ||
-              event.type.endsWith('.request')) &&
-          eventStoredId != null) {
+      final terminalEvent =
+          event.type == 'message.complete' || event.type.endsWith('.request');
+      if (terminalEvent && eventStoredId != null) {
         _queueTranscriptChange(eventStoredId);
+      } else if (terminalEvent &&
+          event.sessionId != null &&
+          event.sessionId!.isNotEmpty) {
+        // A turn that ran under a runtime this client never resumed (the same
+        // stored session driven from another window) arrives with an id the
+        // binding map cannot resolve. Ask the gateway which stored session that
+        // runtime belongs to instead of dropping the completion on the floor —
+        // dropping it is why the open chat only caught up after a switch.
+        unawaited(_resolveRuntimeBinding(event.sessionId!));
       }
     });
     _emitTurnState(HermesDesktopTurnState.idle);
@@ -574,6 +583,45 @@ extension _HermesDesktopLiveRuntime on HermesDesktopApiService {
           data: {'limit': limit, 'order': 'latest'},
         );
       }
+    }
+  }
+
+  /// Learns which stored session an unknown runtime id belongs to, then treats
+  /// its completion like a local one (one transcript reload).
+  Future<void> _resolveRuntimeBinding(String runtimeId) async {
+    if (_closed || _resolvingRuntimes.contains(runtimeId)) return;
+    if (_storedIdForRuntime(runtimeId) != null) return;
+    _resolvingRuntimes.add(runtimeId);
+    try {
+      final rows = _objects(
+        await _rpc.request<Object?>(
+          'session.active_list',
+          params: {'profile': config.desktopProfile},
+          timeout: const Duration(seconds: 10),
+        ),
+        'sessions',
+      );
+      if (_closed) return;
+      for (final row in rows) {
+        final id = validateHermesOpaqueIdentifier(row['id']);
+        final stored = validateHermesOpaqueIdentifier(
+          row['session_key'] ?? row['stored_session_id'],
+        );
+        // Only the runtime that actually sent the event: binding every row in
+        // turn would let the last one overwrite the id we came here to resolve.
+        if (id != runtimeId || stored == null) continue;
+        _bindings[stored] = HermesSessionBinding(
+          storedId: stored,
+          runtimeId: id!,
+        );
+        _bindingSocketGenerations[stored] = _rpc.socketGeneration;
+        _queueTranscriptChange(stored);
+        return;
+      }
+    } catch (_) {
+      // Best-effort: the next terminal event, or a page load, repairs it.
+    } finally {
+      _resolvingRuntimes.remove(runtimeId);
     }
   }
 

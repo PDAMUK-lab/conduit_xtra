@@ -131,6 +131,28 @@ void main() {
     );
   });
 
+  test('a completion from another runtime still reloads the open chat', () async {
+    final changes = <String>[];
+    final subscription = service.transcriptChanges.listen(changes.add);
+    addTearDown(subscription.cancel);
+
+    await service.getSessionMessages('st-1');
+    changes.clear();
+
+    // The same stored session, driven from another window: its runtime id is
+    // not in this client's bindings, so the completion used to be dropped.
+    gateway.extraRuntimeId = 'rt-2';
+    gateway.push({'type': 'message.complete', 'text': 'from elsewhere'}, sessionId: 'rt-2');
+    await _settle();
+
+    expect(gateway.activeListCalls, greaterThan(0), reason: 'asked who owns rt-2');
+    expect(
+      changes,
+      contains('st-1'),
+      reason: 'the open chat must reload for a turn another runtime ran',
+    );
+  });
+
   test('a refresh downloads the newest page, not the whole chat', () async {
     for (var i = 1; i <= 300; i++) {
       gateway.rows.add({'id': i, 'role': 'user', 'content': 'row $i'});
@@ -257,6 +279,11 @@ final class _LiveGateway {
   /// Refuse `session.resume` the way a session owned by another runtime does.
   bool refuseResume = false;
 
+  /// A second runtime serving the same stored session (another window's).
+  String? extraRuntimeId;
+
+  int activeListCalls = 0;
+
   /// Rows `/api/sessions/st-1/messages` serves, in insertion order.
   final List<Map<String, Object?>> rows = [];
 
@@ -336,9 +363,17 @@ final class _LiveGateway {
               'info': {'running': running, 'desktop_contract': 7},
             };
           case 'session.active_list':
+            activeListCalls++;
             result = {
               'sessions': includeInActiveList
                   ? [
+                if (extraRuntimeId != null)
+                  {
+                    'id': extraRuntimeId,
+                    'session_key': 'st-1',
+                    'status': 'idle',
+                    'message_count': rows.length,
+                  },
                 {
                   'id': 'rt-1',
                   'session_key': 'st-1',
@@ -401,7 +436,7 @@ final class _LiveGateway {
     await request.response.close();
   }
 
-  void push(Map<String, Object?> payload) {
+  void push(Map<String, Object?> payload, {String sessionId = 'rt-1'}) {
     for (final socket in List<WebSocket>.of(sockets)) {
       socket.add(
         jsonEncode({
@@ -409,7 +444,7 @@ final class _LiveGateway {
           'method': 'event',
           'params': {
             'type': payload['type'],
-            'session_id': 'rt-1',
+            'session_id': sessionId,
             'payload': payload,
           },
         }),
