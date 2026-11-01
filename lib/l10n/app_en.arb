@@ -6951,6 +6951,47 @@
     "description": "Messaging copy.",
     "placeholders": {"channel": {"type": "String"}}
   },
+  "hermesRestoreSection": "Restore from backup",
+  "@hermesRestoreSection": {
+    "description": "Backup restore copy."
+  },
+  "hermesRestoreEmpty": "No backups on the server yet.",
+  "@hermesRestoreEmpty": {
+    "description": "Backup restore copy."
+  },
+  "hermesRestoreTitle": "Restore backup",
+  "@hermesRestoreTitle": {
+    "description": "Backup restore copy."
+  },
+  "hermesRestoreWarning": "This replaces the current state with the archive's. It cannot be undone — take a fresh backup first if you are unsure.",
+  "@hermesRestoreWarning": {
+    "description": "Backup restore copy."
+  },
+  "hermesRestoreForce": "Force",
+  "@hermesRestoreForce": {
+    "description": "Backup restore copy."
+  },
+  "hermesRestoreForceHelp": "Overwrite even where the archive conflicts with the current state.",
+  "@hermesRestoreForceHelp": {
+    "description": "Backup restore copy."
+  },
+  "hermesRestoreType": "Type {word} to confirm",
+  "@hermesRestoreType": {
+    "description": "Backup restore copy.",
+    "placeholders": {"word": {"type": "String"}}
+  },
+  "hermesBackupsSection": "Backups",
+  "@hermesBackupsSection": {
+    "description": "Backups copy."
+  },
+  "hermesRestoreCliOnly": "Restoring needs the gateway stopped: run hermes import <archive> --force on the node.",
+  "@hermesRestoreCliOnly": {
+    "description": "Backups copy."
+  },
+  "hermesRestoreSection": "Restore from backup",
+  "@hermesRestoreSection": {
+    "description": "Backups copy."
+  },
   "hermesApprovalRequired": "Approval required",
   "@hermesApprovalRequired": {
     "description": "Title of a Hermes human-approval request card."

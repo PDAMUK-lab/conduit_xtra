@@ -171,6 +171,15 @@ before `flutter pub get`.
   destructive confirmation; hooks are listed with their approval state.
   There is **no restore route** in the dashboard — restore stays a CLI job
   (`hermes checkpoints`), documented rather than faked.
+- **Backups (ops import costed, not shipped as a button).** The Ops page now
+  lists the server's own backup archives from `<profile home>/backups` through
+  the files API (there is no listing route). Restoring is deliberately not a
+  button: `hermes import` prompts "Continue? [y/N]" and dashboard children run
+  with stdin at /dev/null, so without `--force` it always aborts; with
+  `--force` it then refuses while the gateway owns the profile ("Exclusive
+  maintenance refused … Drain and stop the gateway"). Both measured live.
+  The page states the terminal procedure instead of offering a tap that can
+  never succeed.
 - **Messaging.** A Messaging page lists every channel (`GET
   /api/messaging/platforms`, 32 on this node), enabled first, with a switch
   that enables/disables one (`PUT /api/messaging/platforms/{id}`) and a detail

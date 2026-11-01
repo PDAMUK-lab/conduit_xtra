@@ -776,6 +776,17 @@ final class _HermesDesktopAdministration {
     return actionStatus('backup');
   }
 
+  /// Restore a backup archive that exists on the server. Destructive: the
+  /// server spawns `hermes import <archive>` and it replaces current state.
+  Future<void> importArchive({
+    required String archive,
+    bool force = false,
+  }) => _owner._requestJson(
+    'POST',
+    '/api/ops/import',
+    body: {'archive': archive, 'force': force},
+  );
+
   Future<HermesActionStatus?> pruneCheckpoints() async {
     await _owner._requestJson('POST', '/api/ops/checkpoints/prune');
     return actionStatus('checkpoints-prune');

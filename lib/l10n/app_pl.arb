@@ -6677,6 +6677,16 @@
   "hermesMessagingEnabledToast": "Kanał włączony.",
   "hermesMessagingDisabledToast": "Kanał wyłączony.",
   "hermesMessagingHomeChannel": "Kanał domowy: {channel}",
+  "hermesRestoreSection": "Przywróć z kopii",
+  "hermesRestoreEmpty": "Na serwerze nie ma jeszcze kopii.",
+  "hermesRestoreTitle": "Przywróć kopię",
+  "hermesRestoreWarning": "Zastępuje bieżący stan zawartością archiwum. Nieodwracalne — najpierw zrób nową kopię.",
+  "hermesRestoreForce": "Wymuś",
+  "hermesRestoreForceHelp": "Nadpisz nawet przy konflikcie archiwum.",
+  "hermesRestoreType": "Wpisz {word}, aby potwierdzić",
+  "hermesBackupsSection": "Kopie",
+  "hermesRestoreCliOnly": "Przywracanie wymaga zatrzymanego gateway: uruchom hermes import <archiwum> --force na węźle.",
+  "hermesRestoreSection": "Przywróć z kopii",
   "hermesApprovalRequired": "Wymagana zgoda",
   "@hermesApprovalRequired": {
     "description": "Title of a Hermes human-approval request card."

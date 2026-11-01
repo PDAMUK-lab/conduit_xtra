@@ -11,6 +11,7 @@ import '../../../shared/widgets/conduit_components.dart';
 import '../../../shared/widgets/themed_dialogs.dart';
 import '../../../shared/widgets/utility_components.dart';
 
+import 'package:conduit_core/features/hermes/models/hermes_fs.dart';
 import 'package:conduit_core/features/hermes/models/hermes_ops.dart';
 import 'package:conduit_core/features/hermes/providers/hermes_providers.dart';
 import 'package:conduit_core/features/hermes/services/hermes_desktop_api_service.dart';
@@ -231,6 +232,81 @@ class _HermesOpsPageState extends ConsumerState<HermesOpsPage> {
           error: (error, _) =>
               _message(theme, l10n.hermesOpsFailed, theme.error),
         ),
+        const SizedBox(height: Spacing.lg),
+        _sectionTitle(l10n.hermesBackupsSection, theme),
+        const SizedBox(height: Spacing.xxs),
+        Text(
+          l10n.hermesRestoreCliOnly,
+          style: AppTypography.captionStyle.copyWith(
+            color: theme.textSecondary,
+          ),
+        ),
+        const SizedBox(height: Spacing.xs),
+        _backupsSection(theme, l10n),
+      ],
+    );
+  }
+
+  /// Backups the server wrote (`<profile home>/backups`), listed through the
+  /// files API because there is no listing route for them. Restoring is not
+  /// offered: the server refuses an import while the gateway owns the profile,
+  /// so it stays a terminal job and the page says so.
+  Widget _backupsSection(ConduitThemeExtension theme, AppLocalizations l10n) {
+    final configPath = ref.watch(hermesRawConfigProvider).asData?.value?.path;
+    if (configPath == null) return const SizedBox.shrink();
+    final dir =
+        '${configPath.substring(0, configPath.lastIndexOf('/'))}/backups';
+    final listing = ref.watch(hermesFsListingProvider(dir)).asData?.value;
+    final archives =
+        (listing?.entries ?? const <HermesFsEntry>[])
+            .where((e) => !e.isDirectory && e.name.endsWith('.zip'))
+            .toList()
+          ..sort((a, b) => b.name.compareTo(a.name));
+    if (archives.isEmpty) {
+      return _card(
+        theme,
+        Text(
+          l10n.hermesRestoreEmpty,
+          style: AppTypography.bodySmallStyle.copyWith(
+            color: theme.textSecondary,
+          ),
+        ),
+      );
+    }
+    return Column(
+      children: [
+        for (final archive in archives.take(6)) ...[
+          Container(
+            key: ValueKey<String>('hermes-backup-${archive.path}'),
+            decoration: BoxDecoration(
+              color: theme.groupedSurface,
+              borderRadius: BorderRadius.circular(AppBorderRadius.card),
+            ),
+            padding: const EdgeInsets.all(Spacing.md),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.archive_outlined,
+                  size: IconSize.listItem,
+                  color: theme.iconSecondary,
+                ),
+                const SizedBox(width: Spacing.sm),
+                Expanded(
+                  child: Text(
+                    archive.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTypography.codeStyle.copyWith(
+                      color: theme.textPrimary,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: Spacing.xs),
+        ],
       ],
     );
   }

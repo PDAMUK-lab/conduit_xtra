@@ -573,6 +573,8 @@ final class HermesDesktopApiService
   Future<HermesActionStatus?> spawnSecurityAudit() =>
       _administration.spawnSecurityAudit();
   Future<HermesActionStatus?> spawnBackup() => _administration.spawnBackup();
+  Future<void> importArchive({required String archive, bool force = false}) =>
+      _administration.importArchive(archive: archive, force: force);
   Future<HermesActionStatus?> pruneCheckpoints() =>
       _administration.pruneCheckpoints();
   Future<HermesActionStatus?> actionStatus(String name, {int lines = 200}) =>
