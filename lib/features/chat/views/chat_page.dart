@@ -551,6 +551,12 @@ class _ChatPageState extends ConsumerState<ChatPage> {
   ProviderSubscription<bool>? _hermesStreamingSub;
   late final OpenWebUiLivePromptNotifier _livePromptNotifier;
   String? _pendingHermesTranscriptRefresh;
+
+  /// Forces a deferred transcript refresh to run even if the streaming flag
+  /// never clears. A chat that followed a turn from another client could defer
+  /// on `isChatStreamingProvider` and stay deferred forever — the reload that
+  /// would clear the flag was the one being deferred.
+  Timer? _hermesTranscriptRefreshWatchdog;
   int _hermesTranscriptRefreshGeneration = 0;
   /// The raw transcript instance last converted into [chatMessagesProvider];
   /// the service re-uses it when a refresh finds nothing new.
@@ -953,6 +959,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
     _hermesTranscriptSub?.close();
     _hermesStreamingSub?.close();
     _hermesTranscriptRefreshGeneration++;
+    _hermesTranscriptRefreshWatchdog?.cancel();
     _markdownPrewarmThrottle.cancel();
     _screenContextRetryTimer?.cancel();
     _cancelExplicitLatestNavigation();
@@ -1015,6 +1022,19 @@ class _ChatPageState extends ConsumerState<ChatPage> {
     if (ref.read(isChatStreamingProvider) &&
         !isRestoredHermesDesktopRunningMessage(visibleTail)) {
       _pendingHermesTranscriptRefresh = storedId;
+      // Bounded: if the streaming flag is still set three seconds later, re-read
+      // anyway. Deferring indefinitely leaves the chat one message short of the
+      // server's tail with nothing left to trigger a reload.
+      _hermesTranscriptRefreshWatchdog?.cancel();
+      _hermesTranscriptRefreshWatchdog = Timer(const Duration(seconds: 3), () {
+        if (!mounted || _pendingHermesTranscriptRefresh != storedId) return;
+        _pendingHermesTranscriptRefresh = null;
+        DebugLogger.warning(
+          'transcript-refresh-deferred-timeout',
+          scope: 'hermes/transcript',
+        );
+        unawaited(_refreshDesktopHermesTranscript(storedId));
+      });
       return;
     }
     final service = ref.read(hermesApiServiceProvider);
