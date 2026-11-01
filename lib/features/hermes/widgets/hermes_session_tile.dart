@@ -327,7 +327,11 @@ Future<void> openHermesSession(
   List<Map<String, dynamic>> raw;
   var pendingDecisions = const <HermesPendingDesktopDecision>[];
   try {
-    raw = await service.getSessionMessages(session.id);
+    // A long chat must not hold the screen back: open on its newest page and
+    // let the rest of the history arrive in the background.
+    raw = service is HermesDesktopApiService
+        ? await service.openSessionTranscript(session.id)
+        : await service.getSessionMessages(session.id);
   } catch (error) {
     // Don't silently open an existing session with an empty transcript — that
     // reads as data loss. Surface the failure and abort the open.

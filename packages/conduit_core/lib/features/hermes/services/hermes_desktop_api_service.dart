@@ -448,6 +448,13 @@ final class HermesDesktopApiService
     String id, {
     CancelToken? cancelToken,
   }) => _runtimeGetSessionMessages(id, cancelToken: cancelToken);
+
+  /// Opens a session with its newest page only, finishing the history in the
+  /// background (the extension keeps the rest out of the navigation path).
+  Future<List<Map<String, dynamic>>> openSessionTranscript(
+    String id, {
+    CancelToken? cancelToken,
+  }) => openDesktopSessionTranscript(id, cancelToken: cancelToken);
   Future<List<HermesPendingDesktopDecision>> pendingDecisionsForSession(
     String storedId,
   ) => _runtimePendingDecisionsForSession(storedId);

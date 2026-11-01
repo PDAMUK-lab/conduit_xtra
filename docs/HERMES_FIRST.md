@@ -357,6 +357,21 @@ before `flutter pub get`.
   assistant) and a chat opened mid-turn reported `running`, then `idle`, with
   the 4,892-character reply loaded.
 
+- **Live follow is now cheap.** The first version followed another client's
+  turn by re-reading the whole transcript; measured against this node's own
+  sessions through the live route, one refresh of a 1,043–1,496-row chat was
+  16–25 MB over 6–8 requests and ~0.9 s of fetch+parse before any widget work,
+  and it grew with the chat — the "gets slower the longer we talk" report.
+  Refreshes now fetch only the newest page and merge by row id (measured 25.0
+  MB → 0.9 MB, 1,051 ms → 44 ms), an idle refresh reuses the snapshot and is
+  skipped before conversion, and a gap wider than one page falls back to the
+  full read. Opening a long chat no longer waits for its whole history either:
+  the newest page is shown first and the rest is read in the background as a
+  transcript change (0.97 MB and 226 ms to first paint, against 6.6 MB and
+  566 ms before). The turn-state watchdog asks `session.active_list` — a few
+  hundred bytes, no transport re-attach, no `session.info` echo to other
+  viewers — instead of re-resuming the session every tick.
+
 ## APK delivery to the NAS
 
 Every file that lands in `build/app/outputs/flutter-apk/` is mirrored to the

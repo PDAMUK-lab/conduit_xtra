@@ -552,6 +552,9 @@ class _ChatPageState extends ConsumerState<ChatPage> {
   late final OpenWebUiLivePromptNotifier _livePromptNotifier;
   String? _pendingHermesTranscriptRefresh;
   int _hermesTranscriptRefreshGeneration = 0;
+  /// The raw transcript instance last converted into [chatMessagesProvider];
+  /// the service re-uses it when a refresh finds nothing new.
+  List<Map<String, dynamic>>? _lastRawDesktopTranscript;
   bool _viewportOwnerChangeScheduled = false;
   bool? _lastProfiledMessageCacheStreamingState;
   bool _explicitLatestNavigationInFlight = false;
@@ -1019,6 +1022,12 @@ class _ChatPageState extends ConsumerState<ChatPage> {
     final generation = ++_hermesTranscriptRefreshGeneration;
     try {
       final raw = await service.getSessionMessages(storedId);
+      // The service hands back the same list instance when the refresh found
+      // nothing new (an idle tick, a reconnect). Converting and replacing the
+      // whole chat for that is pure cost.
+      if (!mounted) return;
+      if (identical(raw, _lastRawDesktopTranscript)) return;
+      _lastRawDesktopTranscript = raw;
       List<HermesPendingDesktopDecision> pending;
       try {
         pending = await service.pendingDecisionsForSession(storedId);

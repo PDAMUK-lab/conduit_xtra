@@ -10,12 +10,13 @@ part of 'hermes_desktop_api_service.dart';
 /// never loads the reply — the operator has to open the dashboard to see it.
 ///
 /// So the socket is not trusted to be alive and the state is not trusted to be
-/// current: while a chat is open in the foreground, the service re-resumes the
-/// session on an interval. `session.resume` answers the gateway's own `running`
-/// flag and re-attaches this client beside whoever else is streaming (the
-/// gateway's `session.info` is an event, not an RPC — asking for it by method
-/// returns -32601). A request that times out or comes back disconnected also
-/// proves the socket dead, which triggers a reconnect and another resume.
+/// current: while a chat is open in the foreground, the service reads
+/// `session.active_list` on an interval — the gateway's own per-session
+/// `status`, a few hundred bytes, no side effects. (A resume would do it too,
+/// but it re-attaches the transport and re-emits `session.info`, waking every
+/// viewer's UI; `session.info` is an event, not an RPC, and answering it by
+/// method returns -32601.) A request that times out or comes back disconnected
+/// proves the socket dead and triggers a reconnect plus a resume.
 extension _HermesDesktopLiveWatch on HermesDesktopApiService {
   /// The session the user last opened; the one the watch keeps honest.
   void _noteLiveSession(String storedId) {
@@ -50,18 +51,17 @@ extension _HermesDesktopLiveWatch on HermesDesktopApiService {
       }
       final result = _object(
         await _rpc.request<Object?>(
-          'session.resume',
+          'session.active_list',
           params: {
-            'session_id': storedId,
-            'omit_messages': true,
+            'current_session_id': binding.runtimeId,
             ..._sessionScope(storedId),
           },
-          timeout: const Duration(seconds: 12),
+          timeout: const Duration(seconds: 10),
         ),
       );
       if (_closed) return;
       _liveWatchFailures = 0;
-      _applyWatchResume(result, storedId);
+      _applyWatchActiveList(result, storedId, binding);
     } on HermesDesktopRpcException catch (error) {
       if (_closed) return;
       if (error.disconnected || error.timedOut) {
@@ -76,25 +76,38 @@ extension _HermesDesktopLiveWatch on HermesDesktopApiService {
     }
   }
 
-  /// Applies a resume payload from the watch: the gateway's `running` flag and
-  /// a fresh runtime id (a gateway restart mints a new one).
-  void _applyWatchResume(Map<String, dynamic> result, String storedId) {
-    final runtime = validateHermesOpaqueIdentifier(result['session_id']);
-    final stored = validateHermesOpaqueIdentifier(
-      result['stored_session_id'] ?? result['session_key'] ?? storedId,
-    );
-    if (runtime == null || stored == null) return;
-    final binding = HermesSessionBinding(storedId: stored, runtimeId: runtime);
-    _bindings[storedId] = binding;
-    _bindings[stored] = binding;
-    _bindingSocketGenerations[storedId] = _rpc.socketGeneration;
-    _bindingSocketGenerations[stored] = _rpc.socketGeneration;
-    final running = result['running'] ?? _object(result['info'])['running'];
-    if (running is! bool) return;
+  /// Applies a `session.active_list` row for the open session: the gateway's
+  /// own `status` is the turn state, and a row that is absent means this
+  /// profile has no live turn for it.
+  ///
+  /// `active_list` is used instead of `session.resume` because it is a few
+  /// hundred bytes with no side effects — a resume re-attaches the transport
+  /// and re-emits `session.info`, which woke every viewer's UI on every tick.
+  void _applyWatchActiveList(
+    Map<String, dynamic> result,
+    String storedId,
+    HermesSessionBinding binding,
+  ) {
+    Map<String, dynamic>? row;
+    final rows = result['sessions'];
+    if (rows is List) {
+      for (final item in rows) {
+        if (item is! Map) continue;
+        if (item['session_key'] == storedId ||
+            item['session_key'] == binding.storedId ||
+            item['id'] == binding.runtimeId) {
+          row = Map<String, dynamic>.from(item);
+          break;
+        }
+      }
+    }
+    final status = row?['status']?.toString() ?? '';
+    final running =
+        status == 'working' || status == 'starting' || status == 'waiting';
     final changed = _applyAuthoritativeRunning(
       running,
       storedId: storedId,
-      runtimeId: runtime,
+      runtimeId: binding.runtimeId,
     );
     if (changed) _queueTranscriptChange(storedId);
   }

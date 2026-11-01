@@ -462,6 +462,21 @@ extension _HermesDesktopLiveRuntime on HermesDesktopApiService {
     }
     final runtimeId = binding?.runtimeId;
     final storedId = binding?.storedId ?? id;
+    // A chat another client drives refreshes after every turn. Re-reading the
+    // whole transcript costs 6–25 MB and ~1 s of local work for a 1,000–1,500
+    // message session on this node, and grows with the chat — the "gets slower
+    // the longer we talk" report. Only the newest page can have changed since
+    // the last read, so try that first.
+    if (binding != null) {
+      final incremental = await _incrementalDesktopTranscript(
+        id,
+        cancelToken: cancelToken,
+      );
+      if (incremental != null) {
+        _lastTranscripts[id] = incremental;
+        return incremental;
+      }
+    }
     final hadBufferedEvent =
         runtimeId != null && _eventBuffer.take(runtimeId).isNotEmpty;
     final isBotChat = _sessionProfiles.containsKey(storedId);
@@ -520,6 +535,152 @@ extension _HermesDesktopLiveRuntime on HermesDesktopApiService {
     );
     _lastTranscripts[id] = usable;
     return usable;
+  }
+
+  /// The newest page of [storedId], shrinking it when the REST transport
+  /// refuses the payload (one tool-heavy row can exceed the cap on its own).
+  Future<List<Map<String, dynamic>>> _latestDesktopTranscriptPage(
+    String storedId, {
+    CancelToken? cancelToken,
+  }) async {
+    var limit = kHermesDesktopTranscriptPageSize;
+    while (true) {
+      try {
+        return _objects(
+          await _requestJson(
+            'GET',
+            '/api/sessions/${Uri.encodeComponent(storedId)}/messages',
+            query: {
+              'limit': limit,
+              'offset': 0,
+              'order': 'latest',
+              'include_compacted': true,
+              ..._sessionScope(storedId),
+            },
+            cancelToken: cancelToken,
+          ),
+          'messages',
+        );
+      } on HermesResponseTooLargeException {
+        if (limit <= kHermesDesktopTranscriptMinimumPageSize) rethrow;
+        limit = max(
+          kHermesDesktopTranscriptMinimumPageSize,
+          limit ~/ 2,
+        );
+        DebugLogger.warning(
+          'transcript-page-too-large',
+          scope: 'hermes/desktop',
+          data: {'limit': limit, 'order': 'latest'},
+        );
+      }
+    }
+  }
+
+  /// The newest page of [storedId], merged into the transcript already held.
+  ///
+  /// Returns null when the caller must do a full read: no snapshot yet, a bot
+  /// chat (whose history comes from `session.history`), a gap larger than one
+  /// page, or a server that does not answer `order=latest`.
+  Future<List<Map<String, dynamic>>?> _incrementalDesktopTranscript(
+    String storedId, {
+    CancelToken? cancelToken,
+  }) async {
+    if (_sessionProfiles.containsKey(storedId)) return null;
+    final previous = _lastTranscripts[storedId];
+    if (previous == null || previous.isEmpty) return null;
+    if (cancelToken?.isCancelled == true) throw cancelToken!.cancelError!;
+    final latest = await _latestDesktopTranscriptPage(
+      storedId,
+      cancelToken: cancelToken,
+    );
+    if (latest.isEmpty) return previous;
+    final lastKnownId = previous.last['id'];
+    if (lastKnownId != null && latest.last['id'] == lastKnownId) {
+      // Nothing new: hand back the very same list so the page can skip the
+      // conversion and the list rebuild as well as the download.
+      return previous;
+    }
+    final known = <Object?>{for (final row in previous) row['id']};
+    if (!latest.any((row) => known.contains(row['id']))) {
+      // More new rows than one page: merging would drop the middle.
+      return null;
+    }
+    final merged = List<Map<String, dynamic>>.of(previous);
+    for (final row in latest) {
+      if (known.contains(row['id'])) continue;
+      merged.add(row);
+    }
+    return merged;
+  }
+
+  /// Opens [id] without waiting for its whole history.
+  ///
+  /// Tapping a long chat used to download every page before the screen could
+  /// even switch (measured: 1,043–1,496 rows, 16–25 MB, ~1 s of local work on
+  /// this node). The newest page is enough to show the chat; the rest is read
+  /// in the background and arrives as a transcript change.
+  Future<List<Map<String, dynamic>>> openDesktopSessionTranscript(
+    String id, {
+    CancelToken? cancelToken,
+  }) async {
+    final previous = _lastTranscripts[id];
+    if (previous != null && previous.isNotEmpty) {
+      return getSessionMessages(id, cancelToken: cancelToken);
+    }
+    final binding = await _resume(id, refresh: true);
+    final storedId = binding.storedId;
+    if (cancelToken?.isCancelled == true) throw cancelToken!.cancelError!;
+    final newest = await _latestDesktopTranscriptPage(
+      storedId,
+      cancelToken: cancelToken,
+    );
+    if (newest.isEmpty) return getSessionMessages(id, cancelToken: cancelToken);
+    _lastTranscripts[id] = newest;
+    unawaited(_completeTranscriptInBackground(id, storedId));
+    return newest;
+  }
+
+  /// Reads the rest of [storedId] after [openDesktopSessionTranscript] showed
+  /// its window, then asks the page to reload. Rows that arrived while the
+  /// history was being read are kept, so a live reply is never dropped.
+  Future<void> _completeTranscriptInBackground(
+    String id,
+    String storedId,
+  ) async {
+    try {
+      final full = await loadHermesDesktopTranscriptPages(
+        (offset, limit) async => _objects(
+          await _requestJson(
+            'GET',
+            '/api/sessions/${Uri.encodeComponent(storedId)}/messages',
+            query: {
+              'limit': limit,
+              'offset': offset,
+              'order': 'oldest',
+              'include_compacted': true,
+              ..._sessionScope(storedId),
+            },
+          ),
+          'messages',
+        ),
+      );
+      if (_closed) return;
+      final current = _lastTranscripts[id] ?? const <Map<String, dynamic>>[];
+      if (full.length <= current.length) return;
+      final known = <Object?>{for (final row in full) row['id']};
+      for (final row in current) {
+        if (known.contains(row['id'])) continue;
+        full.add(row);
+      }
+      _lastTranscripts[id] = full;
+      _emitTranscriptChange(id);
+    } catch (error) {
+      DebugLogger.warning(
+        'transcript-backfill-failed',
+        scope: 'hermes/desktop',
+        data: {'errorType': error.runtimeType.toString()},
+      );
+    }
   }
 
   Future<List<HermesPendingDesktopDecision>> _runtimePendingDecisionsForSession(

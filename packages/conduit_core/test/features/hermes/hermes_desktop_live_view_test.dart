@@ -78,6 +78,78 @@ void main() {
     );
   });
 
+  test('a refresh downloads the newest page, not the whole chat', () async {
+    for (var i = 1; i <= 300; i++) {
+      gateway.rows.add({'id': i, 'role': 'user', 'content': 'row $i'});
+    }
+    final first = await service.getSessionMessages('st-1');
+    expect(first.length, 300);
+    final fullReadsAfterOpen = gateway.fullTranscriptReads;
+    expect(fullReadsAfterOpen, greaterThanOrEqualTo(2)); // 200 + 100 pages
+
+    // Another client's turn adds a reply.
+    gateway.rows.add({'id': 301, 'role': 'assistant', 'content': 'pong'});
+    gateway.push({'type': 'message.complete', 'text': 'pong'});
+    await _settle();
+
+    final refreshed = await service.getSessionMessages('st-1');
+    expect(refreshed.length, 301);
+    expect(refreshed.last['id'], 301);
+    expect(
+      gateway.fullTranscriptReads,
+      fullReadsAfterOpen,
+      reason: 'a refresh must not re-read the pages it already has',
+    );
+    expect(gateway.transcriptRequests.last.order, 'latest');
+
+    // An idle refresh re-uses the snapshot instead of re-downloading.
+    final before = gateway.transcriptRequests.length;
+    final again = await service.getSessionMessages('st-1');
+    expect(identical(again, refreshed), isTrue);
+    expect(gateway.transcriptRequests.length, before + 1);
+  });
+
+  test('a gap wider than one page falls back to the full transcript', () async {
+    for (var i = 1; i <= 250; i++) {
+      gateway.rows.add({'id': i, 'role': 'user', 'content': 'row $i'});
+    }
+    await service.getSessionMessages('st-1');
+    final fullReads = gateway.fullTranscriptReads;
+
+    for (var i = 251; i <= 600; i++) {
+      gateway.rows.add({'id': i, 'role': 'user', 'content': 'row $i'});
+    }
+    final refreshed = await service.getSessionMessages('st-1');
+    expect(refreshed.length, 600);
+    expect(
+      gateway.fullTranscriptReads,
+      greaterThan(fullReads),
+      reason: 'merging would drop the rows between the old tail and the page',
+    );
+  });
+
+  test('opening a long chat shows the newest page, then backfills', () async {
+    for (var i = 1; i <= 500; i++) {
+      gateway.rows.add({'id': i, 'role': 'user', 'content': 'row $i'});
+    }
+    gateway.holdFullReads = true;
+
+    final opened = await service.openSessionTranscript('st-1');
+    expect(opened.length, 200);
+    expect(opened.last['id'], 500);
+    expect(
+      gateway.fullTranscriptReads,
+      0,
+      reason: 'the open must not page the whole history before showing the chat',
+    );
+
+    gateway.releaseFullReads();
+    await _settle(duration: const Duration(milliseconds: 600));
+    final complete = await service.getSessionMessages('st-1');
+    expect(complete.length, 500);
+    expect(complete.first['id'], 1);
+  });
+
   test('a dead socket reconnects and re-reads the open session', () async {
     await service.getSessionMessages('st-1');
     expect(gateway.connections, 1);
@@ -113,6 +185,28 @@ final class _LiveGateway {
   int resumeCalls = 0;
   bool running = false;
 
+  /// Rows `/api/sessions/st-1/messages` serves, in insertion order.
+  final List<Map<String, Object?>> rows = [];
+
+  /// Every transcript request this gateway answered: order, offset, limit.
+  final List<({String order, int offset, int limit})> transcriptRequests = [];
+
+  int get fullTranscriptReads =>
+      transcriptRequests.where((r) => r.order != 'latest').length;
+
+  /// When set, `order=oldest` pages wait until [releaseFullReads] — lets a test
+  /// prove what the open path requested before the background backfill landed.
+  bool holdFullReads = false;
+  final List<Completer<void>> _heldFullReads = [];
+
+  void releaseFullReads() {
+    holdFullReads = false;
+    for (final waiter in _heldFullReads) {
+      if (!waiter.isCompleted) waiter.complete();
+    }
+    _heldFullReads.clear();
+  }
+
   /// Resumes this client asked for on the newest socket.
   int get resumesOnNewestSocket =>
       resumesByConnection.isEmpty ? 0 : resumesByConnection.last;
@@ -135,7 +229,15 @@ final class _LiveGateway {
       resumesByConnection.add(0);
       final socket = await WebSocketTransformer.upgrade(request);
       sockets.add(socket);
-      socket.add(
+      void send(Object? payload) {
+        if (socket.readyState != WebSocket.open) return;
+        try {
+          socket.add(payload);
+        } catch (_) {
+          // The client closed while a reply was in flight (test teardown).
+        }
+      }
+      send(
         jsonEncode({
           'jsonrpc': '2.0',
           'method': 'event',
@@ -156,6 +258,17 @@ final class _LiveGateway {
               'running': running,
               'info': {'running': running, 'desktop_contract': 7},
             };
+          case 'session.active_list':
+            result = {
+              'sessions': [
+                {
+                  'id': 'rt-1',
+                  'session_key': 'st-1',
+                  'status': running ? 'working' : 'idle',
+                  'message_count': rows.length,
+                },
+              ],
+            };
           default:
             // The real gateway answers an unknown method with -32601; a fake
             // that answers everything lets the client call a method that does
@@ -167,7 +280,7 @@ final class _LiveGateway {
                   'unknown method: ${frame['method']} — not available on this Hermes backend',
             };
         }
-        socket.add(
+        send(
           jsonEncode({
             'jsonrpc': '2.0',
             'id': frame['id'],
@@ -183,7 +296,26 @@ final class _LiveGateway {
         jsonEncode({'auth_required': false, 'desktop_contract': 7}),
       );
     } else if (request.uri.path == '/api/sessions/st-1/messages') {
-      request.response.write(jsonEncode({'messages': const []}));
+      final query = request.uri.queryParameters;
+      final offset = int.tryParse(query['offset'] ?? '0') ?? 0;
+      final requested = int.tryParse(query['limit'] ?? '200') ?? 200;
+      final order = query['order'] ?? 'oldest';
+      transcriptRequests.add((order: order, offset: offset, limit: requested));
+      if (order != 'latest' && holdFullReads) {
+        final waiter = Completer<void>();
+        _heldFullReads.add(waiter);
+        await waiter.future;
+      }
+      final List<Map<String, Object?>> page;
+      if (order == 'latest') {
+        // The real route pages back from the newest but answers chronologically.
+        final start = rows.length > requested ? rows.length - requested : 0;
+        page = rows.sublist(start);
+      } else {
+        final end = (offset + requested).clamp(0, rows.length);
+        page = offset >= rows.length ? const [] : rows.sublist(offset, end);
+      }
+      request.response.write(jsonEncode({'messages': page}));
     } else {
       request.response.statusCode = HttpStatus.notFound;
     }
