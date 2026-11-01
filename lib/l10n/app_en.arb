@@ -6787,6 +6787,46 @@
   "@hermesJobDeliverHelp": {
     "description": "Job delivery picker copy."
   },
+  "hermesBlueprintsTitle": "Blueprints",
+  "@hermesBlueprintsTitle": {
+    "description": "Blueprint copy."
+  },
+  "hermesBlueprintsSubtitle": "Ready-made automations: fill the blanks and a scheduled job is created.",
+  "@hermesBlueprintsSubtitle": {
+    "description": "Blueprint copy."
+  },
+  "hermesBlueprintsOther": "Other",
+  "@hermesBlueprintsOther": {
+    "description": "Blueprint copy."
+  },
+  "hermesBlueprintEmpty": "No blueprints on this server.",
+  "@hermesBlueprintEmpty": {
+    "description": "Blueprint copy."
+  },
+  "hermesBlueprintLoadFailed": "Could not load the blueprint catalog.",
+  "@hermesBlueprintLoadFailed": {
+    "description": "Blueprint copy."
+  },
+  "hermesBlueprintPlugin": "plugin",
+  "@hermesBlueprintPlugin": {
+    "description": "Blueprint copy."
+  },
+  "hermesBlueprintUse": "Create job",
+  "@hermesBlueprintUse": {
+    "description": "Blueprint copy."
+  },
+  "hermesBlueprintCustom": "Custom value",
+  "@hermesBlueprintCustom": {
+    "description": "Blueprint copy."
+  },
+  "hermesBlueprintCreated": "Job created.",
+  "@hermesBlueprintCreated": {
+    "description": "Blueprint copy."
+  },
+  "hermesBlueprintCreateFailed": "The blueprint could not be created.",
+  "@hermesBlueprintCreateFailed": {
+    "description": "Blueprint copy."
+  },
   "hermesApprovalRequired": "Approval required",
   "@hermesApprovalRequired": {
     "description": "Title of a Hermes human-approval request card."

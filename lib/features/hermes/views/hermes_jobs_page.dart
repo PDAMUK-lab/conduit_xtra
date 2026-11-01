@@ -1,6 +1,7 @@
 import 'package:conduit/shared/widgets/platform_ui/platform_ui.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../l10n/app_localizations.dart';
 import '../../../l10n/app_localizations_en.dart';
@@ -14,6 +15,7 @@ import 'package:conduit_core/features/hermes/models/hermes_job.dart';
 import 'package:conduit_core/features/hermes/models/hermes_config.dart';
 import 'package:conduit_core/features/hermes/providers/hermes_providers.dart';
 import 'package:conduit_core/features/hermes/utils/hermes_schedule_format.dart';
+import 'package:conduit_core/navigation/routes.dart';
 
 import '../widgets/hermes_job_editor.dart';
 import '../widgets/hermes_session_tile.dart' show openHermesSession;
@@ -71,6 +73,15 @@ class _HermesJobsPageState extends ConsumerState<HermesJobsPage> {
           isFullWidth: true,
           isLoading: _creating,
           onPressed: writable && !_creating ? _createJob : null,
+        ),
+        const SizedBox(height: Spacing.xs),
+        ConduitButton(
+          key: const ValueKey<String>('hermes-blueprints-open'),
+          text: l10n.hermesBlueprintsTitle,
+          icon: Icons.auto_awesome_outlined,
+          isSecondary: true,
+          isFullWidth: true,
+          onPressed: () => context.push(Routes.hermesBlueprints),
         ),
         if (!writable) ...[
           const SizedBox(height: Spacing.sm),

@@ -38,6 +38,7 @@ import 'package:conduit_core/features/hermes/models/hermes_config.dart';
 import 'package:conduit_core/features/hermes/models/hermes_config_view.dart';
 import 'package:conduit_core/features/hermes/models/hermes_connection_profile.dart';
 import 'package:conduit_core/features/hermes/models/hermes_analytics.dart';
+import 'package:conduit_core/features/hermes/models/hermes_blueprint.dart';
 import 'package:conduit_core/features/hermes/models/hermes_delivery_target.dart';
 import 'package:conduit_core/features/hermes/models/hermes_fs.dart';
 import 'package:conduit_core/features/hermes/models/hermes_git.dart';
@@ -2998,6 +2999,15 @@ class HermesJobsController extends AsyncNotifier<List<HermesJob>> {
     ref.invalidateSelf();
   }
 }
+
+/// The blueprint catalog shown on the Scheduled agents page.
+final hermesBlueprintsProvider = FutureProvider<List<HermesBlueprint>>((
+  ref,
+) async {
+  final service = ref.watch(hermesApiServiceProvider);
+  if (service is! HermesDesktopApiService) return const [];
+  return service.blueprints();
+});
 
 /// Delivery targets for the job editor dropdown (`local` plus platforms).
 final hermesDeliveryTargetsProvider =

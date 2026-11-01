@@ -19,6 +19,7 @@ import 'package:conduit_core/features/hermes/models/hermes_chat_input.dart';
 import 'package:conduit_core/features/hermes/models/hermes_config.dart';
 import 'package:conduit_core/features/hermes/models/hermes_config_view.dart';
 import 'package:conduit_core/features/hermes/models/hermes_analytics.dart';
+import 'package:conduit_core/features/hermes/models/hermes_blueprint.dart';
 import 'package:conduit_core/features/hermes/models/hermes_delivery_target.dart';
 import 'package:conduit_core/features/hermes/models/hermes_fs.dart';
 import 'package:conduit_core/features/hermes/models/hermes_git.dart';
@@ -720,6 +721,11 @@ final class HermesDesktopApiService
 
   @override
   Future<List<Map<String, dynamic>>> listJobs() => _administration.listJobs();
+  Future<List<HermesBlueprint>> blueprints() => _administration.blueprints();
+  Future<Map<String, dynamic>> instantiateBlueprint({
+    required String key,
+    required Map<String, String> values,
+  }) => _administration.instantiateBlueprint(key: key, values: values);
   Future<List<HermesDeliveryTarget>> deliveryTargets() =>
       _administration.deliveryTargets();
 

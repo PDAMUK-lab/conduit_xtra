@@ -374,6 +374,25 @@ final class _HermesDesktopAdministration {
     };
   }
 
+  /// The blueprint catalog (built-ins plus this profile's plugin blueprints).
+  Future<List<HermesBlueprint>> blueprints() async =>
+      HermesBlueprint.listFromJson(
+        await _owner._requestJson('GET', '/api/cron/blueprints'),
+      );
+
+  /// Fill a blueprint and create the job it describes. Field errors arrive as
+  /// 422 with the message in `detail`; the form shows it inline.
+  Future<Map<String, dynamic>> instantiateBlueprint({
+    required String key,
+    required Map<String, String> values,
+  }) async => _owner._object(
+    await _owner._requestJson(
+      'POST',
+      '/api/cron/blueprints/instantiate',
+      body: {'blueprint': key, 'values': values},
+    ),
+  );
+
   /// Where a scheduled job can deliver: `local` plus the gateway platforms.
   Future<List<HermesDeliveryTarget>> deliveryTargets() async =>
       HermesDeliveryTarget.listFromJson(

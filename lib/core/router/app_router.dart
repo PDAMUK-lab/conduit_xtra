@@ -37,6 +37,7 @@ import '../../features/profile/views/voice_provider_settings_page.dart';
 import '../../features/hermes/views/hermes_connections_page.dart';
 import '../../features/hermes/views/hermes_settings_page.dart';
 import '../../features/hermes/views/hermes_jobs_page.dart';
+import '../../features/hermes/views/hermes_blueprints_page.dart';
 import '../../features/hermes/views/hermes_approvals_page.dart';
 import '../../features/hermes/views/hermes_skills_page.dart';
 import '../../features/hermes/views/hermes_memory_page.dart';
@@ -543,6 +544,14 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           ),
         );
       },
+    ),
+    GoRoute(
+      path: Routes.hermesBlueprints,
+      name: RouteNames.hermesBlueprints,
+      pageBuilder: (context, state) => _buildPlatformPage(
+        state: state,
+        child: const HermesBlueprintsPage(),
+      ),
     ),
     GoRoute(
       path: Routes.hermesJobs,

@@ -6637,6 +6637,16 @@
   "hermesJobDeliverLabel": "Dostarcz do",
   "hermesJobDeliverNoChannel": "brak kanału domowego",
   "hermesJobDeliverHelp": "Dokąd trafia wynik. Local zostawia go w panelu.",
+  "hermesBlueprintsTitle": "Szablony",
+  "hermesBlueprintsSubtitle": "Gotowe automatyzacje: wypełnij pola, a zadanie powstanie.",
+  "hermesBlueprintsOther": "Inne",
+  "hermesBlueprintEmpty": "Brak szablonów na tym serwerze.",
+  "hermesBlueprintLoadFailed": "Nie udało się wczytać katalogu szablonów.",
+  "hermesBlueprintPlugin": "wtyczka",
+  "hermesBlueprintUse": "Utwórz zadanie",
+  "hermesBlueprintCustom": "Własna wartość",
+  "hermesBlueprintCreated": "Zadanie utworzone.",
+  "hermesBlueprintCreateFailed": "Nie udało się utworzyć szablonu.",
   "hermesApprovalRequired": "Wymagana zgoda",
   "@hermesApprovalRequired": {
     "description": "Title of a Hermes human-approval request card."

@@ -171,6 +171,15 @@ before `flutter pub get`.
   destructive confirmation; hooks are listed with their approval state.
   There is **no restore route** in the dashboard — restore stays a CLI job
   (`hermes checkpoints`), documented rather than faked.
+- **Blueprints.** A Blueprints page lists the server's catalog grouped by
+  category (`GET /api/cron/blueprints`), with the schedule in words and a
+  plugin badge. Tapping one opens a form rendered from its slots: `time`
+  (HH:MM checked locally), `enum`/`weekdays` from the server's options, and
+  `text`; a non-strict enum offers a custom value. `POST
+  /api/cron/blueprints/instantiate` creates the job, and a 422 is shown inline
+  rather than as a generic failure. Measured live: 17 blueprints;
+  `morning-brief` instantiated with `23:59`/`local` produced job
+  `4156e927b219` on `59 23 * * *`, then deleted (job count back to 10).
 - **Scheduled agents: delivery target.** The job editor gains a "Deliver to"
   picker fed by `GET /api/cron/delivery-targets`: `local` first, then every
   configured gateway platform, with a target that has no cron home channel
