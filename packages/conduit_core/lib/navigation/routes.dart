@@ -58,6 +58,8 @@ class Routes {
   static const String hermesMemorySubject =
       '/profile/hermes/memory/subjects/:slug';
   static const String hermesMemoryDay = '/profile/hermes/memory/days/:date';
+  static const String hermesGit = '/profile/hermes/git';
+  static const String hermesGitDiff = '/profile/hermes/git/diff';
   static const String hermesOps = '/profile/hermes/ops';
   static const String hermesConfig = '/profile/hermes/config';
   static const String hermesAnalytics = '/profile/hermes/analytics';
@@ -89,6 +91,9 @@ class Routes {
       '/profile/hermes/memory/subjects/${Uri.encodeComponent(slug)}';
   static String hermesMemoryDayPath(String date) =>
       '/profile/hermes/memory/days/${Uri.encodeComponent(date)}';
+  static String hermesGitDiffPath(String path, String file) =>
+      '/profile/hermes/git/diff?path=${Uri.encodeQueryComponent(path)}'
+      '&file=${Uri.encodeQueryComponent(file)}';
   static String hermesProfilePath(String name) =>
       '/profile/hermes/profiles/${Uri.encodeComponent(name)}';
   static String hermesToolsetPath(String name) =>
@@ -142,6 +147,8 @@ class RouteNames {
   static const String hermesMemorySettings = 'hermes-memory-settings';
   static const String hermesMemorySubject = 'hermes-memory-subject';
   static const String hermesMemoryDay = 'hermes-memory-day';
+  static const String hermesGit = 'hermes-git';
+  static const String hermesGitDiff = 'hermes-git-diff';
   static const String hermesOps = 'hermes-ops';
   static const String hermesConfig = 'hermes-config';
   static const String hermesAnalytics = 'hermes-analytics';

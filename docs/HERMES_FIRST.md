@@ -171,6 +171,11 @@ before `flutter pub get`.
   destructive confirmation; hooks are listed with their approval state.
   There is **no restore route** in the dashboard — restore stays a CLI job
   (`hermes checkpoints`), documented rather than faked.
+- **M4.3 (Git, read-only):** branch/ahead/behind, changed-file list with
+  per-file markers, and each file's diff against HEAD. Stage, commit and
+  push are not wired. Live contract: status keys exactly as modelled
+  (relative file paths), `file-diff` → `{diff}`, and a non-repository
+  path answers HTTP 200 `null`, which the app reads as "not a repo".
 
 ## APK delivery to the NAS
 

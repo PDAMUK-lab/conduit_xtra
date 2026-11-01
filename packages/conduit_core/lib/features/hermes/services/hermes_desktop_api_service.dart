@@ -20,6 +20,7 @@ import 'package:conduit_core/features/hermes/models/hermes_config.dart';
 import 'package:conduit_core/features/hermes/models/hermes_config_view.dart';
 import 'package:conduit_core/features/hermes/models/hermes_analytics.dart';
 import 'package:conduit_core/features/hermes/models/hermes_fs.dart';
+import 'package:conduit_core/features/hermes/models/hermes_git.dart';
 import 'package:conduit_core/features/hermes/models/hermes_logs.dart';
 import 'package:conduit_core/features/hermes/models/hermes_mcp.dart';
 import 'package:conduit_core/features/hermes/models/hermes_memory_wiki.dart';
@@ -386,6 +387,7 @@ final class HermesDesktopApiService
       path.startsWith('/api/config') ||
       path.startsWith('/api/env') ||
       path.startsWith('/api/ops') ||
+      path.startsWith('/api/git') ||
       path.startsWith('/api/logs') ||
       path.startsWith('/api/audio');
 
@@ -511,6 +513,14 @@ final class HermesDesktopApiService
     required String content,
   }) => _administration.fsWriteText(path: path, content: content);
   Future<String?> fsGitRoot(String path) => _administration.fsGitRoot(path);
+
+  // Git (read-only).
+  Future<HermesGitStatus?> gitStatus(String path) =>
+      _administration.gitStatus(path);
+  Future<HermesGitDiff?> gitFileDiff({
+    required String path,
+    required String file,
+  }) => _administration.gitFileDiff(path: path, file: file);
 
   // Operations (doctor/audit/backup/checkpoints/hooks).
   Future<HermesActionStatus?> spawnDoctor() => _administration.spawnDoctor();

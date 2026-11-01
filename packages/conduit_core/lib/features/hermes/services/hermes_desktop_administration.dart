@@ -575,6 +575,32 @@ final class _HermesDesktopAdministration {
     body: {'provider': provider},
   );
 
+  // --- Git (read-only) ------------------------------------------------------
+  //
+  // `status` returns null outside a repository; file diffs are unified text.
+  // Stage/commit/push exist server-side but are not wired yet.
+
+  Future<HermesGitStatus?> gitStatus(String path) async {
+    final data = await _owner._requestJson(
+      'GET',
+      '/api/git/status',
+      query: {'path': path},
+    );
+    return HermesGitStatus.fromJson(data);
+  }
+
+  Future<HermesGitDiff?> gitFileDiff({
+    required String path,
+    required String file,
+  }) async {
+    final data = await _owner._requestJson(
+      'GET',
+      '/api/git/file-diff',
+      query: {'path': path, 'file': file},
+    );
+    return HermesGitDiff.fromJson(data);
+  }
+
   // --- Operations -----------------------------------------------------------
   //
   // Long-running work is spawned (`{ok,pid,name}`) and polled through

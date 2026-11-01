@@ -6588,6 +6588,14 @@
   "hermesOpsHooksEmpty": "Brak hooków.",
   "hermesOpsHookAllowed": "dozwolony",
   "hermesOpsHookBlocked": "niezatwierdzony",
+  "hermesGitTitle": "Git",
+  "hermesGitSubtitle": "Stan drzewa roboczego i diffy, tylko do odczytu.",
+  "hermesGitLoadFailed": "Nie udało się odczytać repozytorium.",
+  "hermesGitClean": "Drzewo robocze jest czyste.",
+  "hermesGitNotRepo": "Ta ścieżka nie jest repozytorium git.",
+  "hermesGitAheadBehind": "{ahead} do przodu · {behind} do tyłu",
+  "hermesGitNoDiff": "Brak diffu dla tego pliku.",
+  "hermesGitChanged": "{count, plural, =1{1 zmiana} other{{count} zmian}}",
   "hermesApprovalRequired": "Wymagana zgoda",
   "@hermesApprovalRequired": {
     "description": "Title of a Hermes human-approval request card."

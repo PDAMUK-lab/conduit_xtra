@@ -69,6 +69,7 @@ bool _isAccountlessBackendLocation(String location) {
       isHermesFilesLocation(location) ||
       isHermesToolsetsLocation(location) ||
       isHermesProfilesLocation(location) ||
+      isHermesGitLocation(location) ||
       location == Routes.hermesOps ||
       location == Routes.hermesConfig ||
       location == Routes.hermesAnalytics ||
@@ -86,6 +87,11 @@ bool isHermesSettingsLocation(String location) =>
 bool isHermesMemoryLocation(String location) =>
     location == Routes.hermesMemory ||
     location.startsWith('${Routes.hermesMemory}/');
+
+/// The git status page and one file's diff.
+bool isHermesGitLocation(String location) =>
+    location == Routes.hermesGit ||
+    location.startsWith('${Routes.hermesGit}/');
 
 /// The profiles list and one profile's page.
 bool isHermesProfilesLocation(String location) =>

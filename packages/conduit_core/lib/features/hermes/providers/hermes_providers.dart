@@ -39,6 +39,7 @@ import 'package:conduit_core/features/hermes/models/hermes_config_view.dart';
 import 'package:conduit_core/features/hermes/models/hermes_connection_profile.dart';
 import 'package:conduit_core/features/hermes/models/hermes_analytics.dart';
 import 'package:conduit_core/features/hermes/models/hermes_fs.dart';
+import 'package:conduit_core/features/hermes/models/hermes_git.dart';
 import 'package:conduit_core/features/hermes/models/hermes_logs.dart';
 import 'package:conduit_core/features/hermes/models/hermes_job.dart';
 import 'package:conduit_core/features/hermes/models/hermes_memory.dart';
@@ -2698,6 +2699,27 @@ final hermesFsTextProvider =
       final service = ref.watch(hermesApiServiceProvider);
       if (service is! HermesDesktopApiService) return null;
       return service.fsReadText(path);
+    });
+
+/// Working-tree status for one repository path.
+final hermesGitStatusProvider =
+    FutureProvider.family<HermesGitStatus?, String>((ref, path) async {
+      final service = ref.watch(hermesApiServiceProvider);
+      if (service is! HermesDesktopApiService) return null;
+      return service.gitStatus(path);
+    });
+
+/// One file's diff against HEAD.
+typedef HermesGitDiffQuery = ({String path, String file});
+
+final hermesGitFileDiffProvider =
+    FutureProvider.family<HermesGitDiff?, HermesGitDiffQuery>((
+      ref,
+      query,
+    ) async {
+      final service = ref.watch(hermesApiServiceProvider);
+      if (service is! HermesDesktopApiService) return null;
+      return service.gitFileDiff(path: query.path, file: query.file);
     });
 
 /// Hooks the server would run, with whether each is allowed.

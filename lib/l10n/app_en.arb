@@ -6582,6 +6582,39 @@
   "@hermesOpsHookBlocked": {
     "description": "Operations copy."
   },
+  "hermesGitTitle": "Git",
+  "@hermesGitTitle": {
+    "description": "Git read-only copy."
+  },
+  "hermesGitSubtitle": "Working tree status and diffs, read-only.",
+  "@hermesGitSubtitle": {
+    "description": "Git read-only copy."
+  },
+  "hermesGitLoadFailed": "Could not read the repository.",
+  "@hermesGitLoadFailed": {
+    "description": "Git read-only copy."
+  },
+  "hermesGitClean": "Working tree clean.",
+  "@hermesGitClean": {
+    "description": "Git read-only copy."
+  },
+  "hermesGitNotRepo": "This path is not a git repository.",
+  "@hermesGitNotRepo": {
+    "description": "Git read-only copy."
+  },
+  "hermesGitAheadBehind": "{ahead} ahead · {behind} behind",
+  "@hermesGitAheadBehind": {
+    "description": "Git read-only copy."
+  },
+  "hermesGitNoDiff": "No diff for this file.",
+  "@hermesGitNoDiff": {
+    "description": "Git read-only copy."
+  },
+  "hermesGitChanged": "{count, plural, =1{1 changed} other{{count} changed}}",
+  "@hermesGitChanged": {
+    "description": "Git changed count.",
+    "placeholders": {"count": {"type": "int"}}
+  },
   "hermesApprovalRequired": "Approval required",
   "@hermesApprovalRequired": {
     "description": "Title of a Hermes human-approval request card."
