@@ -382,8 +382,10 @@ Future<void> openHermesSession(
   ref.read(selectedModelProvider.notifier).set(hermesModel);
   ref.read(activeConversationProvider.notifier).set(conversation);
 
-  if (ui.mounted) {
-    NavigationService.router.go(Routes.chat);
-    closeSidebarDrawerIfOverlay(ui);
-  }
+  // Nothing above awaits any more, so the tile's own context is alive here —
+  // and the drawer lives inside the Scaffold it can see. The root navigator's
+  // context sits ABOVE that Scaffold, so handing it to the drawer close found
+  // nothing and left the list open over the chat.
+  NavigationService.router.go(Routes.chat);
+  closeSidebarDrawerIfOverlay(context);
 }
