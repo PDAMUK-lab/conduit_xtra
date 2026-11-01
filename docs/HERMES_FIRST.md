@@ -180,6 +180,15 @@ before `flutter pub get`.
   gateway up/stopped, version, free disk, active sessions, and `degraded` when
   the server says so. Measured: `degraded · v0.22.5 · 325 GB free` on the
   throwaway instance, which has no gateway.
+- **Fleet actions.** A peer may declare `ssh_target`, `ssh_key`,
+  `raise_command` and `release_command`; the page then offers Raise (when the
+  peer is down) or Release (when it is up), behind a confirm. The server runs
+  that peer's own command over SSH — the request names a peer and a verb, never
+  a command — with one attempt and a 45 s bound; peers without both refuse
+  (409). Verified with a monkeypatched runner: argv carries the configured
+  command and the key, 400/404/409 on bad verb, unknown peer, missing config.
+  Configured here for the desktop: `schtasks /run /tn llama-server` and a
+  PowerShell Stop-Process.
 - **Fleet peers.** `local_runtime.peers` (`{name, base_url, api_key?}`)
   declares other nodes' routers; status probes each once (1.2 s, max four,
   network only, nothing started or stopped) and returns `{name, base_url, up,

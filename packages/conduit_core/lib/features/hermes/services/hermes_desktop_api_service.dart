@@ -770,6 +770,8 @@ final class HermesDesktopApiService
   Future<HermesLocalHardware?> localModelHardware() =>
       _administration.localModelHardware();
   Future<HermesHealth?> statusOverview() => _administration.statusOverview();
+  Future<HermesPeerActionResult?> peerAction(String name, String action) =>
+      _administration.peerAction(name, action);
   Future<List<Map<String, dynamic>>> searchSessions(
     String query, {
     int limit = 20,

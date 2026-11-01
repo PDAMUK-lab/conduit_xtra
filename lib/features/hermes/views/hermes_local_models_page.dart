@@ -4,9 +4,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../l10n/app_localizations_en.dart';
 import '../../../shared/theme/theme_extensions.dart';
+import '../../../shared/utils/ui_utils.dart';
+import '../../../shared/widgets/conduit_components.dart';
+import '../../../shared/widgets/themed_dialogs.dart';
 import '../../../shared/widgets/utility_components.dart';
 
+import 'package:conduit_core/features/hermes/models/hermes_local_models.dart';
 import 'package:conduit_core/features/hermes/providers/hermes_providers.dart';
+import 'package:conduit_core/features/hermes/services/hermes_desktop_api_service.dart';
 
 AppLocalizations _l10n(BuildContext context) =>
     AppLocalizations.of(context) ?? AppLocalizationsEn();
@@ -18,11 +23,19 @@ String _gb(int bytes) => '${(bytes / (1024 * 1024 * 1024)).toStringAsFixed(1)} G
 /// Deliberately does not start or stop a server: on this fleet the serving
 /// worker is often started outside this manager, so a "start" here would spawn
 /// a second server and a "stop" could kill one this manager does not own.
-class HermesLocalModelsPage extends ConsumerWidget {
+class HermesLocalModelsPage extends ConsumerStatefulWidget {
   const HermesLocalModelsPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<HermesLocalModelsPage> createState() =>
+      _HermesLocalModelsPageState();
+}
+
+class _HermesLocalModelsPageState extends ConsumerState<HermesLocalModelsPage> {
+  String? _busyPeer;
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = _l10n(context);
     final theme = context.conduitTheme;
     final status = ref.watch(hermesLocalModelStatusProvider);
@@ -138,16 +151,7 @@ class HermesLocalModelsPage extends ConsumerWidget {
                         ),
                         const SizedBox(height: Spacing.xxs),
                         for (final peer in value.peers)
-                          _row(
-                            peer.name,
-                            peer.up
-                                ? l10n.hermesLocalPeerServing(
-                                    peer.model ?? peer.baseUrl,
-                                  )
-                                : l10n.hermesLocalPeerDown,
-                            theme,
-                            good: peer.up,
-                          ),
+                          _peerRow(peer, theme, l10n),
                       ],
                     ),
                   ),
@@ -272,6 +276,114 @@ class HermesLocalModelsPage extends ConsumerWidget {
         ),
       ],
     );
+  }
+
+  Widget _peerRow(
+    HermesLocalPeer peer,
+    ConduitThemeExtension theme,
+    AppLocalizations l10n,
+  ) {
+    final action = peer.up ? 'release' : 'raise';
+    final allowed = peer.up ? peer.canRelease : peer.canRaise;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: Spacing.xxs),
+      child: Row(
+        children: [
+          Icon(
+            peer.up ? Icons.circle : Icons.circle_outlined,
+            size: 8,
+            color: peer.up ? theme.success : theme.textSecondary,
+          ),
+          const SizedBox(width: Spacing.xs),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  peer.name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTypography.codeStyle.copyWith(
+                    color: theme.textPrimary,
+                    fontSize: 12,
+                  ),
+                ),
+                Text(
+                  peer.up
+                      ? l10n.hermesLocalPeerServing(peer.model ?? peer.baseUrl)
+                      : l10n.hermesLocalPeerDown,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTypography.captionStyle.copyWith(
+                    color: theme.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (allowed)
+            _busyPeer == peer.name
+                ? const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : ConduitButton(
+                    key: ValueKey<String>('hermes-peer-$action-${peer.name}'),
+                    text: peer.up
+                        ? l10n.hermesLocalRelease
+                        : l10n.hermesLocalRaise,
+                    isCompact: true,
+                    isSecondary: true,
+                    onPressed: () => _peerAction(peer, action, l10n),
+                  ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _peerAction(
+    HermesLocalPeer peer,
+    String action,
+    AppLocalizations l10n,
+  ) async {
+    final confirmed = await ThemedDialogs.confirm(
+      context,
+      title: action == 'raise' ? l10n.hermesLocalRaise : l10n.hermesLocalRelease,
+      message: l10n.hermesLocalPeerActionConfirm(peer.name, action),
+      confirmText: action == 'raise' ? l10n.hermesLocalRaise : l10n.hermesLocalRelease,
+      cancelText: l10n.cancel,
+    );
+    if (!confirmed || !mounted) return;
+    final service = ref.read(hermesApiServiceProvider);
+    if (service is! HermesDesktopApiService) return;
+    setState(() => _busyPeer = peer.name);
+    try {
+      final result = await service.peerAction(peer.name, action);
+      ref.invalidate(hermesLocalModelStatusProvider);
+      if (!mounted) return;
+      UiUtils.showMessage(
+        context,
+        result?.ok == true
+            ? (result!.message.isEmpty ? l10n.hermesLocalPeerActionOk : result.message)
+            : (result?.message.isNotEmpty == true
+                  ? result!.message
+                  : l10n.hermesLocalPeerActionFailed),
+        isError: result?.ok != true,
+      );
+    } catch (error) {
+      if (!mounted) return;
+      final detail = RegExp(r'"detail"\s*:\s*"([^"]{1,300})"')
+          .firstMatch(error.toString())
+          ?.group(1);
+      UiUtils.showMessage(
+        context,
+        detail ?? l10n.hermesLocalPeerActionFailed,
+        isError: true,
+      );
+    } finally {
+      if (mounted) setState(() => _busyPeer = null);
+    }
   }
 
   Widget _card(ConduitThemeExtension theme, Widget child) => Container(

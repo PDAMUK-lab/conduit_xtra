@@ -86,6 +86,7 @@ void main() {
             HermesLocalPeer(
               name: 'desktop',
               baseUrl: 'http://20.20.0.40:8080/v1',
+              canRaise: true,
             ),
             HermesLocalPeer(
               name: 'laptop',
@@ -104,6 +105,10 @@ void main() {
     expect(find.text('Fleet'), findsOneWidget);
     expect(find.text('desktop'), findsOneWidget);
     expect(find.textContaining('asleep'), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey<String>('hermes-peer-raise-desktop')),
+      findsOneWidget,
+    );
     expect(find.textContaining('serving ornith-1.5-9b-heretic'), findsOneWidget);
   });
 

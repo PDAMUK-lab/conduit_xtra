@@ -6725,6 +6725,11 @@
   "hermesSessionSearchFailed": "Wyszukiwanie nie powiodło się.",
   "hermesHealthDisk": "{gb} GB wolne",
   "hermesHealthActive": "{count, plural, =1{1 aktywna} other{{count} aktywnych}}",
+  "hermesLocalRaise": "Podnieś",
+  "hermesLocalRelease": "Zwolnij",
+  "hermesLocalPeerActionOk": "Gotowe.",
+  "hermesLocalPeerActionFailed": "Węzeł nie przyjął polecenia.",
+  "hermesLocalPeerActionConfirm": "{action} {name}? Uruchomi polecenie skonfigurowane dla tego węzła.",
   "hermesApprovalRequired": "Wymagana zgoda",
   "@hermesApprovalRequired": {
     "description": "Title of a Hermes human-approval request card."

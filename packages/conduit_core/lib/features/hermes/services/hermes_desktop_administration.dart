@@ -384,6 +384,17 @@ final class _HermesDesktopAdministration {
         await _owner._requestJson('GET', '/api/local-models/hardware'),
       );
 
+  /// Run a peer's configured raise/release command server-side.
+  Future<HermesPeerActionResult?> peerAction(
+    String name,
+    String action,
+  ) async => HermesPeerActionResult.fromJson(
+    await _owner._requestJson(
+      'POST',
+      '/api/local-models/peers/${Uri.encodeComponent(name)}/${Uri.encodeComponent(action)}',
+    ),
+  );
+
   /// `/api/status` reduced to the strip fields (unauthenticated on the server,
   /// sent with auth anyway).
   Future<HermesHealth?> statusOverview() async =>

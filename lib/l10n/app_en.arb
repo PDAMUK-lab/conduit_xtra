@@ -7148,6 +7148,27 @@
     "description": "Health strip and search copy.",
     "placeholders": {"count": {"type": "int"}}
   },
+  "hermesLocalRaise": "Raise",
+  "@hermesLocalRaise": {
+    "description": "Peer action copy."
+  },
+  "hermesLocalRelease": "Release",
+  "@hermesLocalRelease": {
+    "description": "Peer action copy."
+  },
+  "hermesLocalPeerActionOk": "Done.",
+  "@hermesLocalPeerActionOk": {
+    "description": "Peer action copy."
+  },
+  "hermesLocalPeerActionFailed": "The peer did not accept the command.",
+  "@hermesLocalPeerActionFailed": {
+    "description": "Peer action copy."
+  },
+  "hermesLocalPeerActionConfirm": "{action} {name}? This runs the command configured for that peer.",
+  "@hermesLocalPeerActionConfirm": {
+    "description": "Peer action copy.",
+    "placeholders": {"action": {"type": "String"}, "name": {"type": "String"}}
+  },
   "hermesApprovalRequired": "Approval required",
   "@hermesApprovalRequired": {
     "description": "Title of a Hermes human-approval request card."

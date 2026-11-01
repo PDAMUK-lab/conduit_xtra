@@ -155,12 +155,16 @@ final class HermesLocalPeer {
     required this.baseUrl,
     this.up = false,
     this.model,
+    this.canRaise = false,
+    this.canRelease = false,
   });
 
   final String name;
   final String baseUrl;
   final bool up;
   final String? model;
+  final bool canRaise;
+  final bool canRelease;
 
   static HermesLocalPeer? fromJson(Map<String, dynamic> json) {
     final baseUrl = json['base_url']?.toString().trim() ?? '';
@@ -172,6 +176,8 @@ final class HermesLocalPeer {
       baseUrl: baseUrl,
       up: json['up'] == true,
       model: model == null || model.isEmpty ? null : model,
+      canRaise: json['can_raise'] == true,
+      canRelease: json['can_release'] == true,
     );
   }
 
@@ -184,5 +190,44 @@ final class HermesLocalPeer {
       if (peer != null) out.add(peer);
     }
     return List.unmodifiable(out);
+  }
+}
+
+/// `POST /api/local-models/peers/{name}/{action}` — the peer's own command ran.
+final class HermesPeerActionResult {
+  const HermesPeerActionResult({
+    required this.ok,
+    this.exitCode,
+    this.stdout = '',
+    this.stderr = '',
+  });
+
+  final bool ok;
+  final int? exitCode;
+  final String stdout;
+  final String stderr;
+
+  /// The line worth showing the operator: stdout on success, stderr (or stdout)
+  /// on failure, trimmed and bounded.
+  String get message {
+    final text = ok
+        ? (stdout.trim().isNotEmpty ? stdout : stderr)
+        : (stderr.trim().isNotEmpty ? stderr : stdout);
+    final oneLine = text.trim().split(RegExp(r'\r?\n')).lastWhere(
+      (line) => line.trim().isNotEmpty,
+      orElse: () => '',
+    );
+    return oneLine.length > 200 ? oneLine.substring(0, 200) : oneLine;
+  }
+
+  static HermesPeerActionResult? fromJson(Object? json) {
+    if (json is! Map) return null;
+    final code = json['exit_code'];
+    return HermesPeerActionResult(
+      ok: json['ok'] == true,
+      exitCode: code is num ? code.toInt() : null,
+      stdout: json['stdout']?.toString() ?? '',
+      stderr: json['stderr']?.toString() ?? '',
+    );
   }
 }

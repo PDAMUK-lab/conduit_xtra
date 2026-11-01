@@ -63,6 +63,8 @@ void main() {
           'base_url': 'http://127.0.0.1:8080/v1',
           'up': true,
           'model': 'ornith-1.5-9b-heretic',
+          'can_raise': true,
+          'can_release': false,
         },
         'junk',
       ],
@@ -73,6 +75,8 @@ void main() {
     check(status.peers.first.name).equals('desktop');
     check(status.peers.last.up).isTrue();
     check(status.peers.last.model).equals('ornith-1.5-9b-heretic');
+    check(status.peers.last.canRaise).isTrue();
+    check(status.peers.last.canRelease).isFalse();
   });
 
   test('a disabled manager with no models still parses', () {
