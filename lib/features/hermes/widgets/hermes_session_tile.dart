@@ -317,11 +317,37 @@ Future<void> openHermesSession(
   final openEpoch = ref
       .read(hermesSessionNavigationEpochProvider.notifier)
       .bump();
+  // The sessions list rebuilds on its quiet poll, so the tile's own context can
+  // leave the tree while the transcript is loading. Guarding on it then made
+  // the tap do nothing at all — the stock app does exactly that, on occasion.
+  // The root navigator's context lives as long as the app.
+  final ui = Navigator.maybeOf(context, rootNavigator: true)?.context ?? context;
+  final l10n = AppLocalizations.of(ui)!;
   final configController = ref.read(hermesConfigProvider.notifier);
   final admission = configController.captureSessionActionAdmission();
-  if (admission == null) return;
+  if (admission == null) {
+    DebugLogger.warning(
+      'open-session-blocked',
+      scope: 'hermes/sessions',
+      data: {'reason': 'admission'},
+    );
+    if (ui.mounted) {
+      UiUtils.showMessage(ui, l10n.pleaseCheckConnection, isError: true);
+    }
+    return;
+  }
   final service = ref.read(hermesApiServiceProvider);
-  if (service == null) return;
+  if (service == null) {
+    DebugLogger.warning(
+      'open-session-blocked',
+      scope: 'hermes/sessions',
+      data: {'reason': 'service'},
+    );
+    if (ui.mounted) {
+      UiUtils.showMessage(ui, l10n.unableToConnectServer, isError: true);
+    }
+    return;
+  }
   final trustPrincipalId = configController.documentTrustPrincipalId();
 
   List<Map<String, dynamic>> raw;
@@ -344,10 +370,10 @@ Future<void> openHermesSession(
         if (error is DioException) 'httpStatus': error.response?.statusCode,
       },
     );
-    if (context.mounted) {
+    if (ui.mounted) {
       UiUtils.showMessage(
-        context,
-        hermesSessionLoadFailureMessage(AppLocalizations.of(context)!, error),
+        ui,
+        hermesSessionLoadFailureMessage(l10n, error),
         isError: true,
       );
     }
@@ -377,11 +403,26 @@ Future<void> openHermesSession(
 
   // Connection edits rebuild the service. Never bind a transcript fetched
   // with an old endpoint or principal into the newly configured account.
-  if (!context.mounted ||
+  if (!ui.mounted ||
       openEpoch != ref.read(hermesSessionNavigationEpochProvider) ||
       !configController.sessionActionAdmissionIsCurrent(admission) ||
       !identical(ref.read(hermesApiServiceProvider), service) ||
       configController.documentTrustPrincipalId() != trustPrincipalId) {
+    // The connection or the selection moved while the transcript loaded. Say so
+    // instead of dropping the tap on the floor.
+    DebugLogger.warning(
+      'open-session-abandoned',
+      scope: 'hermes/sessions',
+      data: {
+        'mounted': ui.mounted,
+        'epoch': openEpoch == ref.read(hermesSessionNavigationEpochProvider),
+        'admission': configController.sessionActionAdmissionIsCurrent(admission),
+        'service': identical(ref.read(hermesApiServiceProvider), service),
+      },
+    );
+    if (ui.mounted) {
+      UiUtils.showMessage(ui, l10n.pleaseCheckConnection, isError: true);
+    }
     return;
   }
 
@@ -445,8 +486,8 @@ Future<void> openHermesSession(
   );
   ref.read(activeConversationProvider.notifier).set(conversation);
 
-  if (context.mounted) {
+  if (ui.mounted) {
     NavigationService.router.go(Routes.chat);
-    closeSidebarDrawerIfOverlay(context);
+    closeSidebarDrawerIfOverlay(ui);
   }
 }
