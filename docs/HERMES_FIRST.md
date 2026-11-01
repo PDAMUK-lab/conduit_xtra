@@ -171,6 +171,14 @@ before `flutter pub get`.
   destructive confirmation; hooks are listed with their approval state.
   There is **no restore route** in the dashboard — restore stays a CLI job
   (`hermes checkpoints`), documented rather than faked.
+- **Scheduled agents: delivery target.** The job editor gains a "Deliver to"
+  picker fed by `GET /api/cron/delivery-targets`: `local` first, then every
+  configured gateway platform, with a target that has no cron home channel
+  labelled as unusable instead of being offered silently. Create sends the
+  chosen `deliver`; edit sends it only when the operator changed it. Measured
+  live: 5 targets — local, ntfy (`NTFY_HOME_CHANNEL`), three bot-chat channels.
+  The plain Open WebUI backend accepts the value and never sends it (no
+  equivalent there).
 - **M4.3b (Git writes):** per-file stage/unstage from the changed-file list
   (`POST /api/git/review/stage|unstage`), a commit sheet that requires a
   message and starts with "push after committing" off, and a Push action that

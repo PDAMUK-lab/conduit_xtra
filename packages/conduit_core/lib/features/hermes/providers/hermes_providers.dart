@@ -38,6 +38,7 @@ import 'package:conduit_core/features/hermes/models/hermes_config.dart';
 import 'package:conduit_core/features/hermes/models/hermes_config_view.dart';
 import 'package:conduit_core/features/hermes/models/hermes_connection_profile.dart';
 import 'package:conduit_core/features/hermes/models/hermes_analytics.dart';
+import 'package:conduit_core/features/hermes/models/hermes_delivery_target.dart';
 import 'package:conduit_core/features/hermes/models/hermes_fs.dart';
 import 'package:conduit_core/features/hermes/models/hermes_git.dart';
 import 'package:conduit_core/features/hermes/models/hermes_logs.dart';
@@ -2946,9 +2947,15 @@ class HermesJobsController extends AsyncNotifier<List<HermesJob>> {
     required String name,
     required String prompt,
     required String schedule,
+    String deliver = 'local',
   }) async {
     final service = _service;
-    await service.createJob(name: name, prompt: prompt, schedule: schedule);
+    await service.createJob(
+      name: name,
+      prompt: prompt,
+      schedule: schedule,
+      deliver: deliver,
+    );
     ref.invalidateSelf();
   }
 
@@ -2957,9 +2964,16 @@ class HermesJobsController extends AsyncNotifier<List<HermesJob>> {
     String? name,
     String? prompt,
     String? schedule,
+    String? deliver,
   }) async {
     final service = _service;
-    await service.updateJob(id, name: name, prompt: prompt, schedule: schedule);
+    await service.updateJob(
+      id,
+      name: name,
+      prompt: prompt,
+      schedule: schedule,
+      deliver: deliver,
+    );
     ref.invalidateSelf();
   }
 
@@ -2984,6 +2998,14 @@ class HermesJobsController extends AsyncNotifier<List<HermesJob>> {
     ref.invalidateSelf();
   }
 }
+
+/// Delivery targets for the job editor dropdown (`local` plus platforms).
+final hermesDeliveryTargetsProvider =
+    FutureProvider<List<HermesDeliveryTarget>>((ref) async {
+      final service = ref.watch(hermesApiServiceProvider);
+      if (service is! HermesDesktopApiService) return const [];
+      return service.deliveryTargets();
+    });
 
 final hermesJobsProvider =
     AsyncNotifierProvider<HermesJobsController, List<HermesJob>>(

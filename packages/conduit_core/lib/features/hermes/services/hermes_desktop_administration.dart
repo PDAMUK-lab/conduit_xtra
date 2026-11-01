@@ -374,6 +374,12 @@ final class _HermesDesktopAdministration {
     };
   }
 
+  /// Where a scheduled job can deliver: `local` plus the gateway platforms.
+  Future<List<HermesDeliveryTarget>> deliveryTargets() async =>
+      HermesDeliveryTarget.listFromJson(
+        await _owner._requestJson('GET', '/api/cron/delivery-targets'),
+      );
+
   Future<List<Map<String, dynamic>>> listJobs() async =>
       _owner._objects(await _owner._requestJson('GET', '/api/cron/jobs'));
 
@@ -381,6 +387,7 @@ final class _HermesDesktopAdministration {
     required String name,
     required String prompt,
     required String schedule,
+    String deliver = 'local',
   }) async => _owner._object(
     await _owner._requestJson(
       'POST',
@@ -389,7 +396,7 @@ final class _HermesDesktopAdministration {
         'name': name,
         'prompt': prompt,
         'schedule': schedule,
-        'deliver': 'local',
+        'deliver': deliver,
       },
     ),
   );
@@ -400,6 +407,7 @@ final class _HermesDesktopAdministration {
     String? prompt,
     String? schedule,
     bool? enabled,
+    String? deliver,
   }) async {
     await _owner._requestJson(
       'PUT',
@@ -410,6 +418,7 @@ final class _HermesDesktopAdministration {
           'prompt': ?prompt,
           'schedule': ?schedule,
           'enabled': ?enabled,
+          'deliver': ?deliver,
         },
       },
     );

@@ -1723,6 +1723,9 @@ class HermesApiService implements HermesBackendService, HermesTurnService {
     required String name,
     required String prompt,
     required String schedule,
+    // Delivery targets are a Hermes gateway concept; a plain Open WebUI job
+    // server has no equivalent, so the value is accepted and not sent.
+    String deliver = 'local',
   }) async {
     final safeName = _requireHermesJobText(
       name,
@@ -1754,6 +1757,7 @@ class HermesApiService implements HermesBackendService, HermesTurnService {
     String? prompt,
     String? schedule,
     bool? enabled,
+    String? deliver,
   }) async {
     final encodedId = Uri.encodeComponent(_requireOpaqueIdentifier(id));
     await _requestAndConsumeBounded(

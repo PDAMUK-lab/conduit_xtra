@@ -52,12 +52,14 @@ abstract interface class HermesBackendService {
     required String name,
     required String prompt,
     required String schedule,
+    String deliver = 'local',
   });
   Future<void> updateJob(
     String id, {
     String? name,
     String? prompt,
     String? schedule,
+    String? deliver,
     bool? enabled,
   });
   Future<void> deleteJob(String id);

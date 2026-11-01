@@ -6775,6 +6775,18 @@
     "description": "Git write copy.",
     "placeholders": {"count": {"type": "int"}}
   },
+  "hermesJobDeliverLabel": "Deliver to",
+  "@hermesJobDeliverLabel": {
+    "description": "Job delivery picker copy."
+  },
+  "hermesJobDeliverNoChannel": "no home channel",
+  "@hermesJobDeliverNoChannel": {
+    "description": "Job delivery picker copy."
+  },
+  "hermesJobDeliverHelp": "Where the result is sent when the job runs. Local keeps it in this dashboard.",
+  "@hermesJobDeliverHelp": {
+    "description": "Job delivery picker copy."
+  },
   "hermesApprovalRequired": "Approval required",
   "@hermesApprovalRequired": {
     "description": "Title of a Hermes human-approval request card."

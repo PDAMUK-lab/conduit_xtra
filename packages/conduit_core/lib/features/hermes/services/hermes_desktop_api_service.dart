@@ -19,6 +19,7 @@ import 'package:conduit_core/features/hermes/models/hermes_chat_input.dart';
 import 'package:conduit_core/features/hermes/models/hermes_config.dart';
 import 'package:conduit_core/features/hermes/models/hermes_config_view.dart';
 import 'package:conduit_core/features/hermes/models/hermes_analytics.dart';
+import 'package:conduit_core/features/hermes/models/hermes_delivery_target.dart';
 import 'package:conduit_core/features/hermes/models/hermes_fs.dart';
 import 'package:conduit_core/features/hermes/models/hermes_git.dart';
 import 'package:conduit_core/features/hermes/models/hermes_logs.dart';
@@ -719,14 +720,21 @@ final class HermesDesktopApiService
 
   @override
   Future<List<Map<String, dynamic>>> listJobs() => _administration.listJobs();
+  Future<List<HermesDeliveryTarget>> deliveryTargets() =>
+      _administration.deliveryTargets();
 
   @override
   Future<Map<String, dynamic>> createJob({
     required String name,
     required String prompt,
     required String schedule,
-  }) =>
-      _administration.createJob(name: name, prompt: prompt, schedule: schedule);
+    String deliver = 'local',
+  }) => _administration.createJob(
+    name: name,
+    prompt: prompt,
+    schedule: schedule,
+    deliver: deliver,
+  );
 
   @override
   Future<void> updateJob(
@@ -735,12 +743,14 @@ final class HermesDesktopApiService
     String? prompt,
     String? schedule,
     bool? enabled,
+    String? deliver,
   }) => _administration.updateJob(
     id,
     name: name,
     prompt: prompt,
     schedule: schedule,
     enabled: enabled,
+    deliver: deliver,
   );
 
   @override

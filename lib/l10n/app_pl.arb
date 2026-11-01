@@ -6634,6 +6634,9 @@
   "hermesGitPushAhead": "Wypchnij ({count})",
   "hermesGitPushConfirm": "Wypchnąć {branch} do zdalnego?",
   "hermesGitStagedCount": "{count, plural, =1{1 w indeksie} other{{count} w indeksie}}",
+  "hermesJobDeliverLabel": "Dostarcz do",
+  "hermesJobDeliverNoChannel": "brak kanału domowego",
+  "hermesJobDeliverHelp": "Dokąd trafia wynik. Local zostawia go w panelu.",
   "hermesApprovalRequired": "Wymagana zgoda",
   "@hermesApprovalRequired": {
     "description": "Title of a Hermes human-approval request card."

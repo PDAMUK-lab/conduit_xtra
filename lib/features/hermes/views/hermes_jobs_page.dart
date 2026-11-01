@@ -149,6 +149,7 @@ class _HermesJobsPageState extends ConsumerState<HermesJobsPage> {
             name: result.name,
             prompt: result.prompt,
             schedule: result.schedule,
+            deliver: result.deliver,
           ),
       failureMessage: l10n.hermesJobCreateFailed,
       successMessage: l10n.hermesJobCreated,
@@ -467,6 +468,7 @@ class _JobCardState extends ConsumerState<_JobCard> {
       initialName: job.name ?? job.displayName,
       initialPrompt: job.prompt,
       initialSchedule: job.schedule,
+      initialDeliver: job.deliveryTarget,
     );
     if (result == null || !mounted) return;
     await _runMutation(
@@ -478,6 +480,7 @@ class _JobCardState extends ConsumerState<_JobCard> {
             name: result.name,
             prompt: result.prompt,
             schedule: result.schedule,
+            deliver: result.deliver,
           ),
       failureMessage: _l10n(context).hermesJobUpdateFailed,
       successMessage: _l10n(context).hermesJobUpdated,
