@@ -557,6 +557,17 @@ class _ChatPageState extends ConsumerState<ChatPage> {
   /// on `isChatStreamingProvider` and stay deferred forever — the reload that
   /// would clear the flag was the one being deferred.
   Timer? _hermesTranscriptRefreshWatchdog;
+
+  /// Re-reads a Hermes chat's transcript on a timer.
+  ///
+  /// Every event- and counter-driven trigger failed in practice on this app: a
+  /// turn driven by another runtime could complete with no frame here, and the
+  /// signals that looked reliable (admission ids, message counts, completion
+  /// frames) each turned out not to be. This is the trigger that cannot be
+  /// missed: while a Hermes chat is open, ask the server what it holds. The
+  /// refresh returns the cached list untouched when nothing changed, so the
+  /// cost is one small request every few seconds.
+  Timer? _hermesTranscriptPoll;
   int _hermesTranscriptRefreshGeneration = 0;
   /// The raw transcript instance last converted into [chatMessagesProvider];
   /// the service re-uses it when a refresh finds nothing new.
@@ -911,6 +922,16 @@ class _ChatPageState extends ConsumerState<ChatPage> {
         (storedId) => unawaited(_refreshDesktopHermesTranscript(storedId)),
       ),
     );
+    _hermesTranscriptPoll?.cancel();
+    _hermesTranscriptPoll = Timer.periodic(const Duration(seconds: 5), (_) {
+      if (!mounted) return;
+      final active = ref.read(activeConversationProvider);
+      if (!isNativeHermesConversation(active)) return;
+      final storedId = active?.metadata['hermesSessionId']?.toString();
+      if (storedId == null || storedId.isEmpty) return;
+      // `force`: a poll is the authoritative check, so it never defers.
+      unawaited(_refreshDesktopHermesTranscript(storedId, force: true));
+    });
     _hermesStreamingSub = ref.listenManual(isChatStreamingProvider, (
       wasStreaming,
       isStreaming,
@@ -957,6 +978,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
     _apiOwnerSub?.close();
     _databaseOwnerSub?.close();
     _hermesTranscriptSub?.close();
+    _hermesTranscriptPoll?.cancel();
     _hermesStreamingSub?.close();
     _hermesTranscriptRefreshGeneration++;
     _hermesTranscriptRefreshWatchdog?.cancel();
@@ -1011,7 +1033,10 @@ class _ChatPageState extends ConsumerState<ChatPage> {
     return result.dispatched ? committed : null;
   }
 
-  Future<void> _refreshDesktopHermesTranscript(String storedId) async {
+  Future<void> _refreshDesktopHermesTranscript(
+    String storedId, {
+    bool force = false,
+  }) async {
     final active = ref.read(activeConversationProvider);
     if (active == null ||
         !isNativeHermesConversation(active) ||
@@ -1019,7 +1044,8 @@ class _ChatPageState extends ConsumerState<ChatPage> {
       return;
     }
     final visibleTail = ref.read(chatMessagesProvider).lastOrNull;
-    if (ref.read(isChatStreamingProvider) &&
+    if (!force &&
+        ref.read(isChatStreamingProvider) &&
         !isRestoredHermesDesktopRunningMessage(visibleTail)) {
       _pendingHermesTranscriptRefresh = storedId;
       // Bounded: if the streaming flag is still set three seconds later, re-read
