@@ -67,6 +67,7 @@ bool _isAccountlessBackendLocation(String location) {
       isHermesSkillsLocation(location) ||
       isHermesMemoryLocation(location) ||
       isHermesFilesLocation(location) ||
+      isHermesToolsetsLocation(location) ||
       location == Routes.about;
 }
 
@@ -80,6 +81,11 @@ bool isHermesSettingsLocation(String location) =>
 bool isHermesMemoryLocation(String location) =>
     location == Routes.hermesMemory ||
     location.startsWith('${Routes.hermesMemory}/');
+
+/// The toolsets list and one toolset's page.
+bool isHermesToolsetsLocation(String location) =>
+    location == Routes.hermesToolsets ||
+    location.startsWith('${Routes.hermesToolsets}/');
 
 /// The files browser and its editor.
 bool isHermesFilesLocation(String location) =>

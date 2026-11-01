@@ -575,6 +575,61 @@ final class _HermesDesktopAdministration {
     body: {'provider': provider},
   );
 
+  // --- Toolsets (dashboard /api/tools) -------------------------------------
+  //
+  // Verified against hermes_cli/web_routers/tools.py: the list route returns a
+  // bare array; toggle answers {ok,name,platform,enabled,post_setup_started};
+  // config carries providers with env_vars/is_set; models carries the catalog
+  // with current/default.
+
+  Future<List<HermesToolsetSummary>> dashboardToolsets() async {
+    final data = await _owner._requestJson('GET', '/api/tools/toolsets');
+    return HermesToolsetSummary.listFromJson(data);
+  }
+
+  Future<void> setToolsetEnabled({
+    required String name,
+    required bool enabled,
+  }) => _owner._requestJson(
+    'PUT',
+    '/api/tools/toolsets/${Uri.encodeComponent(name)}',
+    body: {'enabled': enabled},
+  );
+
+  Future<HermesToolsetConfig?> toolsetConfig(String name) async {
+    final data = await _owner._requestJson(
+      'GET',
+      '/api/tools/toolsets/${Uri.encodeComponent(name)}/config',
+    );
+    return HermesToolsetConfig.fromJson(data);
+  }
+
+  Future<HermesToolsetModels?> toolsetModels(String name) async {
+    final data = await _owner._requestJson(
+      'GET',
+      '/api/tools/toolsets/${Uri.encodeComponent(name)}/models',
+    );
+    return HermesToolsetModels.fromJson(data);
+  }
+
+  Future<void> setToolsetModel({
+    required String name,
+    required String model,
+  }) => _owner._requestJson(
+    'PUT',
+    '/api/tools/toolsets/${Uri.encodeComponent(name)}/model',
+    body: {'model': model},
+  );
+
+  Future<void> setToolsetProvider({
+    required String name,
+    required String provider,
+  }) => _owner._requestJson(
+    'PUT',
+    '/api/tools/toolsets/${Uri.encodeComponent(name)}/provider',
+    body: {'provider': provider},
+  );
+
   // --- Memory Wiki (dashboard plugin) --------------------------------------
   //
   // The plugin mounts its router at /api/plugins/memory-wiki (manifest `api`),

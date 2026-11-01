@@ -44,6 +44,7 @@ import 'package:conduit_core/features/hermes/models/hermes_model.dart';
 import 'package:conduit_core/features/hermes/models/hermes_session.dart';
 import 'package:conduit_core/features/hermes/models/hermes_skill.dart';
 import 'package:conduit_core/features/hermes/models/hermes_toolset.dart';
+import 'package:conduit_core/features/hermes/models/hermes_toolsets.dart';
 import 'package:conduit_core/features/hermes/services/hermes_api_service.dart';
 import 'package:conduit_core/features/hermes/services/hermes_backend_service.dart';
 import 'package:conduit_core/features/hermes/services/hermes_connection_store.dart';
@@ -2692,6 +2693,31 @@ final hermesFsTextProvider =
       final service = ref.watch(hermesApiServiceProvider);
       if (service is! HermesDesktopApiService) return null;
       return service.fsReadText(path);
+    });
+
+/// Configurable toolsets from the dashboard (bare array from
+/// `GET /api/tools/toolsets`).
+final hermesToolsetListProvider =
+    FutureProvider<List<HermesToolsetSummary>>((ref) async {
+      final service = ref.watch(hermesApiServiceProvider);
+      if (service is! HermesDesktopApiService) return const [];
+      return service.dashboardToolsets();
+    });
+
+/// One toolset's provider configuration.
+final hermesToolsetConfigProvider =
+    FutureProvider.family<HermesToolsetConfig?, String>((ref, name) async {
+      final service = ref.watch(hermesApiServiceProvider);
+      if (service is! HermesDesktopApiService) return null;
+      return service.toolsetConfig(name);
+    });
+
+/// One toolset's model catalog.
+final hermesToolsetModelsProvider =
+    FutureProvider.family<HermesToolsetModels?, String>((ref, name) async {
+      final service = ref.watch(hermesApiServiceProvider);
+      if (service is! HermesDesktopApiService) return null;
+      return service.toolsetModels(name);
     });
 
 /// Synchronous best-effort view of capabilities for gating UI (optimistic

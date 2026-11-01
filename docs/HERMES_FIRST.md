@@ -139,6 +139,11 @@ before `flutter pub get`.
   write-text, git-root), text editor with a client-side stale check; binary
   and truncated previews are read-only. Live contract probed on a gated
   0.22.5 dashboard (30 entries, YAML/Dart reads, EACCES and 404 paths).
+- **M3.2 (Toolsets):** list with enable/disable, per-toolset provider choice
+  (with env keys shown as set/missing, never values) and model choice.
+  Contract extracted by the laptop pool and verified against
+  `tools.py` (12/12 routes, request models and response keys) and a live
+  gated dashboard (27 toolsets, 16 providers, `needs_auth` status).
 
 ## APK delivery to the NAS
 

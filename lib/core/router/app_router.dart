@@ -44,6 +44,8 @@ import '../../features/hermes/views/hermes_memory_wiki_page.dart';
 import '../../features/hermes/views/hermes_memory_subject_page.dart';
 import '../../features/hermes/views/hermes_memory_day_page.dart';
 import '../../features/hermes/views/hermes_skill_editor_page.dart';
+import '../../features/hermes/views/hermes_toolsets_page.dart';
+import '../../features/hermes/views/hermes_toolset_page.dart';
 import '../../features/hermes/views/hermes_files_page.dart';
 import '../../features/hermes/views/hermes_file_editor_page.dart';
 import '../../features/hermes/views/hermes_mcp_page.dart';
@@ -606,6 +608,25 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         child: HermesSkillEditorPage(
           key: ValueKey<String>('hermes-skill-editor-${state.pathParameters['name']}'),
           skillName: state.pathParameters['name'],
+        ),
+      ),
+    ),
+    GoRoute(
+      path: Routes.hermesToolsets,
+      name: RouteNames.hermesToolsets,
+      pageBuilder: (context, state) =>
+          _buildPlatformPage(state: state, child: const HermesToolsetsPage()),
+    ),
+    GoRoute(
+      path: Routes.hermesToolset,
+      name: RouteNames.hermesToolset,
+      pageBuilder: (context, state) => _buildPlatformPage(
+        state: state,
+        child: HermesToolsetPage(
+          key: ValueKey<String>(
+            'hermes-toolset-${state.pathParameters['name']}',
+          ),
+          name: state.pathParameters['name']!,
         ),
       ),
     ),

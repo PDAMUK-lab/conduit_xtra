@@ -6313,6 +6313,62 @@
   "@hermesFilesSubtitle": {
     "description": "Subtitle for the Files tile in the Hermes tab."
   },
+  "hermesToolsetsTitle": "Toolsets",
+  "@hermesToolsetsTitle": {
+    "description": "Toolsets copy."
+  },
+  "hermesToolsetsSubtitle": "What the agent may do, and which model or provider each capability uses.",
+  "@hermesToolsetsSubtitle": {
+    "description": "Toolsets copy."
+  },
+  "hermesToolsetsLoadFailed": "Could not load toolsets.",
+  "@hermesToolsetsLoadFailed": {
+    "description": "Toolsets copy."
+  },
+  "hermesToolsetNeedsSetup": "Needs setup",
+  "@hermesToolsetNeedsSetup": {
+    "description": "Toolsets copy."
+  },
+  "hermesToolsetProviders": "Providers",
+  "@hermesToolsetProviders": {
+    "description": "Toolsets copy."
+  },
+  "hermesToolsetModels": "Models",
+  "@hermesToolsetModels": {
+    "description": "Toolsets copy."
+  },
+  "hermesToolsetCurrent": "Current",
+  "@hermesToolsetCurrent": {
+    "description": "Toolsets copy."
+  },
+  "hermesToolsetUse": "Use",
+  "@hermesToolsetUse": {
+    "description": "Toolsets copy."
+  },
+  "hermesToolsetTools": "Tools",
+  "@hermesToolsetTools": {
+    "description": "Toolsets copy."
+  },
+  "hermesToolsetEnv": "Environment",
+  "@hermesToolsetEnv": {
+    "description": "Toolsets copy."
+  },
+  "hermesToolsetEnvSet": "set",
+  "@hermesToolsetEnvSet": {
+    "description": "Toolsets copy."
+  },
+  "hermesToolsetEnvMissing": "missing",
+  "@hermesToolsetEnvMissing": {
+    "description": "Toolsets copy."
+  },
+  "hermesToolsetToggleFailed": "Could not change that toolset.",
+  "@hermesToolsetToggleFailed": {
+    "description": "Toolsets copy."
+  },
+  "hermesToolsetSelectFailed": "Could not apply that choice.",
+  "@hermesToolsetSelectFailed": {
+    "description": "Toolsets copy."
+  },
   "hermesApprovalRequired": "Approval required",
   "@hermesApprovalRequired": {
     "description": "Title of a Hermes human-approval request card."

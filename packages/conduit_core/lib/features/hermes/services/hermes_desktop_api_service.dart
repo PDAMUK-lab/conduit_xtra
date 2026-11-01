@@ -23,6 +23,7 @@ import 'package:conduit_core/features/hermes/models/hermes_memory_wiki.dart';
 import 'package:conduit_core/features/hermes/models/hermes_model.dart';
 import 'package:conduit_core/features/hermes/models/hermes_run_event.dart';
 import 'package:conduit_core/features/hermes/models/hermes_skill.dart';
+import 'package:conduit_core/features/hermes/models/hermes_toolsets.dart';
 import 'package:conduit_core/features/hermes/services/hermes_backend_service.dart';
 import 'package:conduit_core/features/hermes/services/hermes_http_transport.dart';
 import 'package:conduit_core/features/hermes/services/hermes_dashboard_bridge.dart';
@@ -375,6 +376,7 @@ final class HermesDesktopApiService
       path.startsWith('/api/skills') ||
       path.startsWith('/api/memory') ||
       path.startsWith('/api/fs') ||
+      path.startsWith('/api/tools') ||
       path.startsWith('/api/audio');
 
   @override
@@ -499,6 +501,26 @@ final class HermesDesktopApiService
     required String content,
   }) => _administration.fsWriteText(path: path, content: content);
   Future<String?> fsGitRoot(String path) => _administration.fsGitRoot(path);
+
+  // Toolsets (dashboard /api/tools).
+  Future<List<HermesToolsetSummary>> dashboardToolsets() =>
+      _administration.dashboardToolsets();
+  Future<void> setToolsetEnabled({
+    required String name,
+    required bool enabled,
+  }) => _administration.setToolsetEnabled(name: name, enabled: enabled);
+  Future<HermesToolsetConfig?> toolsetConfig(String name) =>
+      _administration.toolsetConfig(name);
+  Future<HermesToolsetModels?> toolsetModels(String name) =>
+      _administration.toolsetModels(name);
+  Future<void> setToolsetModel({
+    required String name,
+    required String model,
+  }) => _administration.setToolsetModel(name: name, model: model);
+  Future<void> setToolsetProvider({
+    required String name,
+    required String provider,
+  }) => _administration.setToolsetProvider(name: name, provider: provider);
 
   // Memory Wiki (dashboard plugin): subjects, days, notes, archive.
   Future<HermesMemoryWikiOverview?> memoryWikiOverview({
