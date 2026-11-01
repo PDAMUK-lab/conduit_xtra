@@ -162,6 +162,19 @@ void main() {
     expect(gateway.transcriptRequests.length, before + 1);
   });
 
+  test('a refused resume still opens the chat', () async {
+    for (var i = 1; i <= 250; i++) {
+      gateway.rows.add({'id': i, 'role': 'user', 'content': 'row $i'});
+    }
+    // Another runtime still owns the session: session.resume is refused.
+    gateway.refuseResume = true;
+
+    final opened = await service.openSessionTranscript('st-1');
+
+    expect(opened.length, 250, reason: 'the REST transcript must still open');
+    expect(opened.first['id'], 1);
+  });
+
   test('a gap wider than one page falls back to the full transcript', () async {
     for (var i = 1; i <= 250; i++) {
       gateway.rows.add({'id': i, 'role': 'user', 'content': 'row $i'});
@@ -241,6 +254,9 @@ final class _LiveGateway {
   /// Whether `session.active_list` lists the session at all.
   bool includeInActiveList = true;
 
+  /// Refuse `session.resume` the way a session owned by another runtime does.
+  bool refuseResume = false;
+
   /// Rows `/api/sessions/st-1/messages` serves, in insertion order.
   final List<Map<String, Object?>> rows = [];
 
@@ -308,6 +324,11 @@ final class _LiveGateway {
           case 'session.resume':
             resumeCalls++;
             resumesByConnection[connectionIndex]++;
+            if (refuseResume) {
+              result = null;
+              error = {'code': 4037, 'message': 'session owned by another runtime'};
+              break;
+            }
             result = {
               'session_id': 'rt-1',
               'stored_session_id': 'st-1',

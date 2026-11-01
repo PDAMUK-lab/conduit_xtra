@@ -628,17 +628,34 @@ extension _HermesDesktopLiveRuntime on HermesDesktopApiService {
     if (previous != null && previous.isNotEmpty) {
       return getSessionMessages(id, cancelToken: cancelToken);
     }
-    final binding = await _resume(id, refresh: true);
-    final storedId = binding.storedId;
-    if (cancelToken?.isCancelled == true) throw cancelToken!.cancelError!;
-    final newest = await _latestDesktopTranscriptPage(
-      storedId,
-      cancelToken: cancelToken,
-    );
-    if (newest.isEmpty) return getSessionMessages(id, cancelToken: cancelToken);
-    _lastTranscripts[id] = newest;
-    unawaited(_completeTranscriptInBackground(id, storedId));
-    return newest;
+    try {
+      final binding = await _resume(id, refresh: true);
+      final storedId = binding.storedId;
+      if (cancelToken?.isCancelled == true) throw cancelToken!.cancelError!;
+      final newest = await _latestDesktopTranscriptPage(
+        storedId,
+        cancelToken: cancelToken,
+      );
+      if (newest.isEmpty) {
+        return await getSessionMessages(id, cancelToken: cancelToken);
+      }
+      _lastTranscripts[id] = newest;
+      unawaited(_completeTranscriptInBackground(id, storedId));
+      return newest;
+    } catch (error) {
+      if (cancelToken?.isCancelled == true) throw cancelToken!.cancelError!;
+      // The fast path is an optimisation, never the only way in. A session
+      // another runtime still owns (resume refused), a page too large even at
+      // the smallest size, or a transient transport error must not stop the
+      // chat from opening — the full read tolerates a failed resume and pages
+      // with shrinking limits.
+      DebugLogger.warning(
+        'open-fast-path-failed',
+        scope: 'hermes/desktop',
+        data: {'errorType': error.runtimeType.toString()},
+      );
+      return getSessionMessages(id, cancelToken: cancelToken);
+    }
   }
 
   /// Reads the rest of [storedId] after [openDesktopSessionTranscript] showed
