@@ -584,6 +584,62 @@ final class _HermesDesktopAdministration {
 
   static const String _wikiBase = '/api/plugins/memory-wiki';
 
+  // --- Filesystem browser ---------------------------------------------------
+  //
+  // The dashboard's own fs routes. `list` returns only name/path/isDirectory;
+  // `read-text` previews at most 512 KB and flags binary/truncated; `write-text`
+  // caps at 8 MB, requires the parent to exist, and does NOT detect conflicts —
+  // so the editor re-reads before saving.
+
+  Future<HermesFsDefaults?> fsDefaults() async {
+    final data = await _owner._requestJson('GET', '/api/fs/default-cwd');
+    return HermesFsDefaults.fromJson(data);
+  }
+
+  Future<HermesFsListing?> fsList(String path) async {
+    final data = await _owner._requestJson(
+      'GET',
+      '/api/fs/list',
+      query: {'path': path},
+    );
+    return HermesFsListing.fromJson(data);
+  }
+
+  Future<HermesFsTextFile?> fsReadText(String path) async {
+    final data = await _owner._requestJson(
+      'GET',
+      '/api/fs/read-text',
+      query: {'path': path},
+    );
+    return HermesFsTextFile.fromJson(data);
+  }
+
+  Future<int> fsWriteText({
+    required String path,
+    required String content,
+  }) async {
+    final data = _owner._object(
+      await _owner._requestJson(
+        'POST',
+        '/api/fs/write-text',
+        body: {'path': path, 'content': content},
+      ),
+    );
+    final size = data['byteSize'];
+    return size is num ? size.toInt() : content.length;
+  }
+
+  Future<String?> fsGitRoot(String path) async {
+    final data = _owner._object(
+      await _owner._requestJson(
+        'GET',
+        '/api/fs/git-root',
+        query: {'path': path},
+      ),
+    );
+    return validateHermesBoundedString(data['root'], maxCharacters: 4096);
+  }
+
   Future<HermesMemoryWikiOverview?> memoryWikiOverview({
     int subjectLimit = 50,
     int dayLimit = 30,

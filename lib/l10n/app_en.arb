@@ -6253,6 +6253,66 @@
     "description": "Memory Wiki counts.",
     "placeholders": {"count": {"type": "int"}}
   },
+  "hermesFilesTitle": "Files",
+  "@hermesFilesTitle": {
+    "description": "Files browser copy."
+  },
+  "hermesFilesLoadFailed": "Could not list this directory.",
+  "@hermesFilesLoadFailed": {
+    "description": "Files browser copy."
+  },
+  "hermesFilesEmpty": "This directory is empty.",
+  "@hermesFilesEmpty": {
+    "description": "Files browser copy."
+  },
+  "hermesFilesUp": "Up",
+  "@hermesFilesUp": {
+    "description": "Files browser copy."
+  },
+  "hermesFileBinary": "Binary file — editing is disabled.",
+  "@hermesFileBinary": {
+    "description": "Files browser copy."
+  },
+  "hermesFileTruncated": "Preview truncated at 512 KB; saving is disabled so the rest is not lost.",
+  "@hermesFileTruncated": {
+    "description": "Files browser copy."
+  },
+  "hermesFileSave": "Save",
+  "@hermesFileSave": {
+    "description": "Files browser copy."
+  },
+  "hermesFileSaved": "File saved.",
+  "@hermesFileSaved": {
+    "description": "Files browser copy."
+  },
+  "hermesFileSaveFailed": "Could not save the file.",
+  "@hermesFileSaveFailed": {
+    "description": "Files browser copy."
+  },
+  "hermesFileChangedTitle": "File changed on disk",
+  "@hermesFileChangedTitle": {
+    "description": "Files browser copy."
+  },
+  "hermesFileChangedBody": "The file changed since it was opened. Reload it, or overwrite it with your version?",
+  "@hermesFileChangedBody": {
+    "description": "Files browser copy."
+  },
+  "hermesFileReload": "Reload",
+  "@hermesFileReload": {
+    "description": "Files browser copy."
+  },
+  "hermesFileOverwrite": "Overwrite",
+  "@hermesFileOverwrite": {
+    "description": "Files browser copy."
+  },
+  "hermesFileReadFailed": "Could not read this file.",
+  "@hermesFileReadFailed": {
+    "description": "Files browser copy."
+  },
+  "hermesFilesSubtitle": "Browse and edit the agent's files.",
+  "@hermesFilesSubtitle": {
+    "description": "Subtitle for the Files tile in the Hermes tab."
+  },
   "hermesApprovalRequired": "Approval required",
   "@hermesApprovalRequired": {
     "description": "Title of a Hermes human-approval request card."

@@ -36,6 +36,7 @@ import 'package:conduit_core/features/hermes/models/hermes_bot.dart';
 import 'package:conduit_core/features/hermes/models/hermes_capabilities.dart';
 import 'package:conduit_core/features/hermes/models/hermes_config.dart';
 import 'package:conduit_core/features/hermes/models/hermes_connection_profile.dart';
+import 'package:conduit_core/features/hermes/models/hermes_fs.dart';
 import 'package:conduit_core/features/hermes/models/hermes_job.dart';
 import 'package:conduit_core/features/hermes/models/hermes_memory.dart';
 import 'package:conduit_core/features/hermes/models/hermes_memory_wiki.dart';
@@ -2667,6 +2668,30 @@ final hermesMemoryWikiDayProvider =
       final service = ref.watch(hermesApiServiceProvider);
       if (service is! HermesDesktopApiService) return null;
       return service.memoryWikiDay(date);
+    });
+
+/// Where the agent's terminal starts (and its branch), used as the Files
+/// browser's first directory.
+final hermesFsDefaultsProvider = FutureProvider<HermesFsDefaults?>((ref) async {
+  final service = ref.watch(hermesApiServiceProvider);
+  if (service is! HermesDesktopApiService) return null;
+  return service.fsDefaults();
+});
+
+/// One directory listing.
+final hermesFsListingProvider =
+    FutureProvider.family<HermesFsListing?, String>((ref, path) async {
+      final service = ref.watch(hermesApiServiceProvider);
+      if (service is! HermesDesktopApiService) return null;
+      return service.fsList(path);
+    });
+
+/// One text file preview.
+final hermesFsTextProvider =
+    FutureProvider.family<HermesFsTextFile?, String>((ref, path) async {
+      final service = ref.watch(hermesApiServiceProvider);
+      if (service is! HermesDesktopApiService) return null;
+      return service.fsReadText(path);
     });
 
 /// Synchronous best-effort view of capabilities for gating UI (optimistic

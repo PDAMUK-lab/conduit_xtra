@@ -44,6 +44,8 @@ import '../../features/hermes/views/hermes_memory_wiki_page.dart';
 import '../../features/hermes/views/hermes_memory_subject_page.dart';
 import '../../features/hermes/views/hermes_memory_day_page.dart';
 import '../../features/hermes/views/hermes_skill_editor_page.dart';
+import '../../features/hermes/views/hermes_files_page.dart';
+import '../../features/hermes/views/hermes_file_editor_page.dart';
 import '../../features/hermes/views/hermes_mcp_page.dart';
 import '../../features/profile/views/personalization_page.dart';
 import '../../features/profile/views/profile_page.dart';
@@ -606,6 +608,26 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           skillName: state.pathParameters['name'],
         ),
       ),
+    ),
+    GoRoute(
+      path: Routes.hermesFiles,
+      name: RouteNames.hermesFiles,
+      pageBuilder: (context, state) =>
+          _buildPlatformPage(state: state, child: const HermesFilesPage()),
+    ),
+    GoRoute(
+      path: Routes.hermesFileEditor,
+      name: RouteNames.hermesFileEditor,
+      pageBuilder: (context, state) {
+        final path = state.uri.queryParameters['path'] ?? '';
+        return _buildPlatformPage(
+          state: state,
+          child: HermesFileEditorPage(
+            key: ValueKey<String>('hermes-file-editor-$path'),
+            path: path,
+          ),
+        );
+      },
     ),
     GoRoute(
       path: Routes.hermesMcp,

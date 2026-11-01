@@ -17,6 +17,7 @@ import 'package:conduit_core/network/external_link.dart';
 import 'package:conduit_core/features/hermes/models/hermes_bot.dart';
 import 'package:conduit_core/features/hermes/models/hermes_chat_input.dart';
 import 'package:conduit_core/features/hermes/models/hermes_config.dart';
+import 'package:conduit_core/features/hermes/models/hermes_fs.dart';
 import 'package:conduit_core/features/hermes/models/hermes_mcp.dart';
 import 'package:conduit_core/features/hermes/models/hermes_memory_wiki.dart';
 import 'package:conduit_core/features/hermes/models/hermes_model.dart';
@@ -373,6 +374,7 @@ final class HermesDesktopApiService
       path.startsWith('/api/mcp') ||
       path.startsWith('/api/skills') ||
       path.startsWith('/api/memory') ||
+      path.startsWith('/api/fs') ||
       path.startsWith('/api/audio');
 
   @override
@@ -486,6 +488,17 @@ final class HermesDesktopApiService
       _administration.memoryStatus();
   Future<void> setMemoryProvider(String provider) =>
       _administration.setMemoryProvider(provider);
+
+  // Files (dashboard fs routes).
+  Future<HermesFsDefaults?> fsDefaults() => _administration.fsDefaults();
+  Future<HermesFsListing?> fsList(String path) => _administration.fsList(path);
+  Future<HermesFsTextFile?> fsReadText(String path) =>
+      _administration.fsReadText(path);
+  Future<int> fsWriteText({
+    required String path,
+    required String content,
+  }) => _administration.fsWriteText(path: path, content: content);
+  Future<String?> fsGitRoot(String path) => _administration.fsGitRoot(path);
 
   // Memory Wiki (dashboard plugin): subjects, days, notes, archive.
   Future<HermesMemoryWikiOverview?> memoryWikiOverview({
