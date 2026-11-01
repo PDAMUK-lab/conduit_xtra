@@ -17,7 +17,9 @@ import 'package:conduit_core/network/external_link.dart';
 import 'package:conduit_core/features/hermes/models/hermes_bot.dart';
 import 'package:conduit_core/features/hermes/models/hermes_chat_input.dart';
 import 'package:conduit_core/features/hermes/models/hermes_config.dart';
+import 'package:conduit_core/features/hermes/models/hermes_analytics.dart';
 import 'package:conduit_core/features/hermes/models/hermes_fs.dart';
+import 'package:conduit_core/features/hermes/models/hermes_logs.dart';
 import 'package:conduit_core/features/hermes/models/hermes_mcp.dart';
 import 'package:conduit_core/features/hermes/models/hermes_memory_wiki.dart';
 import 'package:conduit_core/features/hermes/models/hermes_profile.dart';
@@ -378,6 +380,8 @@ final class HermesDesktopApiService
       path.startsWith('/api/memory') ||
       path.startsWith('/api/fs') ||
       path.startsWith('/api/tools') ||
+      path.startsWith('/api/analytics') ||
+      path.startsWith('/api/logs') ||
       path.startsWith('/api/audio');
 
   @override
@@ -502,6 +506,25 @@ final class HermesDesktopApiService
     required String content,
   }) => _administration.fsWriteText(path: path, content: content);
   Future<String?> fsGitRoot(String path) => _administration.fsGitRoot(path);
+
+  // Analytics and logs (read-only).
+  Future<HermesUsageAnalytics?> usageAnalytics({int days = 30}) =>
+      _administration.usageAnalytics(days: days);
+  Future<HermesModelsAnalytics?> modelsAnalytics({int days = 30}) =>
+      _administration.modelsAnalytics(days: days);
+  Future<HermesLogTail?> logTail({
+    String file = 'agent',
+    int lines = 100,
+    String? level,
+    String? component,
+    String search = '',
+  }) => _administration.logTail(
+    file: file,
+    lines: lines,
+    level: level,
+    component: component,
+    search: search,
+  );
 
   // Profiles (dashboard /api/profiles).
   Future<List<HermesProfileSummary>> dashboardProfiles() =>

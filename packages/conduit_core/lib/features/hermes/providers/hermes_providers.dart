@@ -36,7 +36,9 @@ import 'package:conduit_core/features/hermes/models/hermes_bot.dart';
 import 'package:conduit_core/features/hermes/models/hermes_capabilities.dart';
 import 'package:conduit_core/features/hermes/models/hermes_config.dart';
 import 'package:conduit_core/features/hermes/models/hermes_connection_profile.dart';
+import 'package:conduit_core/features/hermes/models/hermes_analytics.dart';
 import 'package:conduit_core/features/hermes/models/hermes_fs.dart';
+import 'package:conduit_core/features/hermes/models/hermes_logs.dart';
 import 'package:conduit_core/features/hermes/models/hermes_job.dart';
 import 'package:conduit_core/features/hermes/models/hermes_memory.dart';
 import 'package:conduit_core/features/hermes/models/hermes_memory_wiki.dart';
@@ -2694,6 +2696,44 @@ final hermesFsTextProvider =
       final service = ref.watch(hermesApiServiceProvider);
       if (service is! HermesDesktopApiService) return null;
       return service.fsReadText(path);
+    });
+
+/// Usage analytics for the last [days] (1–365; the server clamps).
+final hermesUsageAnalyticsProvider =
+    FutureProvider.family<HermesUsageAnalytics?, int>((ref, days) async {
+      final service = ref.watch(hermesApiServiceProvider);
+      if (service is! HermesDesktopApiService) return null;
+      return service.usageAnalytics(days: days);
+    });
+
+/// Model analytics for the last [days].
+final hermesModelsAnalyticsProvider =
+    FutureProvider.family<HermesModelsAnalytics?, int>((ref, days) async {
+      final service = ref.watch(hermesApiServiceProvider);
+      if (service is! HermesDesktopApiService) return null;
+      return service.modelsAnalytics(days: days);
+    });
+
+/// One log tail. The query record is the family key (records compare by value).
+typedef HermesLogQuery = ({
+  String file,
+  int lines,
+  String? level,
+  String? component,
+  String search,
+});
+
+final hermesLogTailProvider =
+    FutureProvider.family<HermesLogTail?, HermesLogQuery>((ref, query) async {
+      final service = ref.watch(hermesApiServiceProvider);
+      if (service is! HermesDesktopApiService) return null;
+      return service.logTail(
+        file: query.file,
+        lines: query.lines,
+        level: query.level,
+        component: query.component,
+        search: query.search,
+      );
     });
 
 /// Profiles from the dashboard, with their model, description and state.

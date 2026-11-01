@@ -150,6 +150,14 @@ before `flutter pub get`.
   are deliberately left to a desktop. Contract table delegated to the
   laptop pool and checked against both routers in `profiles.py`
   (16 + 4 = 20 routes; the first count missed `sessions_router`).
+- **M3.4 (Cron depth):** audited, not rebuilt — the app already lists runs
+  (`/api/cron/jobs/{id}/runs`) and shows state/delivery/last/next run.
+  Blueprints and delivery-target pickers are deferred to the end of M3.
+- **M3.5 (Analytics + Logs):** read-only usage/model aggregates with a
+  7/30/90-day switch, and a 500-line log tail with file/level/search
+  filters. Live shapes confirmed on a gated 0.22.5 dashboard
+  (`{daily,by_model,by_task,totals,period_days,skills,tools}`,
+  `{models,totals,period_days}`, `{file,lines}`, 400 on unknown file).
 
 ## APK delivery to the NAS
 

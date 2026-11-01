@@ -6430,6 +6430,62 @@
     "description": "Profile skill count.",
     "placeholders": {"count": {"type": "int"}}
   },
+  "hermesAnalyticsTitle": "Analytics",
+  "@hermesAnalyticsTitle": {
+    "description": "Analytics/logs copy."
+  },
+  "hermesAnalyticsSubtitle": "Tokens, cost and tool use from the dashboard's session history.",
+  "@hermesAnalyticsSubtitle": {
+    "description": "Analytics/logs copy."
+  },
+  "hermesAnalyticsLoadFailed": "Could not load analytics.",
+  "@hermesAnalyticsLoadFailed": {
+    "description": "Analytics/logs copy."
+  },
+  "hermesAnalyticsTokens": "Tokens",
+  "@hermesAnalyticsTokens": {
+    "description": "Analytics/logs copy."
+  },
+  "hermesAnalyticsSessions": "Sessions",
+  "@hermesAnalyticsSessions": {
+    "description": "Analytics/logs copy."
+  },
+  "hermesAnalyticsCost": "Cost",
+  "@hermesAnalyticsCost": {
+    "description": "Analytics/logs copy."
+  },
+  "hermesAnalyticsByModel": "By model",
+  "@hermesAnalyticsByModel": {
+    "description": "Analytics/logs copy."
+  },
+  "hermesAnalyticsTools": "Tools",
+  "@hermesAnalyticsTools": {
+    "description": "Analytics/logs copy."
+  },
+  "hermesAnalyticsNoUsage": "No usage in this period.",
+  "@hermesAnalyticsNoUsage": {
+    "description": "Analytics/logs copy."
+  },
+  "hermesLogsTitle": "Logs",
+  "@hermesLogsTitle": {
+    "description": "Analytics/logs copy."
+  },
+  "hermesLogsSubtitle": "Tail of a server log, filtered by level.",
+  "@hermesLogsSubtitle": {
+    "description": "Analytics/logs copy."
+  },
+  "hermesLogsLoadFailed": "Could not load the log.",
+  "@hermesLogsLoadFailed": {
+    "description": "Analytics/logs copy."
+  },
+  "hermesLogsEmpty": "No lines.",
+  "@hermesLogsEmpty": {
+    "description": "Analytics/logs copy."
+  },
+  "hermesLogsSearch": "Search",
+  "@hermesLogsSearch": {
+    "description": "Analytics/logs copy."
+  },
   "hermesApprovalRequired": "Approval required",
   "@hermesApprovalRequired": {
     "description": "Title of a Hermes human-approval request card."

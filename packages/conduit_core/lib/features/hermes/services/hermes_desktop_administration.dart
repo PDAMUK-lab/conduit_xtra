@@ -575,6 +575,53 @@ final class _HermesDesktopAdministration {
     body: {'provider': provider},
   );
 
+  // --- Analytics and logs ---------------------------------------------------
+  //
+  // `GET /api/analytics/usage|models?days=` (read-only aggregates) and
+  // `GET /api/logs?file&lines&level&component&search` (a tail of one log,
+  // filtered server-side; unknown file -> 400, unknown component -> 400).
+
+  Future<HermesUsageAnalytics?> usageAnalytics({int days = 30}) async {
+    final data = await _owner._requestJson(
+      'GET',
+      '/api/analytics/usage',
+      query: {'days': days},
+    );
+    return HermesUsageAnalytics.fromJson(data);
+  }
+
+  Future<HermesModelsAnalytics?> modelsAnalytics({int days = 30}) async {
+    final data = await _owner._requestJson(
+      'GET',
+      '/api/analytics/models',
+      query: {'days': days},
+    );
+    return HermesModelsAnalytics.fromJson(data);
+  }
+
+  Future<HermesLogTail?> logTail({
+    String file = 'agent',
+    int lines = 100,
+    String? level,
+    String? component,
+    String search = '',
+  }) async {
+    final data = await _owner._requestJson(
+      'GET',
+      '/api/logs',
+      query: {
+        'file': file,
+        'lines': lines,
+        if (level != null && level.isNotEmpty && level != 'ALL')
+          'level': level,
+        if (component != null && component.isNotEmpty && component != 'all')
+          'component': component,
+        if (search.isNotEmpty) 'search': search,
+      },
+    );
+    return HermesLogTail.fromJson(data);
+  }
+
   // --- Profiles (dashboard /api/profiles) -----------------------------------
   //
   // Verified against hermes_cli/web_routers/profiles.py (two routers, 20 routes):
