@@ -684,6 +684,22 @@ final class _HermesDesktopAdministration {
     return HermesRawConfig.fromJson(data);
   }
 
+  /// Write one env key. The server stores it in `.env` and reconciles any
+  /// config.yaml copy of the same key; a redacted preview is refused server-side.
+  Future<void> setEnvVar({required String key, required String value}) =>
+      _owner._requestJson(
+        'PUT',
+        '/api/env',
+        body: {'key': key, 'value': value},
+      );
+
+  /// Remove one env key from `.env`.
+  Future<void> deleteEnvVar(String key) => _owner._requestJson(
+    'DELETE',
+    '/api/env',
+    body: {'key': key},
+  );
+
   Future<List<HermesEnvVar>> envVars() async {
     final data = await _owner._requestJson('GET', '/api/env');
     return HermesEnvVar.listFromJson(data);

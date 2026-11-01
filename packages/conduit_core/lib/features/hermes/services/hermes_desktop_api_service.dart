@@ -540,6 +540,9 @@ final class HermesDesktopApiService
   Future<void> saveRawConfig(String yamlText) =>
       _administration.saveRawConfig(yamlText);
   Future<List<HermesEnvVar>> envVars() => _administration.envVars();
+  Future<void> setEnvVar({required String key, required String value}) =>
+      _administration.setEnvVar(key: key, value: value);
+  Future<void> deleteEnvVar(String key) => _administration.deleteEnvVar(key);
 
   // Analytics and logs (read-only).
   Future<HermesUsageAnalytics?> usageAnalytics({int days = 30}) =>

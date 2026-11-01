@@ -13,6 +13,8 @@ import 'package:conduit_core/features/hermes/models/hermes_config_view.dart';
 import 'package:conduit_core/features/hermes/providers/hermes_providers.dart';
 import 'package:conduit_core/navigation/routes.dart';
 
+import '../widgets/hermes_env_edit_sheet.dart';
+
 AppLocalizations _l10n(BuildContext context) =>
     AppLocalizations.of(context) ?? AppLocalizationsEn();
 
@@ -174,7 +176,12 @@ class _HermesConfigPageState extends ConsumerState<HermesConfigPage> {
             return Column(
               children: [
                 for (final env in filtered) ...[
-                  _envRow(env, theme),
+                  InkWell(
+                    key: ValueKey<String>('hermes-env-${env.name}'),
+                    borderRadius: BorderRadius.circular(AppBorderRadius.card),
+                    onTap: () => showHermesEnvEditSheet(context, env),
+                    child: _envRow(env, theme),
+                  ),
                   const SizedBox(height: Spacing.xs),
                 ],
               ],

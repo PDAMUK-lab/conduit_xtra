@@ -171,6 +171,13 @@ before `flutter pub get`.
   destructive confirmation; hooks are listed with their approval state.
   There is **no restore route** in the dashboard — restore stays a CLI job
   (`hermes checkpoints`), documented rather than faked.
+- **M4.1 Stage B, env writes:** tapping an env key opens a sheet that writes
+  one value (`PUT /api/env`) or removes the key (`DELETE /api/env`, destructive
+  confirmation). Secret fields are obscured and a stored secret is only ever
+  shown as the server's redacted preview; the sheet states that a write
+  updates `.env` and reconciles any `config.yaml` copy of the same key. The
+  list is refreshed after a write. Not yet exercised against a live `.env`:
+  the endpoint is contract-verified and the sheet is widget-tested.
 - **Bug: Scheduled agents opened onto a dimmed barrier.** The jobs sheet body
   grows into the space it is given (`Expanded` list), but the sheet surface
   lays content out in a shrink-wrapped column, which hands children an

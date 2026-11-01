@@ -6682,6 +6682,40 @@
   "@hermesConfigFormatWarning": {
     "description": "Config editor warning."
   },
+  "hermesEnvValueHint": "New value",
+  "@hermesEnvValueHint": {
+    "description": "Env editor copy."
+  },
+  "hermesEnvWriteNote": "Writes .env, and reconciles any config.yaml copy of this key.",
+  "@hermesEnvWriteNote": {
+    "description": "Env editor copy."
+  },
+  "hermesEnvSave": "Save",
+  "@hermesEnvSave": {
+    "description": "Env editor copy."
+  },
+  "hermesEnvSaved": "Saved.",
+  "@hermesEnvSaved": {
+    "description": "Env editor copy."
+  },
+  "hermesEnvSaveFailed": "The server refused the change.",
+  "@hermesEnvSaveFailed": {
+    "description": "Env editor copy."
+  },
+  "hermesEnvRemove": "Remove key",
+  "@hermesEnvRemove": {
+    "description": "Env editor copy."
+  },
+  "hermesEnvCurrentlySet": "Currently set: {value}",
+  "@hermesEnvCurrentlySet": {
+    "description": "Env editor copy.",
+    "placeholders": {"value": {"type": "String"}}
+  },
+  "hermesEnvConfirmRemove": "Remove {name} from .env?",
+  "@hermesEnvConfirmRemove": {
+    "description": "Env editor copy.",
+    "placeholders": {"name": {"type": "String"}}
+  },
   "hermesApprovalRequired": "Approval required",
   "@hermesApprovalRequired": {
     "description": "Title of a Hermes human-approval request card."

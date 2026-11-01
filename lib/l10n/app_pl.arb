@@ -6612,6 +6612,14 @@
   "hermesConfigInvalidYaml": "Nieprawidłowy YAML: {error}",
   "hermesConfigDiffCounts": "{added} dodanych · {removed} usuniętych",
   "hermesConfigFormatWarning": "Serwer zapisuje plik od nowa z postaci po sparsowaniu: komentarze i formatowanie nie są zachowywane.",
+  "hermesEnvValueHint": "Nowa wartość",
+  "hermesEnvWriteNote": "Zapisuje .env i wyrównuje kopię klucza w config.yaml.",
+  "hermesEnvSave": "Zapisz",
+  "hermesEnvSaved": "Zapisano.",
+  "hermesEnvSaveFailed": "Serwer odrzucił zmianę.",
+  "hermesEnvRemove": "Usuń klucz",
+  "hermesEnvCurrentlySet": "Obecnie ustawione: {value}",
+  "hermesEnvConfirmRemove": "Usunąć {name} z .env?",
   "hermesApprovalRequired": "Wymagana zgoda",
   "@hermesApprovalRequired": {
     "description": "Title of a Hermes human-approval request card."
