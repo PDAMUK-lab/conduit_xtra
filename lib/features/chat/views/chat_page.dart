@@ -568,6 +568,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
   /// refresh returns the cached list untouched when nothing changed, so the
   /// cost is one small request every few seconds.
   Timer? _hermesTranscriptPoll;
+  bool _hermesTranscriptTailProbeInFlight = false;
   int _hermesTranscriptRefreshGeneration = 0;
   /// The raw transcript instance last converted into [chatMessagesProvider];
   /// the service re-uses it when a refresh finds nothing new.
@@ -929,8 +930,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
       if (!isNativeHermesConversation(active)) return;
       final storedId = active?.metadata['hermesSessionId']?.toString();
       if (storedId == null || storedId.isEmpty) return;
-      // `force`: a poll is the authoritative check, so it never defers.
-      unawaited(_refreshDesktopHermesTranscript(storedId, force: true));
+      unawaited(_pollHermesTranscriptTail(storedId));
     });
     _hermesStreamingSub = ref.listenManual(isChatStreamingProvider, (
       wasStreaming,
@@ -1031,6 +1031,31 @@ class _ChatPageState extends ConsumerState<ChatPage> {
       onComparisonCommitted: (handle) => committed = handle,
     );
     return result.dispatched ? committed : null;
+  }
+
+  /// One row, then a full read only if that row is not the one on screen.
+  ///
+  /// The unguarded version of this poll fetched a 200-row page every five
+  /// seconds — megabytes on a real session. A tail id compared against what the
+  /// page has actually applied is the same guarantee at a fraction of the cost.
+  Future<void> _pollHermesTranscriptTail(String storedId) async {
+    final service = ref.read(hermesApiServiceProvider);
+    if (service is! HermesDesktopApiService) return;
+    if (_hermesTranscriptTailProbeInFlight) return;
+    _hermesTranscriptTailProbeInFlight = true;
+    try {
+      final newest = await service.newestRowId(storedId);
+      if (!mounted || newest == null) return;
+      final appliedTail = _lastRawDesktopTranscript?.isNotEmpty == true
+          ? _lastRawDesktopTranscript!.last['id']
+          : null;
+      if (newest == appliedTail) return;
+      await _refreshDesktopHermesTranscript(storedId, force: true);
+    } catch (_) {
+      // Transient; the next tick asks again.
+    } finally {
+      _hermesTranscriptTailProbeInFlight = false;
+    }
   }
 
   Future<void> _refreshDesktopHermesTranscript(

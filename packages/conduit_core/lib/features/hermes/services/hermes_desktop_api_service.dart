@@ -587,6 +587,29 @@ final class HermesDesktopApiService
     CancelToken? cancelToken,
   }) => _runtimeGetSessionMessages(id, cancelToken: cancelToken);
 
+  /// The id of the session's newest stored row, without its payload.
+  ///
+  /// One row over REST: cheap enough to ask on a timer, and authoritative about
+  /// whether anything landed — the check a chat does before paying for a
+  /// transcript page.
+  Future<Object?> newestRowId(String storedId) async {
+    final rows = _objects(
+      await _requestJson(
+        'GET',
+        '/api/sessions/${Uri.encodeComponent(storedId)}/messages',
+        query: {
+          'limit': 1,
+          'offset': 0,
+          'order': 'latest',
+          'include_compacted': true,
+          ..._sessionScope(storedId),
+        },
+      ),
+      'messages',
+    );
+    return rows.isEmpty ? null : rows.last['id'];
+  }
+
   /// Opens a session with its newest page only, finishing the history in the
   /// background (the extension keeps the rest out of the navigation path).
   Future<List<Map<String, dynamic>>> openSessionTranscript(
