@@ -79,6 +79,25 @@ void main() {
     check(status.peers.last.canRelease).isFalse();
   });
 
+  test('parses can_raise/can_release exactly as the server sends them', () {
+    final status = HermesLocalModelStatus.fromJson({
+      'peers': [
+        {
+          'name': 'desktop',
+          'base_url': 'http://20.20.0.40:8080/v1',
+          'up': true,
+          'model': 'ornith-1.5-35b-a3b',
+          'can_raise': true,
+          'can_release': true,
+        },
+      ],
+    });
+    final peer = status!.peers.single;
+    check(peer.up).isTrue();
+    check(peer.canRaise).isTrue();
+    check(peer.canRelease).isTrue();
+  });
+
   test('a disabled manager with no models still parses', () {
     final status = HermesLocalModelStatus.fromJson({
       'enabled': false,
