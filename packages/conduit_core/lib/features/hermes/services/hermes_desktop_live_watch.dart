@@ -89,15 +89,22 @@ extension _HermesDesktopLiveWatch on HermesDesktopApiService {
     HermesSessionBinding binding,
   ) {
     Map<String, dynamic>? row;
+    // The same stored session can be live under several runtimes (this app, a
+    // desktop window, the browser's terminal). Take the longest history across
+    // them: that is what the session actually holds, and a count that grew
+    // means new content arrived whichever client ran the turn.
+    var messageCount = -1;
     final rows = result['sessions'];
     if (rows is List) {
       for (final item in rows) {
         if (item is! Map) continue;
-        if (item['session_key'] == storedId ||
-            item['session_key'] == binding.storedId ||
-            item['id'] == binding.runtimeId) {
-          row = Map<String, dynamic>.from(item);
-          break;
+        final matchesStored = item['session_key'] == storedId ||
+            item['session_key'] == binding.storedId;
+        if (!matchesStored && item['id'] != binding.runtimeId) continue;
+        row ??= Map<String, dynamic>.from(item);
+        final count = item['message_count'];
+        if (count is num && count.toInt() > messageCount) {
+          messageCount = count.toInt();
         }
       }
     }
@@ -120,7 +127,14 @@ extension _HermesDesktopLiveWatch on HermesDesktopApiService {
       storedId: storedId,
       runtimeId: binding.runtimeId,
     );
-    if (changed) _queueTranscriptChange(storedId);
+    // Content, not events: if the session's history grew since the last tick the
+    // open chat is stale, whoever ran the turn — and a completion frame that the
+    // client never received can no longer strand it.
+    final grew = messageCount >= 0 &&
+        _liveWatchMessageCount != null &&
+        messageCount > _liveWatchMessageCount!;
+    if (messageCount >= 0) _liveWatchMessageCount = messageCount;
+    if (changed || grew) _queueTranscriptChange(storedId);
   }
 
   /// A refusal is a gateway answer, so the socket is fine; it says nothing

@@ -131,6 +131,30 @@ void main() {
     );
   });
 
+  test('a growing history reloads the chat with no completion frame', () async {
+    final changes = <String>[];
+    final subscription = service.transcriptChanges.listen(changes.add);
+    addTearDown(subscription.cancel);
+
+    await service.getSessionMessages('st-1'); // ticks establish the baseline (0)
+    await _settle(duration: const Duration(milliseconds: 120));
+    changes.clear();
+
+    // Another client's turn appended to the session; this socket never saw a
+    // completion for it, only the history grew.
+    gateway.rows.addAll(const [
+      {'id': 1, 'role': 'user', 'content': 'hi'},
+      {'id': 2, 'role': 'assistant', 'content': 'there'},
+    ]);
+    await _settle(duration: const Duration(milliseconds: 400));
+
+    expect(
+      changes,
+      contains('st-1'),
+      reason: 'a longer history is proof the open chat is stale',
+    );
+  });
+
   test('a completion from another runtime still reloads the open chat', () async {
     final changes = <String>[];
     final subscription = service.transcriptChanges.listen(changes.add);

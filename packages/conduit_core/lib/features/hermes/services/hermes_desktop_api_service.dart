@@ -320,6 +320,9 @@ final class HermesDesktopApiService
   bool _liveWatchInFlight = false;
   int _liveWatchFailures = 0;
   int _liveWatchAbsences = 0;
+
+  /// Highest history length seen for the open session, across its runtimes.
+  int? _liveWatchMessageCount;
   bool _foreground = true;
 
   /// Transcript reloads are coalesced: one turn ends with several frames
