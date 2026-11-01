@@ -56,12 +56,11 @@ extension _HermesDesktopLiveWatch on HermesDesktopApiService {
             'current_session_id': binding.runtimeId,
             ..._sessionScope(storedId),
           },
-          timeout: const Duration(seconds: 10),
         ),
       );
       if (_closed) return;
       _liveWatchFailures = 0;
-      _applyWatchActiveList(result, storedId, binding);
+      await _applyWatchActiveList(result, storedId, binding);
     } on HermesDesktopRpcException catch (error) {
       if (_closed) return;
       if (error.disconnected || error.timedOut) {
@@ -83,11 +82,11 @@ extension _HermesDesktopLiveWatch on HermesDesktopApiService {
   /// `active_list` is used instead of `session.resume` because it is a few
   /// hundred bytes with no side effects — a resume re-attaches the transport
   /// and re-emits `session.info`, which woke every viewer's UI on every tick.
-  void _applyWatchActiveList(
+  Future<void> _applyWatchActiveList(
     Map<String, dynamic> result,
     String storedId,
     HermesSessionBinding binding,
-  ) {
+  ) async {
     Map<String, dynamic>? row;
     // The same stored session can be live under several runtimes (this app, a
     // desktop window, the browser's terminal). Take the longest history across
@@ -127,14 +126,44 @@ extension _HermesDesktopLiveWatch on HermesDesktopApiService {
       storedId: storedId,
       runtimeId: binding.runtimeId,
     );
-    // Content, not events: if the session's history grew since the last tick the
-    // open chat is stale, whoever ran the turn — and a completion frame that the
-    // client never received can no longer strand it.
-    final grew = messageCount >= 0 &&
-        _liveWatchMessageCount != null &&
-        messageCount > _liveWatchMessageCount!;
-    if (messageCount >= 0) _liveWatchMessageCount = messageCount;
-    if (changed || grew) _queueTranscriptChange(storedId);
+    if (changed) _queueTranscriptChange(storedId);
+    await _probeNewestRow(storedId);
+  }
+
+  /// Asks for the session's newest row and reloads when it is not the one this
+  /// chat ends with.
+  ///
+  /// Events and `message_count` both failed in practice: a turn run under
+  /// another runtime can complete without a completion frame here, and the
+  /// counts are per-runtime history lengths that do not always move. One row
+  /// (`limit=1`, newest) is cheap, authoritative, and cannot be missed — the
+  /// only question it answers is "is what I am showing still the tail?".
+  Future<void> _probeNewestRow(String storedId) async {
+    final local = _lastTranscripts[storedId];
+    try {
+      final probe = _objects(
+        await _requestJson(
+          'GET',
+          '/api/sessions/${Uri.encodeComponent(storedId)}/messages',
+          query: {
+            'limit': 1,
+            'offset': 0,
+            'order': 'latest',
+            'include_compacted': true,
+            ..._sessionScope(storedId),
+          },
+        ),
+        'messages',
+      );
+      if (_closed || probe.isEmpty) return;
+      final newestId = probe.last['id'];
+      final knownId = local == null || local.isEmpty ? null : local.last['id'];
+      // No tail at all (a chat opened before it had rows) counts as stale too.
+      if (newestId == null || newestId == knownId) return;
+      _queueTranscriptChange(storedId);
+    } catch (_) {
+      // Transient: the next tick asks again.
+    }
   }
 
   /// A refusal is a gateway answer, so the socket is fine; it says nothing
