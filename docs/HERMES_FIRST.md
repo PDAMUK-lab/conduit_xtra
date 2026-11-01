@@ -179,7 +179,9 @@ before `flutter pub get`.
   (`set_multiplex_active(True)` → raises) and the fix verified: wrapping the
   env build in `set_secret_scope(build_profile_secret_scope(home))` yields 90
   env keys. The app now surfaces the server's `detail` text instead of a
-  generic failure. Patch pending operator approval.
+  generic failure. **Fixed and confirmed end to end:** the dashboard restarted
+  onto the patch, and a Doctor run from the app wrote 7,325 bytes of real output
+  (2 profiles, 3 issues) where the failure had left a 44-byte banner.
 - **M4.3 (Git, read-only):** branch/ahead/behind, changed-file list with
   per-file markers, and each file's diff against HEAD. Stage, commit and
   push are not wired. Live contract: status keys exactly as modelled
