@@ -61,6 +61,7 @@ class Routes {
   static const String hermesGit = '/profile/hermes/git';
   static const String hermesGitDiff = '/profile/hermes/git/diff';
   static const String hermesOps = '/profile/hermes/ops';
+  static const String hermesConfigEdit = '/profile/hermes/config/edit';
   static const String hermesConfig = '/profile/hermes/config';
   static const String hermesAnalytics = '/profile/hermes/analytics';
   static const String hermesLogs = '/profile/hermes/logs';
@@ -150,6 +151,7 @@ class RouteNames {
   static const String hermesGit = 'hermes-git';
   static const String hermesGitDiff = 'hermes-git-diff';
   static const String hermesOps = 'hermes-ops';
+  static const String hermesConfigEdit = 'hermes-config-edit';
   static const String hermesConfig = 'hermes-config';
   static const String hermesAnalytics = 'hermes-analytics';
   static const String hermesLogs = 'hermes-logs';

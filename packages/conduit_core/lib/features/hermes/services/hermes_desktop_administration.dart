@@ -668,6 +668,17 @@ final class _HermesDesktopAdministration {
   // slice reads only — the write path replaces the whole document and lands
   // behind its own confirmation.
 
+  /// Write the whole `config.yaml`. The server parses it (must be a mapping)
+  /// and replaces the document — `merge_existing=False` — so callers must show
+  /// the diff and confirm first, then read the file back to verify.
+  Future<void> saveRawConfig(String yamlText) async {
+    await _owner._requestJson(
+      'PUT',
+      '/api/config/raw',
+      body: {'yaml_text': yamlText},
+    );
+  }
+
   Future<HermesRawConfig?> rawConfig() async {
     final data = await _owner._requestJson('GET', '/api/config/raw');
     return HermesRawConfig.fromJson(data);

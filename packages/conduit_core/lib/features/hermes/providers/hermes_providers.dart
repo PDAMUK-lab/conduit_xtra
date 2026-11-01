@@ -2777,6 +2777,21 @@ final hermesCheckpointsProvider = FutureProvider<HermesCheckpoints?>((ref) async
   return service.checkpoints();
 });
 
+/// The config text that was on disk before the last successful save, so the
+/// editor can offer a one-step restore.
+final hermesConfigUndoProvider =
+    NotifierProvider<HermesConfigUndoNotifier, String?>(
+      HermesConfigUndoNotifier.new,
+    );
+
+class HermesConfigUndoNotifier extends Notifier<String?> {
+  @override
+  String? build() => null;
+
+  void remember(String? previous) => state = previous;
+  void clear() => state = null;
+}
+
 /// The server's raw config.yaml and its path.
 final hermesRawConfigProvider = FutureProvider<HermesRawConfig?>((ref) async {
   final service = ref.watch(hermesApiServiceProvider);

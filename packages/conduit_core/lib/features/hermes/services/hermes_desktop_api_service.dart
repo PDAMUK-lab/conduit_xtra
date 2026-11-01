@@ -537,6 +537,8 @@ final class HermesDesktopApiService
 
   // Config and env (read-only).
   Future<HermesRawConfig?> rawConfig() => _administration.rawConfig();
+  Future<void> saveRawConfig(String yamlText) =>
+      _administration.saveRawConfig(yamlText);
   Future<List<HermesEnvVar>> envVars() => _administration.envVars();
 
   // Analytics and logs (read-only).

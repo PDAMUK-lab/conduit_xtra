@@ -171,6 +171,18 @@ before `flutter pub get`.
   destructive confirmation; hooks are listed with their approval state.
   There is **no restore route** in the dashboard — restore stays a CLI job
   (`hermes checkpoints`), documented rather than faked.
+- **M4.1 Stage B (config write):** full-document editor for `config.yaml`:
+  local YAML parse (must be a mapping), a line diff against the file on disk,
+  the file name typed to confirm, then `PUT /api/config/raw` and a read-back.
+  Verification compares **canonical** documents, because the server
+  re-serialises from its parsed form (comments dropped, quoting normalised) —
+  the page says so before the editor. The pre-save text is kept so the Config
+  page can offer "restore previous version", itself diffed and confirmed.
+  Measured live: 9,414 characters round-tripped to the same document; the file
+  is rewritten on save, and a custom `HERMES_HOME` is not an isolated home for
+  config endpoints (it resolves to the default profile), so the test wrote the
+  real file once — restored byte-identically and verified (doctor: v52, no
+  deprecated keys).
 - **Ops blocker (server, 0.22.5):** `POST /api/ops/*` fails at spawn with
   `agent.secret_scope.UnscopedSecretError` for `DESKTOP_LLM_KEY` whenever the
   dashboard is the multiplexing process: `_profile_action_environment` calls

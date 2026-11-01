@@ -72,6 +72,7 @@ bool _isAccountlessBackendLocation(String location) {
       isHermesGitLocation(location) ||
       location == Routes.hermesOps ||
       location == Routes.hermesConfig ||
+      location == Routes.hermesConfigEdit ||
       location == Routes.hermesAnalytics ||
       location == Routes.hermesLogs ||
       location == Routes.about;

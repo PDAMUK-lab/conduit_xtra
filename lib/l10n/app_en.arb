@@ -6627,6 +6627,61 @@
   "@hermesGitChooseRepo": {
     "description": "Git path copy."
   },
+  "hermesConfigEditTitle": "Edit config.yaml",
+  "@hermesConfigEditTitle": {
+    "description": "Config editor copy."
+  },
+  "hermesConfigEditSubtitle": "The whole file is replaced on save. Review the diff, then type the file name to confirm.",
+  "@hermesConfigEditSubtitle": {
+    "description": "Config editor copy."
+  },
+  "hermesConfigReview": "Review",
+  "@hermesConfigReview": {
+    "description": "Config editor copy."
+  },
+  "hermesConfigSave": "Save changes",
+  "@hermesConfigSave": {
+    "description": "Config editor copy."
+  },
+  "hermesConfigNotMapping": "The file must be a YAML mapping at the top level.",
+  "@hermesConfigNotMapping": {
+    "description": "Config editor copy."
+  },
+  "hermesConfigSaveFailed": "The server refused the write.",
+  "@hermesConfigSaveFailed": {
+    "description": "Config editor copy."
+  },
+  "hermesConfigVerifyFailed": "The file on the server does not match what was sent — nothing was confirmed, check the file before retrying.",
+  "@hermesConfigVerifyFailed": {
+    "description": "Config editor copy."
+  },
+  "hermesConfigSaved": "Saved and verified.",
+  "@hermesConfigSaved": {
+    "description": "Config editor copy."
+  },
+  "hermesConfigRestore": "Restore previous version",
+  "@hermesConfigRestore": {
+    "description": "Config editor copy."
+  },
+  "hermesConfigConfirmHint": "{name} — type it to confirm",
+  "@hermesConfigConfirmHint": {
+    "description": "Config editor copy.",
+    "placeholders": {"name": {"type": "String"}}
+  },
+  "hermesConfigInvalidYaml": "Invalid YAML: {error}",
+  "@hermesConfigInvalidYaml": {
+    "description": "Config editor copy.",
+    "placeholders": {"error": {"type": "String"}}
+  },
+  "hermesConfigDiffCounts": "{added} added · {removed} removed",
+  "@hermesConfigDiffCounts": {
+    "description": "Config editor copy.",
+    "placeholders": {"added": {"type": "int"}, "removed": {"type": "int"}}
+  },
+  "hermesConfigFormatWarning": "The server rewrites this file from its parsed form: comments and formatting are not preserved.",
+  "@hermesConfigFormatWarning": {
+    "description": "Config editor warning."
+  },
   "hermesApprovalRequired": "Approval required",
   "@hermesApprovalRequired": {
     "description": "Title of a Hermes human-approval request card."

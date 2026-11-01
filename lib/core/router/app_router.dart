@@ -48,6 +48,7 @@ import '../../features/hermes/views/hermes_git_page.dart';
 import '../../features/hermes/views/hermes_git_diff_page.dart';
 import '../../features/hermes/views/hermes_ops_page.dart';
 import '../../features/hermes/views/hermes_config_page.dart';
+import '../../features/hermes/views/hermes_config_edit_page.dart';
 import '../../features/hermes/views/hermes_analytics_page.dart';
 import '../../features/hermes/views/hermes_logs_page.dart';
 import '../../features/hermes/views/hermes_profiles_page.dart';
@@ -646,6 +647,14 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       name: RouteNames.hermesOps,
       pageBuilder: (context, state) =>
           _buildPlatformPage(state: state, child: const HermesOpsPage()),
+    ),
+    GoRoute(
+      path: Routes.hermesConfigEdit,
+      name: RouteNames.hermesConfigEdit,
+      pageBuilder: (context, state) => _buildPlatformPage(
+        state: state,
+        child: HermesConfigEditPage(restoreText: state.extra as String?),
+      ),
     ),
     GoRoute(
       path: Routes.hermesConfig,

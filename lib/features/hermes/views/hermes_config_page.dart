@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../l10n/app_localizations.dart';
 import '../../../l10n/app_localizations_en.dart';
@@ -10,6 +11,7 @@ import '../../../shared/widgets/utility_components.dart';
 
 import 'package:conduit_core/features/hermes/models/hermes_config_view.dart';
 import 'package:conduit_core/features/hermes/providers/hermes_providers.dart';
+import 'package:conduit_core/navigation/routes.dart';
 
 AppLocalizations _l10n(BuildContext context) =>
     AppLocalizations.of(context) ?? AppLocalizationsEn();
@@ -71,6 +73,36 @@ class _HermesConfigPageState extends ConsumerState<HermesConfigPage> {
                   ),
                 ),
                 const SizedBox(height: Spacing.xs),
+                Row(
+                  children: [
+                    Expanded(
+                      child: ConduitButton(
+                        key: const ValueKey<String>('hermes-config-edit'),
+                        text: l10n.hermesConfigEditTitle,
+                        isSecondary: true,
+                        isCompact: true,
+                        onPressed: () =>
+                            context.push(Routes.hermesConfigEdit),
+                      ),
+                    ),
+                    if (ref.watch(hermesConfigUndoProvider) != null) ...[
+                      const SizedBox(width: Spacing.sm),
+                      Expanded(
+                        child: ConduitButton(
+                          key: const ValueKey<String>('hermes-config-restore'),
+                          text: l10n.hermesConfigRestore,
+                          isSecondary: true,
+                          isCompact: true,
+                          onPressed: () => context.push(
+                            Routes.hermesConfigEdit,
+                            extra: ref.read(hermesConfigUndoProvider),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+                const SizedBox(height: Spacing.sm),
                 Container(
                   padding: const EdgeInsets.all(Spacing.sm),
                   decoration: BoxDecoration(
