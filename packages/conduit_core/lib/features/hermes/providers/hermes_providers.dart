@@ -40,6 +40,7 @@ import 'package:conduit_core/features/hermes/models/hermes_connection_profile.da
 import 'package:conduit_core/features/hermes/models/hermes_analytics.dart';
 import 'package:conduit_core/features/hermes/models/hermes_blueprint.dart';
 import 'package:conduit_core/features/hermes/models/hermes_delivery_target.dart';
+import 'package:conduit_core/features/hermes/models/hermes_live_activity.dart';
 import 'package:conduit_core/features/hermes/models/hermes_local_models.dart';
 import 'package:conduit_core/features/hermes/models/hermes_messaging.dart';
 import 'package:conduit_core/features/hermes/models/hermes_fs.dart';
@@ -2163,6 +2164,20 @@ final hermesDesktopTranscriptChangesProvider = StreamProvider<String>((ref) {
       ? service.transcriptChanges
       : const Stream<String>.empty();
 });
+
+/// The visible step of the turn running in [storedId], when a chat is
+/// following a run another client started.
+final hermesLiveActivityProvider =
+    StreamProvider.autoDispose.family<HermesLiveActivity?, String>((
+      ref,
+      storedId,
+    ) {
+      final service = ref.watch(hermesApiServiceProvider);
+      if (service is! HermesDesktopApiService || storedId.isEmpty) {
+        return const Stream<HermesLiveActivity?>.empty();
+      }
+      return service.liveActivityFor(storedId);
+    });
 
 final hermesDesktopModelsProvider = FutureProvider<List<Model>>((ref) async {
   final service = ref.watch(hermesApiServiceProvider);

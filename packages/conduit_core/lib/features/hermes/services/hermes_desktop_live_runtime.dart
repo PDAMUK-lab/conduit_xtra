@@ -47,6 +47,7 @@ extension _HermesDesktopLiveRuntime on HermesDesktopApiService {
     );
     _stateSubscription ??= _rpc.events.listen((event) {
       _eventBuffer.add(event);
+      _recordLiveActivity(event);
       final eventStoredId = _storedIdForRuntime(event.sessionId);
       if (event.type == 'session.info') {
         // Update BOTH keys. `session.create` can omit `running`, which parks

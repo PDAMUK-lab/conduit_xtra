@@ -14,6 +14,7 @@ import 'package:conduit_core/features/chat/views/chat_turn_render_state.dart';
 import '../../../shared/theme/theme_extensions.dart';
 import '../../../shared/widgets/markdown/renderer/markdown_style.dart';
 import 'conduit_streaming_orbit.dart';
+import 'hermes_live_activity_line.dart';
 
 class StreamingTurnFooter extends ConsumerStatefulWidget {
   const StreamingTurnFooter({
@@ -124,14 +125,32 @@ class _StreamingTurnFooterState extends ConsumerState<StreamingTurnFooter> {
                           .paragraphSpacing,
                       bottom: Spacing.xs,
                     ),
-                    child: RepaintBoundary(
-                      child: ConduitStreamingOrbit(
-                        size: 28,
-                        color: context.conduitTheme.textSecondary.withValues(
-                          alpha: 0.75,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        RepaintBoundary(
+                          child: ConduitStreamingOrbit(
+                            size: 28,
+                            color: context.conduitTheme.textSecondary
+                                .withValues(alpha: 0.75),
+                            animate: !_disableAnimations,
+                          ),
                         ),
-                        animate: !_disableAnimations,
-                      ),
+                        // What the turn is doing right now (a tool, thinking, a
+                        // reply being written) — a spinner alone reads as a
+                        // hang when another client is driving the turn.
+                        if ((widget.message.metadata?['hermesSessionId']
+                                ?.toString() ??
+                            '')
+                        .isNotEmpty)
+                          HermesLiveActivityLine(
+                            storedSessionId: widget
+                                .message
+                                .metadata!['hermesSessionId']
+                                .toString(),
+                          ),
+                      ],
                     ),
                   ),
                 ),

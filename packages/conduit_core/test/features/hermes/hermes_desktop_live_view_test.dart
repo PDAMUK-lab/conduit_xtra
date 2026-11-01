@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:conduit_core/features/hermes/models/hermes_config.dart';
+import 'package:conduit_core/features/hermes/models/hermes_live_activity.dart';
 import 'package:conduit_core/features/hermes/services/hermes_desktop_api_service.dart';
 import 'package:test/test.dart';
 
@@ -75,6 +76,37 @@ void main() {
       service.turnStateFor('st-1'),
       HermesDesktopTurnState.idle,
       reason: 'a stale running state leaves the typing indicator up forever',
+    );
+  });
+
+  test('the steps of a turn another client runs are visible', () async {
+    final streamed = <HermesLiveActivity?>[];
+    final subscription = service.liveActivityFor('st-1').listen(streamed.add);
+    addTearDown(subscription.cancel);
+
+    await service.getSessionMessages('st-1');
+    gateway.push({'type': 'thinking.delta', 'text': 'planning the fix'});
+    gateway.push({'type': 'tool.start', 'name': 'terminal', 'detail': 'flutter test'});
+    gateway.push({'type': 'tool.complete', 'name': 'terminal', 'result_text': 'ok'});
+    gateway.push({'type': 'message.delta', 'delta': 'done.'});
+    await _settle();
+
+    final activities = streamed.whereType<HermesLiveActivity>().toList();
+    final kinds = activities.map((activity) => activity.kind).toList();
+    expect(kinds, contains(HermesLiveActivityKind.thinking));
+    expect(kinds, contains(HermesLiveActivityKind.tool));
+    expect(kinds, contains(HermesLiveActivityKind.writing));
+    expect(
+      activities.firstWhere((a) => a.kind == HermesLiveActivityKind.tool).text,
+      'terminal',
+    );
+
+    gateway.push({'type': 'message.complete', 'text': 'done.'});
+    await _settle();
+    expect(
+      streamed.last,
+      anyOf(isNull, predicate<HermesLiveActivity>((a) => a.kind == HermesLiveActivityKind.done)),
+      reason: 'the line must clear when the turn ends',
     );
   });
 

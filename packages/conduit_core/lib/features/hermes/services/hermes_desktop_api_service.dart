@@ -21,6 +21,7 @@ import 'package:conduit_core/features/hermes/models/hermes_config_view.dart';
 import 'package:conduit_core/features/hermes/models/hermes_analytics.dart';
 import 'package:conduit_core/features/hermes/models/hermes_blueprint.dart';
 import 'package:conduit_core/features/hermes/models/hermes_delivery_target.dart';
+import 'package:conduit_core/features/hermes/models/hermes_live_activity.dart';
 import 'package:conduit_core/features/hermes/models/hermes_local_models.dart';
 import 'package:conduit_core/features/hermes/models/hermes_messaging.dart';
 import 'package:conduit_core/features/hermes/models/hermes_fs.dart';
@@ -295,6 +296,10 @@ final class HermesDesktopApiService
   final _sessionTurnStateChanges = StreamController<String>.broadcast();
   final Map<String, HermesDesktopTurnState> _sessionTurnStates = {};
   final _transcriptChanges = StreamController<String>.broadcast();
+  final _liveActivities = StreamController<HermesLiveActivity>.broadcast();
+
+  /// Per-session text a chat shows while another client's turn is running.
+  final Map<String, HermesLiveActivity> _liveActivity = {};
   final _desktopContractChanges = StreamController<int>.broadcast();
 
   Map<String, dynamic>? _status;
@@ -371,6 +376,136 @@ final class HermesDesktopApiService
   }
 
   Stream<String> get transcriptChanges => _transcriptChanges.stream;
+
+  /// The latest visible step of the turn running in [storedId], for a chat that
+  /// is following another client's run. Emits `null` when that session has no
+  /// running turn.
+  Stream<HermesLiveActivity?> liveActivityFor(String storedId) =>
+      Stream<HermesLiveActivity?>.multi((controller) {
+        final subscription = _liveActivities.stream.listen(
+          // Null means "this session has no visible step any more", which is
+          // what clears the line when the turn ends.
+          (_) => controller.add(_liveActivityForId(storedId)),
+          onError: controller.addError,
+          onDone: controller.close,
+        );
+        controller
+          ..add(_liveActivityForId(storedId))
+          ..onCancel = subscription.cancel;
+      });
+
+  HermesLiveActivity? _liveActivityForId(String storedId) {
+    final direct = _liveActivity[storedId];
+    if (direct != null) return direct;
+    final binding = _bindings[storedId];
+    return binding == null ? null : _liveActivity[binding.runtimeId];
+  }
+
+  /// Projects one gateway event onto the visible step for its session.
+  ///
+  /// Only the tail is kept: a chat shows a status line, not the whole reply
+  /// (the transcript carries that). Throttling is the UI's business — this
+  /// only emits when the visible text actually changes.
+  void _recordLiveActivity(HermesDesktopEvent event) {
+    final storedId = _storedIdForRuntime(event.sessionId);
+    final id = storedId ?? event.sessionId;
+    if (id == null || id.isEmpty) return;
+    final payload = event.payload;
+    String text(String key) => payload[key]?.toString() ?? '';
+    HermesLiveActivity? next;
+    switch (event.type) {
+      case 'thinking.delta':
+      case 'reasoning.delta':
+        final delta = text('delta').isNotEmpty ? text('delta') : text('text');
+        if (delta.isNotEmpty) {
+          next = HermesLiveActivity(
+            kind: HermesLiveActivityKind.thinking,
+            text: _boundedActivity(
+              '${_liveActivity[id]?.kind == HermesLiveActivityKind.thinking ? _liveActivity[id]!.text : ''}$delta',
+            ),
+          );
+        }
+      case 'message.delta':
+        final delta = text('delta').isNotEmpty ? text('delta') : text('text');
+        if (delta.isNotEmpty) {
+          next = HermesLiveActivity(
+            kind: HermesLiveActivityKind.writing,
+            text: _boundedActivity(
+              '${_liveActivity[id]?.kind == HermesLiveActivityKind.writing ? _liveActivity[id]!.text : ''}$delta',
+            ),
+          );
+        }
+      case 'tool.start':
+      case 'tool.generating':
+        next = HermesLiveActivity(
+          kind: HermesLiveActivityKind.tool,
+          text: text('name').isEmpty ? 'tool' : text('name'),
+          detail: _boundedActivity(
+            text('detail').isNotEmpty
+                ? text('detail')
+                : (text('args_text').isNotEmpty ? text('args_text') : text('args')),
+          ),
+        );
+      case 'tool.progress':
+        next = HermesLiveActivity(
+          kind: HermesLiveActivityKind.tool,
+          text: text('name').isEmpty ? (_liveActivity[id]?.text ?? 'tool') : text('name'),
+          detail: _boundedActivity(
+            text('detail').isNotEmpty ? text('detail') : text('message'),
+          ),
+        );
+      case 'tool.complete':
+        next = HermesLiveActivity(
+          kind: HermesLiveActivityKind.tool,
+          text: text('name').isEmpty ? (_liveActivity[id]?.text ?? 'tool') : text('name'),
+          detail: _boundedActivity(text('error').isNotEmpty ? text('error') : text('result_text')),
+          failed: text('error').isNotEmpty,
+        );
+      case 'subagent.start':
+      case 'subagent.tool':
+      case 'subagent.complete':
+        next = HermesLiveActivity(
+          kind: HermesLiveActivityKind.subagent,
+          text: text('name').isEmpty ? 'subagent' : text('name'),
+          detail: _boundedActivity(
+            [text('goal'), text('tool_name'), text('summary'), text('error')]
+                .firstWhere((value) => value.isNotEmpty, orElse: () => ''),
+          ),
+        );
+      case 'message.complete':
+      case 'session.info':
+        if (event.type == 'message.complete' ||
+            payload['running'] == false) {
+          _liveActivity.remove(id);
+          _liveActivities.add(const HermesLiveActivity(
+            kind: HermesLiveActivityKind.done,
+            text: '',
+          ));
+          return;
+        }
+      default:
+        return;
+    }
+    if (next == null) return;
+    final previous = _liveActivity[id];
+    if (previous != null &&
+        previous.kind == next.kind &&
+        previous.text == next.text &&
+        previous.detail == next.detail &&
+        previous.failed == next.failed) {
+      return;
+    }
+    _liveActivity[id] = next;
+    _liveActivities.add(next);
+  }
+
+  static String _boundedActivity(String value) {
+    final collapsed = value.replaceAll(RegExp(r'\s+'), ' ').trim();
+    return collapsed.length <= 160
+        ? collapsed
+        : collapsed.substring(collapsed.length - 160);
+  }
+
   Stream<int> get desktopContractChanges => _desktopContractChanges.stream;
   Stream<int> desktopContracts() => Stream<int>.multi((controller) {
     final subscription = _desktopContractChanges.stream.listen(
@@ -951,6 +1086,7 @@ final class HermesDesktopApiService
     unawaited(_turnStates.close());
     unawaited(_sessionTurnStateChanges.close());
     unawaited(_transcriptChanges.close());
+    unawaited(_liveActivities.close());
     unawaited(_desktopContractChanges.close());
     _eventBuffer.clear();
     _bindings.clear();
