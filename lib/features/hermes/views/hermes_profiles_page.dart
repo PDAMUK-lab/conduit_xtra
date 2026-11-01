@@ -27,6 +27,10 @@ class HermesProfilesPage extends ConsumerWidget {
 
     return UtilityPageScaffold.settings(
       title: l10n.hermesProfilesTitle,
+      onRefresh: () async {
+        ref.invalidate(hermesProfileListProvider);
+        ref.invalidate(hermesActiveProfileProvider);
+      },
       children: [
         Text(
           l10n.hermesProfilesSubtitle,

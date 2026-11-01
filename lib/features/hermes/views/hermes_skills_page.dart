@@ -52,6 +52,9 @@ class _HermesSkillsPageState extends ConsumerState<HermesSkillsPage> {
 
     return UtilityPageScaffold.settings(
       title: l10n.hermesSkillsTitle,
+      onRefresh: () async {
+        ref.invalidate(hermesDashboardSkillsProvider);
+      },
       children: [
         ConduitButton(
           key: const ValueKey<String>('hermes-skill-new'),

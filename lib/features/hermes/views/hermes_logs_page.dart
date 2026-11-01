@@ -52,6 +52,9 @@ class _HermesLogsPageState extends ConsumerState<HermesLogsPage> {
 
     return UtilityPageScaffold.settings(
       title: l10n.hermesLogsTitle,
+      onRefresh: () async {
+        ref.invalidate(hermesLogTailProvider);
+      },
       children: [
         Text(
           l10n.hermesLogsSubtitle,

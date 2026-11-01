@@ -322,6 +322,15 @@ class _HermesLocalModelsPageState extends ConsumerState<HermesLocalModelsPage> {
                     color: theme.textSecondary,
                   ),
                 ),
+                if (peer.metrics != null && !peer.metrics!.isEmpty)
+                  Text(
+                    _metricsLine(peer.metrics!),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTypography.captionStyle.copyWith(
+                      color: theme.textSecondary,
+                    ),
+                  ),
               ],
             ),
           ),
@@ -344,6 +353,25 @@ class _HermesLocalModelsPageState extends ConsumerState<HermesLocalModelsPage> {
         ],
       ),
     );
+  }
+
+  /// "7.6 GB VRAM used · 25.3 GB RAM free" — only what the peer measured.
+  String _metricsLine(HermesPeerMetrics metrics) {
+    final parts = <String>[];
+    final used = metrics.vramUsedMb;
+    final total = metrics.vramTotalMb;
+    if (used != null) {
+      parts.add(
+        total != null
+            ? '${(used / 1024).toStringAsFixed(1)} / ${(total / 1024).toStringAsFixed(1)} GB VRAM'
+            : '${(used / 1024).toStringAsFixed(1)} GB VRAM used',
+      );
+    }
+    final ramFree = metrics.ramAvailableMb;
+    if (ramFree != null) {
+      parts.add('${(ramFree / 1024).toStringAsFixed(1)} GB RAM free');
+    }
+    return parts.join(' · ');
   }
 
   Future<void> _peerAction(

@@ -98,6 +98,31 @@ void main() {
     check(peer.canRelease).isTrue();
   });
 
+  test('parses a peer metrics block, and tolerates none', () {
+    final status = HermesLocalModelStatus.fromJson({
+      'peers': [
+        {
+          'name': 'desktop',
+          'base_url': 'http://20.20.0.40:8080/v1',
+          'up': true,
+          'metrics': {
+            'gpu': 'AMD Radeon RX 6600 XT',
+            'vram_used_mb': 7831,
+            'ram_available_mb': 25958,
+            'ram_total_mb': 32680,
+          },
+        },
+        {'name': 'bare', 'base_url': 'http://x/v1', 'metrics': <String, dynamic>{}},
+      ],
+    });
+    final desktop = status!.peers.first;
+    check(desktop.metrics!.vramUsedMb).equals(7831);
+    check(desktop.metrics!.ramAvailableMb).equals(25958);
+    check(desktop.metrics!.gpu ?? '').contains('6600');
+    check(desktop.metrics!.isEmpty).isFalse();
+    check(status.peers.last.metrics).isNull();
+  });
+
   test('a disabled manager with no models still parses', () {
     final status = HermesLocalModelStatus.fromJson({
       'enabled': false,

@@ -40,6 +40,9 @@ class _HermesAnalyticsPageState extends ConsumerState<HermesAnalyticsPage> {
 
     return UtilityPageScaffold.settings(
       title: l10n.hermesAnalyticsTitle,
+      onRefresh: () async {
+        ref.invalidate(hermesUsageAnalyticsProvider);
+      },
       children: [
         Text(
           l10n.hermesAnalyticsSubtitle,

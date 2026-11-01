@@ -193,6 +193,16 @@ before `flutter pub get`.
   gateway up/stopped, version, free disk, active sessions, and `degraded` when
   the server says so. Measured: `degraded · v0.22.5 · 325 GB free` on the
   throwaway instance, which has no gateway.
+- **Fleet hardware.** A peer may declare `ssh_metrics_command`; the server runs
+  it over the same SSH target (15 s bound, 30 s cache) and keeps only
+  `vram_used_mb`, `vram_total_mb`, `ram_available_mb`, `ram_total_mb`, `gpu`.
+  The Fleet row then reads e.g. "7.6 GB VRAM used · 25.3 GB RAM free". The
+  platform detail lives in that command deliberately: on the Windows desktop
+  `AdapterRAM` wraps at 4,095 MB, so it reports *used* VRAM from the GPU
+  counters and never invents a total. Measured live: 7,831 MB used,
+  25,958 / 32,680 MB RAM, "AMD Radeon RX 6600 XT".
+- **Pull-to-refresh, the rest.** Analytics, Logs, Skills, Toolsets and Profiles
+  now refresh too, so every settings page in the Hermes hub responds to a pull.
 - **Fleet actions.** A peer may declare `ssh_target`, `ssh_key`,
   `raise_command` and `release_command`; the page then offers Raise (when the
   peer is down) or Release (when it is up), behind a confirm. The server runs

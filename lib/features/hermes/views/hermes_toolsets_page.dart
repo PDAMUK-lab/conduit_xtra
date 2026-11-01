@@ -40,6 +40,9 @@ class _HermesToolsetsPageState extends ConsumerState<HermesToolsetsPage> {
 
     return UtilityPageScaffold.settings(
       title: l10n.hermesToolsetsTitle,
+      onRefresh: () async {
+        ref.invalidate(hermesToolsetListProvider);
+      },
       children: [
         Text(
           l10n.hermesToolsetsSubtitle,

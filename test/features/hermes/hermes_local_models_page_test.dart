@@ -87,6 +87,12 @@ void main() {
               name: 'desktop',
               baseUrl: 'http://20.20.0.40:8080/v1',
               canRaise: true,
+              metrics: HermesPeerMetrics(
+                gpu: 'AMD Radeon RX 6600 XT',
+                vramUsedMb: 7831,
+                ramAvailableMb: 25958,
+                ramTotalMb: 32680,
+              ),
             ),
             HermesLocalPeer(
               name: 'laptop',
@@ -109,6 +115,8 @@ void main() {
       find.byKey(const ValueKey<String>('hermes-peer-raise-desktop')),
       findsOneWidget,
     );
+    expect(find.textContaining('7.6 GB VRAM used'), findsOneWidget);
+    expect(find.textContaining('25.3 GB RAM free'), findsOneWidget);
     expect(find.textContaining('serving ornith-1.5-9b-heretic'), findsOneWidget);
   });
 

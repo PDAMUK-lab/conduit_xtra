@@ -157,6 +157,7 @@ final class HermesLocalPeer {
     this.model,
     this.canRaise = false,
     this.canRelease = false,
+    this.metrics,
   });
 
   final String name;
@@ -165,6 +166,9 @@ final class HermesLocalPeer {
   final String? model;
   final bool canRaise;
   final bool canRelease;
+
+  /// What the peer measured about itself, when it declares how to measure.
+  final HermesPeerMetrics? metrics;
 
   static HermesLocalPeer? fromJson(Map<String, dynamic> json) {
     final baseUrl = json['base_url']?.toString().trim() ?? '';
@@ -178,6 +182,7 @@ final class HermesLocalPeer {
       model: model == null || model.isEmpty ? null : model,
       canRaise: json['can_raise'] == true,
       canRelease: json['can_release'] == true,
+      metrics: HermesPeerMetrics.fromJson(json['metrics']),
     );
   }
 
@@ -229,5 +234,40 @@ final class HermesPeerActionResult {
       stdout: json['stdout']?.toString() ?? '',
       stderr: json['stderr']?.toString() ?? '',
     );
+  }
+}
+
+/// Hardware a peer reported about itself (`metrics` in the peer row).
+final class HermesPeerMetrics {
+  const HermesPeerMetrics({
+    this.gpu,
+    this.vramUsedMb,
+    this.vramTotalMb,
+    this.ramAvailableMb,
+    this.ramTotalMb,
+  });
+
+  final String? gpu;
+  final int? vramUsedMb;
+  final int? vramTotalMb;
+  final int? ramAvailableMb;
+  final int? ramTotalMb;
+
+  bool get isEmpty =>
+      vramUsedMb == null && ramAvailableMb == null && ramTotalMb == null;
+
+  static int? _int(Object? value) =>
+      value is num ? value.toInt().clamp(0, 1 << 30) : null;
+
+  static HermesPeerMetrics? fromJson(Object? json) {
+    if (json is! Map) return null;
+    final metrics = HermesPeerMetrics(
+      gpu: json['gpu']?.toString(),
+      vramUsedMb: _int(json['vram_used_mb']),
+      vramTotalMb: _int(json['vram_total_mb']),
+      ramAvailableMb: _int(json['ram_available_mb']),
+      ramTotalMb: _int(json['ram_total_mb']),
+    );
+    return metrics.isEmpty && metrics.gpu == null ? null : metrics;
   }
 }
