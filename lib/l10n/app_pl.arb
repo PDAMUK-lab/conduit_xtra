@@ -6596,6 +6596,9 @@
   "hermesGitAheadBehind": "{ahead} do przodu · {behind} do tyłu",
   "hermesGitNoDiff": "Brak diffu dla tego pliku.",
   "hermesGitChanged": "{count, plural, =1{1 zmiana} other{{count} zmian}}",
+  "hermesGitPathHint": "Ścieżka repozytorium",
+  "hermesGitOpen": "Otwórz",
+  "hermesGitChooseRepo": "Repozytoria w tym folderze",
   "hermesApprovalRequired": "Wymagana zgoda",
   "@hermesApprovalRequired": {
     "description": "Title of a Hermes human-approval request card."

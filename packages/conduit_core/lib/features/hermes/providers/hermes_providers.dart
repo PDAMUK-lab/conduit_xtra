@@ -2701,6 +2701,47 @@ final hermesFsTextProvider =
       return service.fsReadText(path);
     });
 
+/// The enclosing repository of a path, or null when there is none.
+final hermesGitRootProvider = FutureProvider.family<String?, String>((
+  ref,
+  path,
+) async {
+  final service = ref.watch(hermesApiServiceProvider);
+  if (service is! HermesDesktopApiService) return null;
+  return service.gitRoot(path);
+});
+
+/// Repositories directly inside one directory (used to offer a choice when the
+/// default path is not itself a repository). Bounded to twelve children.
+final hermesGitReposProvider = FutureProvider.family<List<String>, String>((
+  ref,
+  directory,
+) async {
+  final service = ref.watch(hermesApiServiceProvider);
+  if (service is! HermesDesktopApiService) return const [];
+  final listing = await service.fsList(directory);
+  if (listing == null) return const [];
+  final roots = <String>[];
+  for (final entry in listing.entries.where((e) => e.isDirectory).take(12)) {
+    final root = await service.gitRoot(entry.path);
+    if (root != null && !roots.contains(root)) roots.add(root);
+  }
+  return roots;
+});
+
+/// The repository the Git page is showing; null until resolved.
+final hermesGitPathProvider =
+    NotifierProvider<HermesGitPathNotifier, String?>(
+      HermesGitPathNotifier.new,
+    );
+
+class HermesGitPathNotifier extends Notifier<String?> {
+  @override
+  String? build() => null;
+
+  void select(String? path) => state = path;
+}
+
 /// Working-tree status for one repository path.
 final hermesGitStatusProvider =
     FutureProvider.family<HermesGitStatus?, String>((ref, path) async {

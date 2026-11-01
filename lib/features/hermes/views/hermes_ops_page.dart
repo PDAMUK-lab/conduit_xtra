@@ -46,6 +46,7 @@ class _HermesOpsPageState extends ConsumerState<HermesOpsPage> {
   Timer? _poll;
   String? _action;
   HermesActionStatus? _status;
+  String? _error;
   bool _starting = false;
 
   @override
@@ -106,6 +107,14 @@ class _HermesOpsPageState extends ConsumerState<HermesOpsPage> {
         ),
         const SizedBox(height: Spacing.md),
         if (_action != null) _actionCard(theme, l10n),
+        if (_error != null)
+          Padding(
+            padding: const EdgeInsets.only(top: Spacing.xs),
+            child: Text(
+              _error!,
+              style: AppTypography.bodySmallStyle.copyWith(color: theme.error),
+            ),
+          ),
         const SizedBox(height: Spacing.lg),
         _sectionTitle(l10n.hermesOpsCheckpoints, theme),
         checkpointsAsync.when(
@@ -259,6 +268,13 @@ class _HermesOpsPageState extends ConsumerState<HermesOpsPage> {
                 ),
             ],
           ),
+          if (status == null && _error != null) ...[
+            const SizedBox(height: Spacing.xs),
+            Text(
+              _error!,
+              style: AppTypography.bodySmallStyle.copyWith(color: theme.error),
+            ),
+          ],
           if (tail.isNotEmpty) ...[
             const SizedBox(height: Spacing.xs),
             SelectableText(
@@ -312,6 +328,7 @@ class _HermesOpsPageState extends ConsumerState<HermesOpsPage> {
     setState(() {
       _action = action;
       _status = null;
+      _error = null;
       _starting = true;
     });
     try {
@@ -327,13 +344,13 @@ class _HermesOpsPageState extends ConsumerState<HermesOpsPage> {
         _status = status;
       });
       _pollUntilDone(action);
-    } catch (_) {
+    } catch (error) {
       if (mounted) {
         setState(() {
           _starting = false;
-          _action = null;
+          _error = _errorText(error);
         });
-        UiUtils.showMessage(context, _l10n(context).hermesOpsFailed, isError: true);
+        UiUtils.showMessage(context, _errorText(error), isError: true);
       }
     }
   }
@@ -354,6 +371,7 @@ class _HermesOpsPageState extends ConsumerState<HermesOpsPage> {
     setState(() {
       _action = 'checkpoints-prune';
       _status = null;
+      _error = null;
       _starting = true;
     });
     try {
@@ -365,15 +383,24 @@ class _HermesOpsPageState extends ConsumerState<HermesOpsPage> {
       });
       ref.invalidate(hermesCheckpointsProvider);
       _pollUntilDone('checkpoints-prune');
-    } catch (_) {
+    } catch (error) {
       if (mounted) {
         setState(() {
           _starting = false;
-          _action = null;
+          _error = _errorText(error);
         });
-        UiUtils.showMessage(context, l10n.hermesOpsFailed, isError: true);
+        UiUtils.showMessage(context, _errorText(error), isError: true);
       }
     }
+  }
+
+  /// The server's own reason when it gives one (a 500 carries the spawn error
+  /// in `detail`), so a failed action names its cause instead of "failed".
+  String _errorText(Object error) {
+    final match = RegExp(
+      r'"detail"\s*:\s*"([^"]{1,300})"',
+    ).firstMatch(error.toString());
+    return match?.group(1) ?? _l10n(context).hermesOpsFailed;
   }
 
   void _pollUntilDone(String action) {

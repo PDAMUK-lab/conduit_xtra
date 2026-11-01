@@ -171,11 +171,23 @@ before `flutter pub get`.
   destructive confirmation; hooks are listed with their approval state.
   There is **no restore route** in the dashboard — restore stays a CLI job
   (`hermes checkpoints`), documented rather than faked.
+- **Ops blocker (server, 0.22.5):** `POST /api/ops/*` fails at spawn with
+  `agent.secret_scope.UnscopedSecretError` for `DESKTOP_LLM_KEY` whenever the
+  dashboard is the multiplexing process: `_profile_action_environment` calls
+  `build_subprocess_env(scrub_secrets=True)` outside any profile secret scope.
+  Affects the dashboard's own Ops buttons too. Reproduced in-process
+  (`set_multiplex_active(True)` → raises) and the fix verified: wrapping the
+  env build in `set_secret_scope(build_profile_secret_scope(home))` yields 90
+  env keys. The app now surfaces the server's `detail` text instead of a
+  generic failure. Patch pending operator approval.
 - **M4.3 (Git, read-only):** branch/ahead/behind, changed-file list with
   per-file markers, and each file's diff against HEAD. Stage, commit and
   push are not wired. Live contract: status keys exactly as modelled
   (relative file paths), `file-diff` → `{diff}`, and a non-repository
-  path answers HTTP 200 `null`, which the app reads as "not a repo".
+  path answers HTTP 200 `null`, which the app reads as "not a repo". The
+  page starts at the enclosing repo of the agent's cwd (`/api/fs/git-root`),
+  offers the repos directly inside it when that cwd is not one (measured 12
+  under `/home/hermes/repos`), and keeps the path editable.
 
 ## APK delivery to the NAS
 

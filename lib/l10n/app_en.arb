@@ -6615,6 +6615,18 @@
     "description": "Git changed count.",
     "placeholders": {"count": {"type": "int"}}
   },
+  "hermesGitPathHint": "Repository path",
+  "@hermesGitPathHint": {
+    "description": "Git path copy."
+  },
+  "hermesGitOpen": "Open",
+  "@hermesGitOpen": {
+    "description": "Git path copy."
+  },
+  "hermesGitChooseRepo": "Repositories in this folder",
+  "@hermesGitChooseRepo": {
+    "description": "Git path copy."
+  },
   "hermesApprovalRequired": "Approval required",
   "@hermesApprovalRequired": {
     "description": "Title of a Hermes human-approval request card."

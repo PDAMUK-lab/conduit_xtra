@@ -515,6 +515,7 @@ final class HermesDesktopApiService
   Future<String?> fsGitRoot(String path) => _administration.fsGitRoot(path);
 
   // Git (read-only).
+  Future<String?> gitRoot(String path) => _administration.gitRoot(path);
   Future<HermesGitStatus?> gitStatus(String path) =>
       _administration.gitStatus(path);
   Future<HermesGitDiff?> gitFileDiff({

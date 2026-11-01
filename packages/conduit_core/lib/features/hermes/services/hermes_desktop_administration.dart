@@ -580,6 +580,17 @@ final class _HermesDesktopAdministration {
   // `status` returns null outside a repository; file diffs are unified text.
   // Stage/commit/push exist server-side but are not wired yet.
 
+  Future<String?> gitRoot(String path) async {
+    final data = await _owner._requestJson(
+      'GET',
+      '/api/fs/git-root',
+      query: {'path': path},
+    );
+    if (data is! Map) return null;
+    final root = data['root'];
+    return root is String && root.trim().isNotEmpty ? root.trim() : null;
+  }
+
   Future<HermesGitStatus?> gitStatus(String path) async {
     final data = await _owner._requestJson(
       'GET',
