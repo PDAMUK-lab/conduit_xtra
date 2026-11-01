@@ -600,6 +600,38 @@ final class _HermesDesktopAdministration {
     return HermesGitStatus.fromJson(data);
   }
 
+  /// Stage or unstage one file (`/api/git/review/stage|unstage`, `{ok:true}`).
+  Future<void> stageGitFile({required String path, required String file}) =>
+      _owner._requestJson(
+        'POST',
+        '/api/git/review/stage',
+        body: {'path': path, 'file': file},
+      );
+
+  Future<void> unstageGitFile({required String path, required String file}) =>
+      _owner._requestJson(
+        'POST',
+        '/api/git/review/unstage',
+        body: {'path': path, 'file': file},
+      );
+
+  /// Commit what is staged. `push` also pushes the branch after committing.
+  Future<void> commitGit({
+    required String path,
+    required String message,
+    bool push = false,
+  }) => _owner._requestJson(
+    'POST',
+    '/api/git/review/commit',
+    body: {'path': path, 'message': message, 'push': push},
+  );
+
+  Future<void> pushGit(String path) => _owner._requestJson(
+    'POST',
+    '/api/git/review/push',
+    body: {'path': path},
+  );
+
   Future<HermesGitDiff?> gitFileDiff({
     required String path,
     required String file,

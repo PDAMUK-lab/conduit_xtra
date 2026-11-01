@@ -70,6 +70,11 @@ void main() {
     expect(find.text('A'), findsOneWidget);
     expect(find.text('?'), findsOneWidget);
     expect(find.byKey(const ValueKey<String>('hermes-git-path')), findsOneWidget);
+    expect(find.byKey(const ValueKey<String>('hermes-git-stage-lib/a.dart')),
+        findsOneWidget);
+    expect(find.byKey(const ValueKey<String>('hermes-git-commit')), findsOneWidget);
+    expect(find.byKey(const ValueKey<String>('hermes-git-push')), findsOneWidget);
+    expect(find.textContaining('Push (2)'), findsOneWidget);
   });
 
   testWidgets('a clean tree says so', (tester) async {

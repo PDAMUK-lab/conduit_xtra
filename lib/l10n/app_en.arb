@@ -6716,6 +6716,65 @@
     "description": "Env editor copy.",
     "placeholders": {"name": {"type": "String"}}
   },
+  "hermesGitCommit": "Commit",
+  "@hermesGitCommit": {
+    "description": "Git write copy."
+  },
+  "hermesGitCommitTitle": "Commit changes",
+  "@hermesGitCommitTitle": {
+    "description": "Git write copy."
+  },
+  "hermesGitCommitMessage": "Message",
+  "@hermesGitCommitMessage": {
+    "description": "Git write copy."
+  },
+  "hermesGitCommitPush": "Push after committing",
+  "@hermesGitCommitPush": {
+    "description": "Git write copy."
+  },
+  "hermesGitCommitted": "Committed.",
+  "@hermesGitCommitted": {
+    "description": "Git write copy."
+  },
+  "hermesGitCommitFailed": "The commit failed.",
+  "@hermesGitCommitFailed": {
+    "description": "Git write copy."
+  },
+  "hermesGitPush": "Push",
+  "@hermesGitPush": {
+    "description": "Git write copy."
+  },
+  "hermesGitPushed": "Pushed.",
+  "@hermesGitPushed": {
+    "description": "Git write copy."
+  },
+  "hermesGitPushFailed": "The push failed.",
+  "@hermesGitPushFailed": {
+    "description": "Git write copy."
+  },
+  "hermesGitStageFailed": "That change could not be staged.",
+  "@hermesGitStageFailed": {
+    "description": "Git write copy."
+  },
+  "hermesGitNoStaged": "Nothing staged.",
+  "@hermesGitNoStaged": {
+    "description": "Git write copy."
+  },
+  "hermesGitPushAhead": "Push ({count})",
+  "@hermesGitPushAhead": {
+    "description": "Git write copy.",
+    "placeholders": {"count": {"type": "int"}}
+  },
+  "hermesGitPushConfirm": "Push {branch} to its remote?",
+  "@hermesGitPushConfirm": {
+    "description": "Git write copy.",
+    "placeholders": {"branch": {"type": "String"}}
+  },
+  "hermesGitStagedCount": "{count, plural, =1{1 staged} other{{count} staged}}",
+  "@hermesGitStagedCount": {
+    "description": "Git write copy.",
+    "placeholders": {"count": {"type": "int"}}
+  },
   "hermesApprovalRequired": "Approval required",
   "@hermesApprovalRequired": {
     "description": "Title of a Hermes human-approval request card."

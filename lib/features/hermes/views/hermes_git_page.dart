@@ -5,12 +5,17 @@ import 'package:go_router/go_router.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../l10n/app_localizations_en.dart';
 import '../../../shared/theme/theme_extensions.dart';
+import '../../../shared/utils/ui_utils.dart';
 import '../../../shared/widgets/conduit_components.dart';
+import '../../../shared/widgets/themed_dialogs.dart';
 import '../../../shared/widgets/utility_components.dart';
 
 import 'package:conduit_core/features/hermes/models/hermes_git.dart';
 import 'package:conduit_core/features/hermes/providers/hermes_providers.dart';
 import 'package:conduit_core/navigation/routes.dart';
+import 'package:conduit_core/features/hermes/services/hermes_desktop_api_service.dart';
+
+import '../widgets/hermes_git_commit_sheet.dart';
 
 AppLocalizations _l10n(BuildContext context) =>
     AppLocalizations.of(context) ?? AppLocalizationsEn();
@@ -231,6 +236,38 @@ class _HermesGitPageState extends ConsumerState<HermesGitPage> {
             ],
           ),
         ),
+        const SizedBox(height: Spacing.sm),
+        Row(
+          children: [
+            Expanded(
+              child: ConduitButton(
+                key: const ValueKey<String>('hermes-git-commit'),
+                text: l10n.hermesGitCommit,
+                isSecondary: true,
+                isCompact: true,
+                onPressed: status.staged == 0
+                    ? null
+                    : () => showHermesGitCommitSheet(
+                        context,
+                        path: path,
+                        staged: status.staged,
+                      ),
+              ),
+            ),
+            if (status.ahead > 0) ...[
+              const SizedBox(width: Spacing.sm),
+              Expanded(
+                child: ConduitButton(
+                  key: const ValueKey<String>('hermes-git-push'),
+                  text: l10n.hermesGitPushAhead(status.ahead),
+                  isSecondary: true,
+                  isCompact: true,
+                  onPressed: () => _push(path, branch, l10n),
+                ),
+              ),
+            ],
+          ],
+        ),
         const SizedBox(height: Spacing.md),
         if (status.clean)
           _message(theme, l10n.hermesGitClean, theme.textSecondary)
@@ -250,6 +287,23 @@ class _HermesGitPageState extends ConsumerState<HermesGitPage> {
                   padding: const EdgeInsets.all(Spacing.md),
                   child: Row(
                     children: [
+                      InkWell(
+                        key: ValueKey<String>('hermes-git-stage-${file.path}'),
+                        borderRadius: BorderRadius.circular(IconSize.listItem),
+                        onTap: () => _toggleStage(path, file),
+                        child: Padding(
+                          padding: const EdgeInsets.only(right: Spacing.xs),
+                          child: Icon(
+                            file.staged && !file.unstaged
+                                ? Icons.check_circle
+                                : Icons.radio_button_unchecked,
+                            size: IconSize.listItem,
+                            color: file.staged && !file.unstaged
+                                ? theme.success
+                                : theme.iconSecondary,
+                          ),
+                        ),
+                      ),
                       SizedBox(
                         width: 18,
                         child: Text(
@@ -300,6 +354,52 @@ class _HermesGitPageState extends ConsumerState<HermesGitPage> {
           ),
         ),
       );
+
+  Future<void> _toggleStage(String path, HermesGitFile file) async {
+    final service = ref.read(hermesApiServiceProvider);
+    if (service is! HermesDesktopApiService) return;
+    final l10n = _l10n(context);
+    try {
+      if (file.staged && !file.unstaged) {
+        await service.unstageGitFile(path: path, file: file.path);
+      } else {
+        await service.stageGitFile(path: path, file: file.path);
+      }
+      ref.invalidate(hermesGitStatusProvider(path));
+    } catch (error) {
+      if (!mounted) return;
+      UiUtils.showMessage(context, l10n.hermesGitStageFailed, isError: true);
+    }
+  }
+
+  Future<void> _push(String path, String branch, AppLocalizations l10n) async {
+    final confirmed = await ThemedDialogs.confirm(
+      context,
+      title: l10n.hermesGitPush,
+      message: l10n.hermesGitPushConfirm(branch),
+      confirmText: l10n.hermesGitPush,
+      cancelText: l10n.cancel,
+    );
+    if (!confirmed || !mounted) return;
+    final service = ref.read(hermesApiServiceProvider);
+    if (service is! HermesDesktopApiService) return;
+    try {
+      await service.pushGit(path);
+      ref.invalidate(hermesGitStatusProvider(path));
+      if (!mounted) return;
+      UiUtils.showMessage(context, l10n.hermesGitPushed);
+    } catch (error) {
+      if (!mounted) return;
+      final detail = RegExp(r'"detail"\s*:\s*"([^"]{1,300})"')
+          .firstMatch(error.toString())
+          ?.group(1);
+      UiUtils.showMessage(
+        context,
+        detail ?? l10n.hermesGitPushFailed,
+        isError: true,
+      );
+    }
+  }
 
   void _openPath(String value) {
     final path = value.trim();

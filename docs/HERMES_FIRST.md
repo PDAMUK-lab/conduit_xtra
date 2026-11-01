@@ -171,6 +171,14 @@ before `flutter pub get`.
   destructive confirmation; hooks are listed with their approval state.
   There is **no restore route** in the dashboard — restore stays a CLI job
   (`hermes checkpoints`), documented rather than faked.
+- **M4.3b (Git writes):** per-file stage/unstage from the changed-file list
+  (`POST /api/git/review/stage|unstage`), a commit sheet that requires a
+  message and starts with "push after committing" off, and a Push action that
+  only appears when the branch is ahead and asks for confirmation. All four
+  routes answer `{ok:true}`. Verified end to end from the app's own service
+  against a scratch repository: `M`/`?` → `A`/`A` after staging, commit
+  `dddf6d8 probe commit from app service` in `git log`, tree clean after.
+  Revert and branch/worktree switching are deliberately not wired.
 - **M4.1 Stage B, env writes:** tapping an env key opens a sheet that writes
   one value (`PUT /api/env`) or removes the key (`DELETE /api/env`, destructive
   confirmation). Secret fields are obscured and a stored secret is only ever

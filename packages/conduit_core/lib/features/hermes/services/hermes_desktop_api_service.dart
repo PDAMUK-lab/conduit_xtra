@@ -522,6 +522,16 @@ final class HermesDesktopApiService
     required String path,
     required String file,
   }) => _administration.gitFileDiff(path: path, file: file);
+  Future<void> stageGitFile({required String path, required String file}) =>
+      _administration.stageGitFile(path: path, file: file);
+  Future<void> unstageGitFile({required String path, required String file}) =>
+      _administration.unstageGitFile(path: path, file: file);
+  Future<void> commitGit({
+    required String path,
+    required String message,
+    bool push = false,
+  }) => _administration.commitGit(path: path, message: message, push: push);
+  Future<void> pushGit(String path) => _administration.pushGit(path);
 
   // Operations (doctor/audit/backup/checkpoints/hooks).
   Future<HermesActionStatus?> spawnDoctor() => _administration.spawnDoctor();
