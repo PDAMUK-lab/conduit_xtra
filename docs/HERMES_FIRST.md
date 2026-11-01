@@ -171,6 +171,14 @@ before `flutter pub get`.
   destructive confirmation; hooks are listed with their approval state.
   There is **no restore route** in the dashboard — restore stays a CLI job
   (`hermes checkpoints`), documented rather than faked.
+- **Git branches and worktrees.** The branch name in the summary opens a
+  branch sheet (local first, remote after, current and default marked);
+  switching asks for confirmation and shows git's own refusal when
+  uncommitted changes block it. A worktrees sheet lists every checkout of the
+  repo, opens one as the page's path, and removes a non-main worktree behind a
+  destructive confirmation. Measured live in a scratch repo: master* → switch
+  to other → back; worktree added at `<repo>/.worktrees/wt-probe` on other,
+  then removed, leaving only the main checkout.
 - **Blueprints.** A Blueprints page lists the server's catalog grouped by
   category (`GET /api/cron/blueprints`), with the schedule in words and a
   plugin badge. Tapping one opens a form rendered from its slots: `time`

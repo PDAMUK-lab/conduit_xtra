@@ -628,6 +628,63 @@ final class _HermesDesktopAdministration {
     return HermesGitStatus.fromJson(data);
   }
 
+  Future<List<HermesGitWorktree>> gitWorktrees(String path) async =>
+      HermesGitWorktree.listFromJson(
+        await _owner._requestJson(
+          'GET',
+          '/api/git/worktrees',
+          query: {'path': path},
+        ),
+      );
+
+  Future<List<HermesGitBranch>> gitBranches(String path) async =>
+      HermesGitBranch.listFromJson(
+        await _owner._requestJson(
+          'GET',
+          '/api/git/branches',
+          query: {'path': path},
+        ),
+      );
+
+  /// Check out [branch] in [path]. Git refuses when the tree has conflicting
+  /// changes; the server turns that into an error with the reason.
+  Future<void> switchGitBranch({
+    required String path,
+    required String branch,
+  }) => _owner._requestJson(
+    'POST',
+    '/api/git/branch/switch',
+    body: {'path': path, 'branch': branch},
+  );
+
+  Future<void> addGitWorktree({
+    required String path,
+    String? name,
+    String? branch,
+    String? base,
+    bool existingBranch = false,
+  }) => _owner._requestJson(
+    'POST',
+    '/api/git/worktree/add',
+    body: {
+      'path': path,
+      if (name != null && name.isNotEmpty) 'name': name,
+      if (branch != null && branch.isNotEmpty) 'branch': branch,
+      if (base != null && base.isNotEmpty) 'base': base,
+      if (existingBranch) 'existingBranch': true,
+    },
+  );
+
+  Future<void> removeGitWorktree({
+    required String path,
+    required String worktreePath,
+    bool force = false,
+  }) => _owner._requestJson(
+    'POST',
+    '/api/git/worktree/remove',
+    body: {'path': path, 'worktreePath': worktreePath, 'force': force},
+  );
+
   /// Stage or unstage one file (`/api/git/review/stage|unstage`, `{ok:true}`).
   Future<void> stageGitFile({required String path, required String file}) =>
       _owner._requestJson(

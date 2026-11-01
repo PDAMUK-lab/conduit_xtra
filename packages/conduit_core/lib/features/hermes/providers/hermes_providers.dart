@@ -2703,6 +2703,22 @@ final hermesFsTextProvider =
       return service.fsReadText(path);
     });
 
+/// Branches of a repository, local first.
+final hermesGitBranchesProvider =
+    FutureProvider.family<List<HermesGitBranch>, String>((ref, path) async {
+      final service = ref.watch(hermesApiServiceProvider);
+      if (service is! HermesDesktopApiService) return const [];
+      return service.gitBranches(path);
+    });
+
+/// Worktrees attached to a repository.
+final hermesGitWorktreesProvider =
+    FutureProvider.family<List<HermesGitWorktree>, String>((ref, path) async {
+      final service = ref.watch(hermesApiServiceProvider);
+      if (service is! HermesDesktopApiService) return const [];
+      return service.gitWorktrees(path);
+    });
+
 /// The enclosing repository of a path, or null when there is none.
 final hermesGitRootProvider = FutureProvider.family<String?, String>((
   ref,

@@ -524,6 +524,38 @@ final class HermesDesktopApiService
     required String path,
     required String file,
   }) => _administration.gitFileDiff(path: path, file: file);
+  Future<List<HermesGitWorktree>> gitWorktrees(String path) =>
+      _administration.gitWorktrees(path);
+  Future<List<HermesGitBranch>> gitBranches(String path) =>
+      _administration.gitBranches(path);
+  Future<void> addGitWorktree({
+    required String path,
+    String? name,
+    String? branch,
+    String? base,
+    bool existingBranch = false,
+  }) => _administration.addGitWorktree(
+    path: path,
+    name: name,
+    branch: branch,
+    base: base,
+    existingBranch: existingBranch,
+  );
+
+  Future<void> removeGitWorktree({
+    required String path,
+    required String worktreePath,
+    bool force = false,
+  }) => _administration.removeGitWorktree(
+    path: path,
+    worktreePath: worktreePath,
+    force: force,
+  );
+
+  Future<void> switchGitBranch({
+    required String path,
+    required String branch,
+  }) => _administration.switchGitBranch(path: path, branch: branch);
   Future<void> stageGitFile({required String path, required String file}) =>
       _administration.stageGitFile(path: path, file: file);
   Future<void> unstageGitFile({required String path, required String file}) =>

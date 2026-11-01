@@ -115,3 +115,75 @@ final class HermesGitDiff {
     return HermesGitDiff(diff: diff);
   }
 }
+
+/// One entry of `GET /api/git/worktrees`.
+final class HermesGitWorktree {
+  const HermesGitWorktree({
+    required this.path,
+    this.branch,
+    this.isMain = false,
+  });
+
+  final String path;
+  final String? branch;
+  final bool isMain;
+
+  static HermesGitWorktree? fromJson(Map<String, dynamic> json) {
+    final path = json['path']?.toString().trim() ?? '';
+    if (path.isEmpty) return null;
+    final branch = json['branch']?.toString();
+    return HermesGitWorktree(
+      path: path,
+      branch: branch != null && branch.trim().isNotEmpty ? branch.trim() : null,
+      isMain: json['isMain'] == true,
+    );
+  }
+
+  static List<HermesGitWorktree> listFromJson(Object? json) {
+    if (json is! Map || json['worktrees'] is! List) return const [];
+    final out = <HermesGitWorktree>[];
+    for (final row in json['worktrees'] as List) {
+      if (row is! Map) continue;
+      final worktree = fromJson(Map<String, dynamic>.from(row));
+      if (worktree != null) out.add(worktree);
+    }
+    return List.unmodifiable(out);
+  }
+}
+
+/// One entry of `GET /api/git/branches`.
+final class HermesGitBranch {
+  const HermesGitBranch({
+    required this.name,
+    this.checkedOut = false,
+    this.isDefault = false,
+    this.isRemote = false,
+  });
+
+  final String name;
+  final bool checkedOut;
+  final bool isDefault;
+  final bool isRemote;
+
+  static HermesGitBranch? fromJson(Map<String, dynamic> json) {
+    final name = json['name']?.toString().trim() ?? '';
+    if (name.isEmpty) return null;
+    return HermesGitBranch(
+      name: name,
+      checkedOut: json['checkedOut'] == true,
+      isDefault: json['isDefault'] == true,
+      isRemote: json['isRemote'] == true,
+    );
+  }
+
+  static List<HermesGitBranch> listFromJson(Object? json) {
+    if (json is! Map || json['branches'] is! List) return const [];
+    final out = <HermesGitBranch>[];
+    for (final row in json['branches'] as List) {
+      if (row is! Map) continue;
+      final branch = fromJson(Map<String, dynamic>.from(row));
+      if (branch != null) out.add(branch);
+    }
+    return List.unmodifiable(out);
+  }
+}

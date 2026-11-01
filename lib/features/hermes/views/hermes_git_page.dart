@@ -15,7 +15,9 @@ import 'package:conduit_core/features/hermes/providers/hermes_providers.dart';
 import 'package:conduit_core/navigation/routes.dart';
 import 'package:conduit_core/features/hermes/services/hermes_desktop_api_service.dart';
 
+import '../widgets/hermes_git_branch_sheet.dart';
 import '../widgets/hermes_git_commit_sheet.dart';
+import '../widgets/hermes_git_worktrees_sheet.dart';
 
 AppLocalizations _l10n(BuildContext context) =>
     AppLocalizations.of(context) ?? AppLocalizationsEn();
@@ -209,29 +211,73 @@ class _HermesGitPageState extends ConsumerState<HermesGitPage> {
             color: theme.groupedSurface,
             borderRadius: BorderRadius.circular(AppBorderRadius.card),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: Row(
             children: [
-              Text(
-                branch,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: AppTypography.standard.copyWith(
-                  color: theme.textPrimary,
-                  fontWeight: FontWeight.w600,
+              Expanded(
+                child: InkWell(
+                  key: const ValueKey<String>('hermes-git-switch-branch'),
+                  onTap: () => showHermesGitBranchSheet(context, path: path),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Flexible(
+                            child: Text(
+                              branch,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: AppTypography.standard.copyWith(
+                                color: theme.textPrimary,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: Spacing.xxs),
+                          Icon(
+                            Icons.unfold_more,
+                            size: IconSize.small,
+                            color: theme.iconSecondary,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: Spacing.xxs),
+                      Text(
+                        [
+                          l10n.hermesGitChanged(status.changed),
+                          if (status.ahead > 0 || status.behind > 0)
+                            l10n.hermesGitAheadBehind(
+                              status.ahead,
+                              status.behind,
+                            ),
+                          '+${status.added} −${status.removed}',
+                        ].join(' · '),
+                        style: AppTypography.captionStyle.copyWith(
+                          color: theme.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-              const SizedBox(height: Spacing.xxs),
-              Text(
-                [
-                  l10n.hermesGitChanged(status.changed),
-                  if (status.ahead > 0 || status.behind > 0)
-                    l10n.hermesGitAheadBehind(status.ahead, status.behind),
-                  '+${status.added} −${status.removed}',
-                ].join(' · '),
-                style: AppTypography.captionStyle.copyWith(
-                  color: theme.textSecondary,
+              IconButton(
+                key: const ValueKey<String>('hermes-git-worktrees'),
+                tooltip: l10n.hermesGitWorktrees,
+                icon: Icon(
+                  Icons.account_tree_outlined,
+                  size: IconSize.listItem,
+                  color: theme.iconSecondary,
                 ),
+                onPressed: () async {
+                  final chosen = await showHermesGitWorktreesSheet(
+                    context,
+                    path: path,
+                    current: path,
+                  );
+                  if (chosen != null && context.mounted) {
+                    _select(chosen);
+                  }
+                },
               ),
             ],
           ),

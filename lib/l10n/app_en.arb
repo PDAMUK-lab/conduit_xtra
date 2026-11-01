@@ -6827,6 +6827,61 @@
   "@hermesBlueprintCreateFailed": {
     "description": "Blueprint copy."
   },
+  "hermesGitSwitchBranch": "Switch branch",
+  "@hermesGitSwitchBranch": {
+    "description": "Git branch/worktree copy."
+  },
+  "hermesGitNoBranches": "No branches found.",
+  "@hermesGitNoBranches": {
+    "description": "Git branch/worktree copy."
+  },
+  "hermesGitRemoteBranches": "Remote",
+  "@hermesGitRemoteBranches": {
+    "description": "Git branch/worktree copy."
+  },
+  "hermesGitDefaultBranch": "default",
+  "@hermesGitDefaultBranch": {
+    "description": "Git branch/worktree copy."
+  },
+  "hermesGitSwitchFailed": "The branch could not be switched.",
+  "@hermesGitSwitchFailed": {
+    "description": "Git branch/worktree copy."
+  },
+  "hermesGitWorktrees": "Worktrees",
+  "@hermesGitWorktrees": {
+    "description": "Git branch/worktree copy."
+  },
+  "hermesGitNoWorktrees": "No worktrees.",
+  "@hermesGitNoWorktrees": {
+    "description": "Git branch/worktree copy."
+  },
+  "hermesGitRemoveWorktree": "Remove worktree",
+  "@hermesGitRemoveWorktree": {
+    "description": "Git branch/worktree copy."
+  },
+  "hermesGitWorktreeRemoved": "Worktree removed.",
+  "@hermesGitWorktreeRemoved": {
+    "description": "Git branch/worktree copy."
+  },
+  "hermesGitWorktreeRemoveFailed": "The worktree could not be removed.",
+  "@hermesGitWorktreeRemoveFailed": {
+    "description": "Git branch/worktree copy."
+  },
+  "hermesGitSwitchConfirm": "Switch to {branch}? Uncommitted changes may block it.",
+  "@hermesGitSwitchConfirm": {
+    "description": "Git branch/worktree copy.",
+    "placeholders": {"branch": {"type": "String"}}
+  },
+  "hermesGitSwitched": "Switched to {branch}.",
+  "@hermesGitSwitched": {
+    "description": "Git branch/worktree copy.",
+    "placeholders": {"branch": {"type": "String"}}
+  },
+  "hermesGitRemoveWorktreeConfirm": "Remove the worktree at {path}? Its directory is deleted.",
+  "@hermesGitRemoveWorktreeConfirm": {
+    "description": "Git branch/worktree copy.",
+    "placeholders": {"path": {"type": "String"}}
+  },
   "hermesApprovalRequired": "Approval required",
   "@hermesApprovalRequired": {
     "description": "Title of a Hermes human-approval request card."

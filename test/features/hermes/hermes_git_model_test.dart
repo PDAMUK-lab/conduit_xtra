@@ -45,6 +45,33 @@ void main() {
     check(HermesGitStatus.fromJson('nope')).isNull();
   });
 
+  test('parses branches with their checkout state', () {
+    final branches = HermesGitBranch.listFromJson({
+      'branches': [
+        {'name': 'master', 'checkedOut': true, 'isDefault': true},
+        {'name': 'other', 'checkedOut': false, 'isDefault': false},
+        {'name': 'origin/main', 'isRemote': true},
+      ],
+    });
+    check(branches).length.equals(3);
+    check(branches.first.checkedOut).isTrue();
+    check(branches.first.isDefault).isTrue();
+    check(branches.last.isRemote).isTrue();
+  });
+
+  test('parses worktrees, keeping the main one marked', () {
+    final trees = HermesGitWorktree.listFromJson({
+      'worktrees': [
+        {'path': '/repo', 'branch': 'master', 'isMain': true},
+        {'path': '/repo/.worktrees/wt', 'branch': 'other'},
+      ],
+    });
+    check(trees).length.equals(2);
+    check(trees.first.isMain).isTrue();
+    check(trees.last.branch).equals('other');
+    check(HermesGitWorktree.listFromJson(null)).isEmpty();
+  });
+
   test('parses a diff and rejects a missing one', () {
     final diff = HermesGitDiff.fromJson({'diff': '@@ -1 +1 @@\n-a\n+b'});
     check(diff).isNotNull();
