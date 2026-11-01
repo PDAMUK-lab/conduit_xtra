@@ -171,6 +171,15 @@ before `flutter pub get`.
   destructive confirmation; hooks are listed with their approval state.
   There is **no restore route** in the dashboard — restore stays a CLI job
   (`hermes checkpoints`), documented rather than faked.
+- **Messaging.** A Messaging page lists every channel (`GET
+  /api/messaging/platforms`, 32 on this node), enabled first, with a switch
+  that enables/disables one (`PUT /api/messaging/platforms/{id}`) and a detail
+  sheet showing each credential's name and whether it is set — never a value.
+  "Check connection" posts to `.../test` and prints the server's own verdict.
+  Measured on a throwaway profile: toggling ntfy flipped state to
+  `not_configured`, the check answered "Missing required setup: NTFY_TOPIC",
+  and the toggle was set back off. Onboarding (Telegram/WhatsApp pairing) is
+  not wired.
 - **Git branches and worktrees.** The branch name in the summary opens a
   branch sheet (local first, remote after, current and default marked);
   switching asks for confirmation and shows git's own refusal when

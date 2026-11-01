@@ -21,6 +21,7 @@ import 'package:conduit_core/features/hermes/models/hermes_config_view.dart';
 import 'package:conduit_core/features/hermes/models/hermes_analytics.dart';
 import 'package:conduit_core/features/hermes/models/hermes_blueprint.dart';
 import 'package:conduit_core/features/hermes/models/hermes_delivery_target.dart';
+import 'package:conduit_core/features/hermes/models/hermes_messaging.dart';
 import 'package:conduit_core/features/hermes/models/hermes_fs.dart';
 import 'package:conduit_core/features/hermes/models/hermes_git.dart';
 import 'package:conduit_core/features/hermes/models/hermes_logs.dart';
@@ -753,6 +754,14 @@ final class HermesDesktopApiService
 
   @override
   Future<List<Map<String, dynamic>>> listJobs() => _administration.listJobs();
+  Future<List<HermesMessagingPlatform>> messagingPlatforms() =>
+      _administration.messagingPlatforms();
+  Future<void> setMessagingPlatformEnabled(
+    String id, {
+    required bool enabled,
+  }) => _administration.setMessagingPlatformEnabled(id, enabled: enabled);
+  Future<HermesMessagingTestResult?> testMessagingPlatform(String id) =>
+      _administration.testMessagingPlatform(id);
   Future<List<HermesBlueprint>> blueprints() => _administration.blueprints();
   Future<Map<String, dynamic>> instantiateBlueprint({
     required String key,

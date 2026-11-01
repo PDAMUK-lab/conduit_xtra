@@ -64,6 +64,7 @@ bool _isAccountlessBackendLocation(String location) {
       isHermesSettingsLocation(location) ||
       location == Routes.hermesJobs ||
       location == Routes.hermesBlueprints ||
+      location == Routes.hermesMessaging ||
       location == Routes.hermesApprovals ||
       isHermesSkillsLocation(location) ||
       isHermesMemoryLocation(location) ||

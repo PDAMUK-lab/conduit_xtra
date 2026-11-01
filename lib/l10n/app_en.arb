@@ -6882,6 +6882,75 @@
     "description": "Git branch/worktree copy.",
     "placeholders": {"path": {"type": "String"}}
   },
+  "hermesMessagingTitle": "Messaging",
+  "@hermesMessagingTitle": {
+    "description": "Messaging copy."
+  },
+  "hermesMessagingSubtitle": "Channels Hermes listens on. Enabling one needs its credentials set on the server.",
+  "@hermesMessagingSubtitle": {
+    "description": "Messaging copy."
+  },
+  "hermesMessagingEmpty": "No channels.",
+  "@hermesMessagingEmpty": {
+    "description": "Messaging copy."
+  },
+  "hermesMessagingLoadFailed": "Could not load channels.",
+  "@hermesMessagingLoadFailed": {
+    "description": "Messaging copy."
+  },
+  "hermesMessagingEnabled": "Enabled",
+  "@hermesMessagingEnabled": {
+    "description": "Messaging copy."
+  },
+  "hermesMessagingNeedsSetup": "Enabled — needs setup",
+  "@hermesMessagingNeedsSetup": {
+    "description": "Messaging copy."
+  },
+  "hermesMessagingDisabled": "Disabled",
+  "@hermesMessagingDisabled": {
+    "description": "Messaging copy."
+  },
+  "hermesMessagingSetup": "Setup",
+  "@hermesMessagingSetup": {
+    "description": "Messaging copy."
+  },
+  "hermesMessagingRequired": "required",
+  "@hermesMessagingRequired": {
+    "description": "Messaging copy."
+  },
+  "hermesMessagingTest": "Check connection",
+  "@hermesMessagingTest": {
+    "description": "Messaging copy."
+  },
+  "hermesMessagingTesting": "Checking…",
+  "@hermesMessagingTesting": {
+    "description": "Messaging copy."
+  },
+  "hermesMessagingTestDone": "Checked.",
+  "@hermesMessagingTestDone": {
+    "description": "Messaging copy."
+  },
+  "hermesMessagingTestFailed": "The check failed.",
+  "@hermesMessagingTestFailed": {
+    "description": "Messaging copy."
+  },
+  "hermesMessagingToggleFailed": "The channel could not be changed.",
+  "@hermesMessagingToggleFailed": {
+    "description": "Messaging copy."
+  },
+  "hermesMessagingEnabledToast": "Channel enabled.",
+  "@hermesMessagingEnabledToast": {
+    "description": "Messaging copy."
+  },
+  "hermesMessagingDisabledToast": "Channel disabled.",
+  "@hermesMessagingDisabledToast": {
+    "description": "Messaging copy."
+  },
+  "hermesMessagingHomeChannel": "Home channel: {channel}",
+  "@hermesMessagingHomeChannel": {
+    "description": "Messaging copy.",
+    "placeholders": {"channel": {"type": "String"}}
+  },
   "hermesApprovalRequired": "Approval required",
   "@hermesApprovalRequired": {
     "description": "Title of a Hermes human-approval request card."

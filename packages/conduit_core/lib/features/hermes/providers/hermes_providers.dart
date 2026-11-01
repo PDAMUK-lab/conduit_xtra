@@ -40,6 +40,7 @@ import 'package:conduit_core/features/hermes/models/hermes_connection_profile.da
 import 'package:conduit_core/features/hermes/models/hermes_analytics.dart';
 import 'package:conduit_core/features/hermes/models/hermes_blueprint.dart';
 import 'package:conduit_core/features/hermes/models/hermes_delivery_target.dart';
+import 'package:conduit_core/features/hermes/models/hermes_messaging.dart';
 import 'package:conduit_core/features/hermes/models/hermes_fs.dart';
 import 'package:conduit_core/features/hermes/models/hermes_git.dart';
 import 'package:conduit_core/features/hermes/models/hermes_logs.dart';
@@ -3015,6 +3016,21 @@ class HermesJobsController extends AsyncNotifier<List<HermesJob>> {
     ref.invalidateSelf();
   }
 }
+
+/// Messaging channels, enabled ones first.
+final hermesMessagingProvider =
+    FutureProvider<List<HermesMessagingPlatform>>((ref) async {
+      final service = ref.watch(hermesApiServiceProvider);
+      if (service is! HermesDesktopApiService) return const [];
+      final platforms = await service.messagingPlatforms();
+      final sorted = [...platforms]
+        ..sort((a, b) {
+          if (a.enabled != b.enabled) return a.enabled ? -1 : 1;
+          if (a.configured != b.configured) return a.configured ? -1 : 1;
+          return a.name.toLowerCase().compareTo(b.name.toLowerCase());
+        });
+      return List.unmodifiable(sorted);
+    });
 
 /// The blueprint catalog shown on the Scheduled agents page.
 final hermesBlueprintsProvider = FutureProvider<List<HermesBlueprint>>((

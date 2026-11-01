@@ -374,6 +374,31 @@ final class _HermesDesktopAdministration {
     };
   }
 
+  Future<List<HermesMessagingPlatform>> messagingPlatforms() async =>
+      HermesMessagingPlatform.listFromJson(
+        await _owner._requestJson('GET', '/api/messaging/platforms'),
+      );
+
+  /// Enable or disable one channel. The server may refuse (e.g. a platform
+  /// already served by the default profile's listener) and says why.
+  Future<void> setMessagingPlatformEnabled(
+    String id, {
+    required bool enabled,
+  }) => _owner._requestJson(
+    'PUT',
+    '/api/messaging/platforms/${Uri.encodeComponent(id)}',
+    body: {'enabled': enabled},
+  );
+
+  /// Ask the server to check one channel and report what it found.
+  Future<HermesMessagingTestResult?> testMessagingPlatform(String id) async =>
+      HermesMessagingTestResult.fromJson(
+        await _owner._requestJson(
+          'POST',
+          '/api/messaging/platforms/${Uri.encodeComponent(id)}/test',
+        ),
+      );
+
   /// The blueprint catalog (built-ins plus this profile's plugin blueprints).
   Future<List<HermesBlueprint>> blueprints() async =>
       HermesBlueprint.listFromJson(
