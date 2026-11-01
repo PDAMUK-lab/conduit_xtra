@@ -39,6 +39,7 @@ import '../../features/hermes/views/hermes_settings_page.dart';
 import '../../features/hermes/views/hermes_jobs_page.dart';
 import '../../features/hermes/views/hermes_blueprints_page.dart';
 import '../../features/hermes/views/hermes_messaging_page.dart';
+import '../../features/hermes/views/hermes_local_models_page.dart';
 import '../../features/hermes/views/hermes_approvals_page.dart';
 import '../../features/hermes/views/hermes_skills_page.dart';
 import '../../features/hermes/views/hermes_memory_page.dart';
@@ -545,6 +546,14 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           ),
         );
       },
+    ),
+    GoRoute(
+      path: Routes.hermesLocalModels,
+      name: RouteNames.hermesLocalModels,
+      pageBuilder: (context, state) => _buildPlatformPage(
+        state: state,
+        child: const HermesLocalModelsPage(),
+      ),
     ),
     GoRoute(
       path: Routes.hermesMessaging,

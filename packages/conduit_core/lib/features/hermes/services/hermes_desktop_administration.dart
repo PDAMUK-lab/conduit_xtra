@@ -374,6 +374,16 @@ final class _HermesDesktopAdministration {
     };
   }
 
+  Future<HermesLocalModelStatus?> localModelStatus() async =>
+      HermesLocalModelStatus.fromJson(
+        await _owner._requestJson('GET', '/api/local-models/status'),
+      );
+
+  Future<HermesLocalHardware?> localModelHardware() async =>
+      HermesLocalHardware.fromJson(
+        await _owner._requestJson('GET', '/api/local-models/hardware'),
+      );
+
   Future<List<HermesMessagingPlatform>> messagingPlatforms() async =>
       HermesMessagingPlatform.listFromJson(
         await _owner._requestJson('GET', '/api/messaging/platforms'),

@@ -6992,6 +6992,98 @@
   "@hermesRestoreSection": {
     "description": "Backups copy."
   },
+  "hermesLocalModelsTitle": "Local models",
+  "@hermesLocalModelsTitle": {
+    "description": "Local models copy."
+  },
+  "hermesLocalModelsSubtitle": "The node's local engine: state, hardware and what it can fit.",
+  "@hermesLocalModelsSubtitle": {
+    "description": "Local models copy."
+  },
+  "hermesLocalManager": "Manager",
+  "@hermesLocalManager": {
+    "description": "Local models copy."
+  },
+  "hermesLocalEnabled": "enabled",
+  "@hermesLocalEnabled": {
+    "description": "Local models copy."
+  },
+  "hermesLocalDisabled": "disabled",
+  "@hermesLocalDisabled": {
+    "description": "Local models copy."
+  },
+  "hermesLocalRuntime": "Runtime",
+  "@hermesLocalRuntime": {
+    "description": "Local models copy."
+  },
+  "hermesLocalInstalled": "installed",
+  "@hermesLocalInstalled": {
+    "description": "Local models copy."
+  },
+  "hermesLocalNotInstalled": "not installed",
+  "@hermesLocalNotInstalled": {
+    "description": "Local models copy."
+  },
+  "hermesLocalUpdateAvailable": "update available",
+  "@hermesLocalUpdateAvailable": {
+    "description": "Local models copy."
+  },
+  "hermesLocalServer": "Server",
+  "@hermesLocalServer": {
+    "description": "Local models copy."
+  },
+  "hermesLocalRunning": "running",
+  "@hermesLocalRunning": {
+    "description": "Local models copy."
+  },
+  "hermesLocalStopped": "stopped",
+  "@hermesLocalStopped": {
+    "description": "Local models copy."
+  },
+  "hermesLocalActiveModel": "Active model",
+  "@hermesLocalActiveModel": {
+    "description": "Local models copy."
+  },
+  "hermesLocalModelsCount": "Models",
+  "@hermesLocalModelsCount": {
+    "description": "Local models copy."
+  },
+  "hermesLocalNoModels": "No models staged.",
+  "@hermesLocalNoModels": {
+    "description": "Local models copy."
+  },
+  "hermesLocalHardwareTitle": "Hardware",
+  "@hermesLocalHardwareTitle": {
+    "description": "Local models copy."
+  },
+  "hermesLocalGpu": "GPU",
+  "@hermesLocalGpu": {
+    "description": "Local models copy."
+  },
+  "hermesLocalVram": "VRAM",
+  "@hermesLocalVram": {
+    "description": "Local models copy."
+  },
+  "hermesLocalRam": "RAM",
+  "@hermesLocalRam": {
+    "description": "Local models copy."
+  },
+  "hermesLocalUsable": "usable",
+  "@hermesLocalUsable": {
+    "description": "Local models copy."
+  },
+  "hermesLocalUma": "unified memory",
+  "@hermesLocalUma": {
+    "description": "Local models copy."
+  },
+  "hermesLocalOutsideNote": "Read-only: a model served outside this manager is neither started nor stopped from here.",
+  "@hermesLocalOutsideNote": {
+    "description": "Local models copy."
+  },
+  "hermesLocalLoadFailed": "Could not read the local model state.",
+  "@hermesLocalLoadFailed": {
+    "description": "Local models copy."
+  },
   "hermesApprovalRequired": "Approval required",
   "@hermesApprovalRequired": {
     "description": "Title of a Hermes human-approval request card."

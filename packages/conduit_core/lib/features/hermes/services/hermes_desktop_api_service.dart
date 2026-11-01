@@ -21,6 +21,7 @@ import 'package:conduit_core/features/hermes/models/hermes_config_view.dart';
 import 'package:conduit_core/features/hermes/models/hermes_analytics.dart';
 import 'package:conduit_core/features/hermes/models/hermes_blueprint.dart';
 import 'package:conduit_core/features/hermes/models/hermes_delivery_target.dart';
+import 'package:conduit_core/features/hermes/models/hermes_local_models.dart';
 import 'package:conduit_core/features/hermes/models/hermes_messaging.dart';
 import 'package:conduit_core/features/hermes/models/hermes_fs.dart';
 import 'package:conduit_core/features/hermes/models/hermes_git.dart';
@@ -756,6 +757,10 @@ final class HermesDesktopApiService
 
   @override
   Future<List<Map<String, dynamic>>> listJobs() => _administration.listJobs();
+  Future<HermesLocalModelStatus?> localModelStatus() =>
+      _administration.localModelStatus();
+  Future<HermesLocalHardware?> localModelHardware() =>
+      _administration.localModelHardware();
   Future<List<HermesMessagingPlatform>> messagingPlatforms() =>
       _administration.messagingPlatforms();
   Future<void> setMessagingPlatformEnabled(

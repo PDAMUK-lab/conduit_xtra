@@ -40,6 +40,7 @@ import 'package:conduit_core/features/hermes/models/hermes_connection_profile.da
 import 'package:conduit_core/features/hermes/models/hermes_analytics.dart';
 import 'package:conduit_core/features/hermes/models/hermes_blueprint.dart';
 import 'package:conduit_core/features/hermes/models/hermes_delivery_target.dart';
+import 'package:conduit_core/features/hermes/models/hermes_local_models.dart';
 import 'package:conduit_core/features/hermes/models/hermes_messaging.dart';
 import 'package:conduit_core/features/hermes/models/hermes_fs.dart';
 import 'package:conduit_core/features/hermes/models/hermes_git.dart';
@@ -3016,6 +3017,22 @@ class HermesJobsController extends AsyncNotifier<List<HermesJob>> {
     ref.invalidateSelf();
   }
 }
+
+/// The node's local model manager state (read-only in this build).
+final hermesLocalModelStatusProvider =
+    FutureProvider<HermesLocalModelStatus?>((ref) async {
+      final service = ref.watch(hermesApiServiceProvider);
+      if (service is! HermesDesktopApiService) return null;
+      return service.localModelStatus();
+    });
+
+/// GPU and RAM headroom for fitting a model.
+final hermesLocalModelHardwareProvider =
+    FutureProvider<HermesLocalHardware?>((ref) async {
+      final service = ref.watch(hermesApiServiceProvider);
+      if (service is! HermesDesktopApiService) return null;
+      return service.localModelHardware();
+    });
 
 /// Messaging channels, enabled ones first.
 final hermesMessagingProvider =

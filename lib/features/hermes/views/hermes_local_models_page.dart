@@ -1,0 +1,277 @@
+import 'package:material_ui/material_ui.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../l10n/app_localizations.dart';
+import '../../../l10n/app_localizations_en.dart';
+import '../../../shared/theme/theme_extensions.dart';
+import '../../../shared/widgets/utility_components.dart';
+
+import 'package:conduit_core/features/hermes/providers/hermes_providers.dart';
+
+AppLocalizations _l10n(BuildContext context) =>
+    AppLocalizations.of(context) ?? AppLocalizationsEn();
+
+String _gb(int bytes) => '${(bytes / (1024 * 1024 * 1024)).toStringAsFixed(1)} GB';
+
+/// The node's local engine, read-only.
+///
+/// Deliberately does not start or stop a server: on this fleet the serving
+/// worker is often started outside this manager, so a "start" here would spawn
+/// a second server and a "stop" could kill one this manager does not own.
+class HermesLocalModelsPage extends ConsumerWidget {
+  const HermesLocalModelsPage({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = _l10n(context);
+    final theme = context.conduitTheme;
+    final status = ref.watch(hermesLocalModelStatusProvider);
+    final hardware = ref.watch(hermesLocalModelHardwareProvider);
+
+    return UtilityPageScaffold.settings(
+      title: l10n.hermesLocalModelsTitle,
+      children: [
+        Text(
+          l10n.hermesLocalModelsSubtitle,
+          style: AppTypography.bodySmallStyle.copyWith(
+            color: theme.textSecondary,
+          ),
+        ),
+        const SizedBox(height: Spacing.lg),
+        status.when(
+          data: (value) {
+            if (value == null) {
+              return _card(
+                theme,
+                Text(
+                  l10n.hermesLocalLoadFailed,
+                  style: AppTypography.bodySmallStyle.copyWith(color: theme.error),
+                ),
+              );
+            }
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _card(
+                  theme,
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _row(
+                        l10n.hermesLocalManager,
+                        value.enabled
+                            ? l10n.hermesLocalEnabled
+                            : l10n.hermesLocalDisabled,
+                        theme,
+                        good: value.enabled,
+                      ),
+                      _row(
+                        l10n.hermesLocalRuntime,
+                        [
+                          value.runtimeInstalled
+                              ? l10n.hermesLocalInstalled
+                              : l10n.hermesLocalNotInstalled,
+                          if (value.runtimeBackend != null &&
+                              value.runtimeBackend!.isNotEmpty)
+                            value.runtimeBackend!,
+                          if (value.tag.isNotEmpty) value.tag,
+                          if (value.updateAvailable)
+                            l10n.hermesLocalUpdateAvailable,
+                        ].join(' · '),
+                        theme,
+                        good: value.runtimeInstalled,
+                      ),
+                      _row(
+                        l10n.hermesLocalServer,
+                        value.serverRunning
+                            ? (value.serverBaseUrl ?? l10n.hermesLocalRunning)
+                            : l10n.hermesLocalStopped,
+                        theme,
+                        good: value.serverRunning,
+                      ),
+                      if (value.activeModelId != null &&
+                          value.activeModelId!.isNotEmpty)
+                        _row(
+                          l10n.hermesLocalActiveModel,
+                          value.activeModelId!,
+                          theme,
+                        ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: Spacing.sm),
+                if (!value.enabled)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: Spacing.sm),
+                    child: Text(
+                      l10n.hermesLocalOutsideNote,
+                      style: AppTypography.captionStyle.copyWith(
+                        color: theme.textSecondary,
+                      ),
+                    ),
+                  ),
+                _card(
+                  theme,
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '${l10n.hermesLocalModelsCount} · ${value.modelCount}',
+                        style: AppTypography.standard.copyWith(
+                          color: theme.textPrimary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: Spacing.xxs),
+                      if (value.models.isEmpty)
+                        Text(
+                          l10n.hermesLocalNoModels,
+                          style: AppTypography.captionStyle.copyWith(
+                            color: theme.textSecondary,
+                          ),
+                        )
+                      else
+                        for (final model in value.models.take(8))
+                          Padding(
+                            padding: const EdgeInsets.only(top: Spacing.xxs),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    model.name.isEmpty ? model.id : model.name,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: AppTypography.codeStyle.copyWith(
+                                      color: theme.textPrimary,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ),
+                                Text(
+                                  _gb(model.sizeBytes),
+                                  style: AppTypography.captionStyle.copyWith(
+                                    color: theme.textSecondary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                      if (value.modelsDir.isNotEmpty) ...[
+                        const SizedBox(height: Spacing.xs),
+                        Text(
+                          value.modelsDir,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTypography.captionStyle.copyWith(
+                            color: theme.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ],
+            );
+          },
+          loading: () => const Padding(
+            padding: EdgeInsets.symmetric(vertical: Spacing.xl),
+            child: Center(child: CircularProgressIndicator()),
+          ),
+          error: (error, _) => _card(
+            theme,
+            Text(
+              l10n.hermesLocalLoadFailed,
+              style: AppTypography.bodySmallStyle.copyWith(color: theme.error),
+            ),
+          ),
+        ),
+        const SizedBox(height: Spacing.lg),
+        Text(
+          l10n.hermesLocalHardwareTitle,
+          style: AppTypography.labelStyle.copyWith(
+            color: theme.textSecondary,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        const SizedBox(height: Spacing.xs),
+        hardware.when(
+          data: (value) {
+            if (value == null) return const SizedBox.shrink();
+            final used = value.vramUsedBytes;
+            return _card(
+              theme,
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _row(
+                    l10n.hermesLocalGpu,
+                    value.gpuName ?? (value.uma ? l10n.hermesLocalUma : '—'),
+                    theme,
+                  ),
+                  _row(
+                    l10n.hermesLocalVram,
+                    used == null
+                        ? '${_gb(value.vramTotalBytes)} · ${_gb(value.vramUsableBytes)} ${l10n.hermesLocalUsable}'
+                        : '${_gb(used)} / ${_gb(value.vramTotalBytes)}',
+                    theme,
+                  ),
+                  _row(
+                    l10n.hermesLocalRam,
+                    '${_gb(value.ramAvailableBytes)} / ${_gb(value.ramTotalBytes)}',
+                    theme,
+                  ),
+                ],
+              ),
+            );
+          },
+          loading: () => const SizedBox.shrink(),
+          error: (error, _) => const SizedBox.shrink(),
+        ),
+      ],
+    );
+  }
+
+  Widget _card(ConduitThemeExtension theme, Widget child) => Container(
+    padding: const EdgeInsets.all(Spacing.md),
+    decoration: BoxDecoration(
+      color: theme.groupedSurface,
+      borderRadius: BorderRadius.circular(AppBorderRadius.card),
+    ),
+    child: child,
+  );
+
+  Widget _row(
+    String label,
+    String value,
+    ConduitThemeExtension theme, {
+    bool? good,
+  }) => Padding(
+    padding: const EdgeInsets.symmetric(vertical: Spacing.xxs),
+    child: Row(
+      children: [
+        Expanded(
+          child: Text(
+            label,
+            style: AppTypography.bodySmallStyle.copyWith(
+              color: theme.textSecondary,
+            ),
+          ),
+        ),
+        Flexible(
+          child: Text(
+            value,
+            maxLines: 2,
+            textAlign: TextAlign.right,
+            overflow: TextOverflow.ellipsis,
+            style: AppTypography.codeStyle.copyWith(
+              color: good == null
+                  ? theme.textPrimary
+                  : (good ? theme.success : theme.textSecondary),
+              fontSize: 12,
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+}

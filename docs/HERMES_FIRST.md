@@ -171,6 +171,15 @@ before `flutter pub get`.
   destructive confirmation; hooks are listed with their approval state.
   There is **no restore route** in the dashboard — restore stays a CLI job
   (`hermes checkpoints`), documented rather than faked.
+- **Local models (read-only).** The Local models page reads
+  `/api/local-models/status` and `/hardware`: manager enabled/disabled, runtime
+  installed and backend, tag and update, server running and its base URL,
+  staged models with sizes, and GPU/VRAM/RAM. It deliberately has no
+  start/stop: measured on this node the manager reports disabled with no
+  runtime while the 9B worker serves on :8080 from outside it, so a start would
+  spawn a second server and a stop could kill one the manager does not own.
+  Measured: GTX 1070 Max-Q, 8.0 GB VRAM of which 7.2 GB in use, 5.6 GB RAM
+  available of 15.5 GB.
 - **Backups (ops import costed, not shipped as a button).** The Ops page now
   lists the server's own backup archives from `<profile home>/backups` through
   the files API (there is no listing route). Restoring is deliberately not a
