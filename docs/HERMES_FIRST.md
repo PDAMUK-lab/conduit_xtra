@@ -171,6 +171,13 @@ before `flutter pub get`.
   destructive confirmation; hooks are listed with their approval state.
   There is **no restore route** in the dashboard — restore stays a CLI job
   (`hermes checkpoints`), documented rather than faked.
+- **Fleet peers.** `local_runtime.peers` (`{name, base_url, api_key?}`)
+  declares other nodes' routers; status probes each once (1.2 s, max four,
+  network only, nothing started or stopped) and returns `{name, base_url, up,
+  model}`. The page shows a Fleet card: `serving <model>` or
+  `asleep or unreachable`. Configured here: desktop at
+  `http://20.20.0.40:8080/v1` — measured asleep on 2026-11-01 while its SSH
+  answered, which is the expected resting state.
 - **Local models (read-only).** The Local models page reads
   `/api/local-models/status` and `/hardware`: manager enabled/disabled, runtime
   installed and backend, tag and update, server running and its base URL,

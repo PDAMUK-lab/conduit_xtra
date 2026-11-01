@@ -6712,6 +6712,9 @@
   "hermesLocalLoadFailed": "Nie udało się odczytać stanu modeli lokalnych.",
   "hermesRestoreDrainNote": "Gateway zatrzymuje się na czas przywracania i wraca sam; komunikacja jest wtedy offline.",
   "hermesLocalServedElsewhere": "Router uruchomiony poza tym menedżerem obsługuje {url} ({model}). Strona tylko to zgłasza.",
+  "hermesLocalFleet": "Flota",
+  "hermesLocalPeerDown": "uśpiony lub nieosiągalny",
+  "hermesLocalPeerServing": "obsługuje {model}",
   "hermesApprovalRequired": "Wymagana zgoda",
   "@hermesApprovalRequired": {
     "description": "Title of a Hermes human-approval request card."

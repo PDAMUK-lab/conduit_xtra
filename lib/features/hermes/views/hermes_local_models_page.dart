@@ -123,6 +123,36 @@ class HermesLocalModelsPage extends ConsumerWidget {
                       ),
                     ),
                   ),
+                if (value.peers.isNotEmpty) ...[
+                  _card(
+                    theme,
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          l10n.hermesLocalFleet,
+                          style: AppTypography.standard.copyWith(
+                            color: theme.textPrimary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: Spacing.xxs),
+                        for (final peer in value.peers)
+                          _row(
+                            peer.name,
+                            peer.up
+                                ? l10n.hermesLocalPeerServing(
+                                    peer.model ?? peer.baseUrl,
+                                  )
+                                : l10n.hermesLocalPeerDown,
+                            theme,
+                            good: peer.up,
+                          ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: Spacing.sm),
+                ],
                 _card(
                   theme,
                   Column(

@@ -77,6 +77,36 @@ void main() {
     expect(find.textContaining('ornith-1.5-9b-heretic'), findsWidgets);
   });
 
+  testWidgets('the fleet lists peers and their state', (tester) async {
+    await tester.pumpWidget(
+      _host(
+        status: const HermesLocalModelStatus(
+          enabled: true,
+          peers: [
+            HermesLocalPeer(
+              name: 'desktop',
+              baseUrl: 'http://20.20.0.40:8080/v1',
+            ),
+            HermesLocalPeer(
+              name: 'laptop',
+              baseUrl: 'http://127.0.0.1:8080/v1',
+              up: true,
+              model: 'ornith-1.5-9b-heretic',
+            ),
+          ],
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.drag(find.byType(Scrollable).first, const Offset(0, -700));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Fleet'), findsOneWidget);
+    expect(find.text('desktop'), findsOneWidget);
+    expect(find.textContaining('asleep'), findsOneWidget);
+    expect(find.textContaining('serving ornith-1.5-9b-heretic'), findsOneWidget);
+  });
+
   testWidgets('a running manager with models lists them', (tester) async {
     await tester.pumpWidget(
       _host(

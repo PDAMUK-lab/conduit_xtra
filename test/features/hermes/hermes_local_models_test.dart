@@ -49,6 +49,32 @@ void main() {
     check(managed!.servedElsewhere).isFalse();
   });
 
+  test('parses fleet peers, up and down', () {
+    final status = HermesLocalModelStatus.fromJson({
+      'peers': [
+        {
+          'name': 'desktop',
+          'base_url': 'http://20.20.0.40:8080/v1',
+          'up': false,
+          'model': null,
+        },
+        {
+          'name': 'laptop',
+          'base_url': 'http://127.0.0.1:8080/v1',
+          'up': true,
+          'model': 'ornith-1.5-9b-heretic',
+        },
+        'junk',
+      ],
+    });
+    check(status).isNotNull();
+    check(status!.peers).length.equals(2);
+    check(status.peers.first.up).isFalse();
+    check(status.peers.first.name).equals('desktop');
+    check(status.peers.last.up).isTrue();
+    check(status.peers.last.model).equals('ornith-1.5-9b-heretic');
+  });
+
   test('a disabled manager with no models still parses', () {
     final status = HermesLocalModelStatus.fromJson({
       'enabled': false,

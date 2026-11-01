@@ -7093,6 +7093,19 @@
     "description": "External local router.",
     "placeholders": {"url": {"type": "String"}, "model": {"type": "String"}}
   },
+  "hermesLocalFleet": "Fleet",
+  "@hermesLocalFleet": {
+    "description": "Fleet copy."
+  },
+  "hermesLocalPeerDown": "asleep or unreachable",
+  "@hermesLocalPeerDown": {
+    "description": "Fleet copy."
+  },
+  "hermesLocalPeerServing": "serving {model}",
+  "@hermesLocalPeerServing": {
+    "description": "Fleet copy.",
+    "placeholders": {"model": {"type": "String"}}
+  },
   "hermesApprovalRequired": "Approval required",
   "@hermesApprovalRequired": {
     "description": "Title of a Hermes human-approval request card."

@@ -16,6 +16,7 @@ final class HermesLocalModelStatus {
     this.models = const [],
     this.modelsDir = '',
     this.externalServer,
+    this.peers = const [],
   });
 
   final bool enabled;
@@ -31,6 +32,9 @@ final class HermesLocalModelStatus {
 
   /// A router this manager did not start, reported (never claimed as its own).
   final HermesExternalServer? externalServer;
+
+  /// Other nodes' routers, probed over the network only.
+  final List<HermesLocalPeer> peers;
 
   bool get servedElsewhere => !serverRunning && externalServer != null;
 
@@ -56,6 +60,7 @@ final class HermesLocalModelStatus {
       models: List.unmodifiable(models),
       modelsDir: json['models_dir']?.toString() ?? '',
       externalServer: HermesExternalServer.fromJson(json['external_server']),
+      peers: HermesLocalPeer.listFromJson(json['peers']),
     );
   }
 }
@@ -140,5 +145,44 @@ final class HermesExternalServer {
       baseUrl: baseUrl,
       model: model == null || model.isEmpty ? null : model,
     );
+  }
+}
+
+/// Another node's local router, as configured in `local_runtime.peers`.
+final class HermesLocalPeer {
+  const HermesLocalPeer({
+    required this.name,
+    required this.baseUrl,
+    this.up = false,
+    this.model,
+  });
+
+  final String name;
+  final String baseUrl;
+  final bool up;
+  final String? model;
+
+  static HermesLocalPeer? fromJson(Map<String, dynamic> json) {
+    final baseUrl = json['base_url']?.toString().trim() ?? '';
+    if (baseUrl.isEmpty) return null;
+    final name = json['name']?.toString().trim();
+    final model = json['model']?.toString().trim();
+    return HermesLocalPeer(
+      name: name == null || name.isEmpty ? baseUrl : name,
+      baseUrl: baseUrl,
+      up: json['up'] == true,
+      model: model == null || model.isEmpty ? null : model,
+    );
+  }
+
+  static List<HermesLocalPeer> listFromJson(Object? json) {
+    if (json is! List) return const [];
+    final out = <HermesLocalPeer>[];
+    for (final row in json) {
+      if (row is! Map) continue;
+      final peer = fromJson(Map<String, dynamic>.from(row));
+      if (peer != null) out.add(peer);
+    }
+    return List.unmodifiable(out);
   }
 }
