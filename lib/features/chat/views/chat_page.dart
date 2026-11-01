@@ -2404,6 +2404,17 @@ class _ChatPageState extends ConsumerState<ChatPage> {
         _bottomAnchorController.resetForDetachedScroll();
       }
     }
+
+    // A Hermes chat is bound before its transcript is fetched (the session tile
+    // only opens the screen), so load it here — into the view that shows it.
+    final conversation = ref.read(activeConversationProvider);
+    if (isNativeHermesConversation(conversation) &&
+        (conversation?.messages.isEmpty ?? false)) {
+      final storedId = conversation?.metadata['hermesSessionId']?.toString();
+      if (storedId != null && storedId.isNotEmpty) {
+        unawaited(_refreshDesktopHermesTranscript(storedId));
+      }
+    }
   }
 
   void _handleViewportOwnerChanged() {

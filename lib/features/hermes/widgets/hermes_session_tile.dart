@@ -22,21 +22,16 @@ import 'package:conduit_core/features/chat/providers/chat_providers.dart'
 
 import '../../navigation/widgets/conversation_tile.dart';
 
-import 'package:conduit_core/features/hermes/models/hermes_config.dart';
 import 'package:conduit_core/features/hermes/models/hermes_model.dart';
 import 'package:conduit_core/features/hermes/models/hermes_session.dart';
 import 'package:conduit_core/features/hermes/models/hermes_bot.dart';
 import 'package:conduit_core/features/hermes/providers/hermes_providers.dart';
 import 'package:conduit_core/features/hermes/services/hermes_backend_service.dart';
 import 'package:conduit_core/features/hermes/services/hermes_bot_chat.dart';
-import 'package:conduit_core/features/hermes/services/hermes_desktop_api_service.dart';
 import 'package:conduit_core/features/hermes/services/hermes_desktop_transport.dart';
-import 'package:conduit_core/features/hermes/services/hermes_decision_projection.dart';
 import 'package:conduit_core/features/hermes/services/hermes_identifier.dart';
 import 'package:conduit_core/features/hermes/services/hermes_json_guard.dart';
 import 'package:conduit_core/features/hermes/services/hermes_local_document_trust_store.dart';
-import 'package:conduit_core/features/hermes/services/hermes_message_mapper.dart';
-import 'package:conduit_core/features/hermes/services/hermes_pending_decision_store.dart';
 import 'package:conduit_core/features/hermes/services/hermes_session_provenance.dart';
 
 /// A single Hermes session row, styled to match the chat conversation tiles —
@@ -314,13 +309,14 @@ Future<void> openHermesSession(
   HermesBot? bot,
   String? botAvatar,
 }) async {
-  final openEpoch = ref
-      .read(hermesSessionNavigationEpochProvider.notifier)
-      .bump();
-  // The sessions list rebuilds on its quiet poll, so the tile's own context can
-  // leave the tree while the transcript is loading. Guarding on it then made
-  // the tap do nothing at all — the stock app does exactly that, on occasion.
-  // The root navigator's context lives as long as the app.
+  // Open the chat first; the transcript loads inside it.
+  //
+  // This used to fetch the transcript here, and then abandon the whole open if
+  // a guard (its own BuildContext, the navigation epoch, the admission token,
+  // the service identity) had moved while it was in flight — which is the
+  // stock "tapping a conversation does nothing, no message" behaviour. Nothing
+  // in this screen's lifetime is worth losing the tap over: bind the
+  // conversation and let the chat page fetch into the screen that shows it.
   final ui = Navigator.maybeOf(context, rootNavigator: true)?.context ?? context;
   final l10n = AppLocalizations.of(ui)!;
   final configController = ref.read(hermesConfigProvider.notifier);
@@ -348,122 +344,16 @@ Future<void> openHermesSession(
     }
     return;
   }
+  ref.read(hermesSessionNavigationEpochProvider.notifier).bump();
   final trustPrincipalId = configController.documentTrustPrincipalId();
-
-  List<Map<String, dynamic>> raw;
-  var pendingDecisions = const <HermesPendingDesktopDecision>[];
-  try {
-    // A long chat must not hold the screen back: open on its newest page and
-    // let the rest of the history arrive in the background.
-    raw = service is HermesDesktopApiService
-        ? await service.openSessionTranscript(session.id)
-        : await service.getSessionMessages(session.id);
-  } catch (error) {
-    // Don't silently open an existing session with an empty transcript — that
-    // reads as data loss. Surface the failure and abort the open.
-    DebugLogger.error(
-      'open-session-failed',
-      scope: 'hermes/sessions',
-      data: {
-        'errorType': error.runtimeType.toString(),
-        if (error is HermesDesktopRpcException) 'rpcCode': error.code,
-        if (error is DioException) 'httpStatus': error.response?.statusCode,
-      },
-    );
-    if (ui.mounted) {
-      UiUtils.showMessage(
-        ui,
-        hermesSessionLoadFailureMessage(l10n, error),
-        isError: true,
-      );
-    }
-    return;
-  }
-  if (service is HermesDesktopApiService) {
-    try {
-      pendingDecisions = await service.pendingDecisionsForSession(session.id);
-    } catch (_) {
-      // Pending presentation is recoverable; the transcript is still useful.
-    }
-  }
-
-  var hermesModel = hermesSyntheticModel(name: service.config.name);
-  try {
-    final models = await ref.read(modelsProvider.future);
-    for (final model in models) {
-      if (isHermesModel(model)) {
-        hermesModel = model;
-        break;
-      }
-    }
-  } catch (_) {
-    // The model list may not be ready in Hermes-only or degraded startup.
-    // Keep the locally minted fallback so transport routing stays Hermes-safe.
-  }
-
-  // Connection edits rebuild the service. Never bind a transcript fetched
-  // with an old endpoint or principal into the newly configured account.
-  if (!ui.mounted ||
-      openEpoch != ref.read(hermesSessionNavigationEpochProvider) ||
-      !configController.sessionActionAdmissionIsCurrent(admission) ||
-      !identical(ref.read(hermesApiServiceProvider), service) ||
-      configController.documentTrustPrincipalId() != trustPrincipalId) {
-    // The connection or the selection moved while the transcript loaded. Say so
-    // instead of dropping the tap on the floor.
-    DebugLogger.warning(
-      'open-session-abandoned',
-      scope: 'hermes/sessions',
-      data: {
-        'mounted': ui.mounted,
-        'epoch': openEpoch == ref.read(hermesSessionNavigationEpochProvider),
-        'admission': configController.sessionActionAdmissionIsCurrent(admission),
-        'service': identical(ref.read(hermesApiServiceProvider), service),
-      },
-    );
-    if (ui.mounted) {
-      UiUtils.showMessage(ui, l10n.pleaseCheckConnection, isError: true);
-    }
-    return;
-  }
-
   final connectionIdentity = _sessionConnectionIdentity(
     service,
     trustPrincipalId,
   ).connectionIdentity;
-  final trustedDocuments = connectionIdentity == null
-      ? const <String>{}
-      : HermesLocalDocumentTrustStore.trustedDocumentKeys(
-          connectionIdentity: connectionIdentity,
-          sessionId: session.id,
-        );
-  var messages =
-      hermesMessagesToChatMessages(
-        raw,
-        modelId: hermesModel.id,
-        trustedLocalDocumentKeys: trustedDocuments,
-      )..addAll(
-        hermesPendingDesktopDecisionMessages(
-          pendingDecisions,
-          modelId: hermesModel.id,
-        ),
-      );
-  if (service is HermesDesktopApiService) {
-    messages = restoreHermesDesktopRunningMessage(
-      messages,
-      sessionId: session.id,
-      modelId: hermesModel.id,
-      isRunning:
-          service.turnStateFor(session.id) == HermesDesktopTurnState.running,
-    );
-  }
-
-  ref.read(hermesActiveSessionProvider.notifier).set(session.id);
-  // Mark as a manual selection (same as startNewHermesChat) so the default-
-  // model restoration that fires on conversation-open can't race past this
-  // and overwrite the Hermes model with the user's OWUI default.
-  ref.read(isManualModelSelectionProvider.notifier).set(true);
-  ref.read(selectedModelProvider.notifier).set(hermesModel);
-
+  final selected = ref.read(selectedModelProvider);
+  final hermesModel = selected != null && isHermesModel(selected)
+      ? selected
+      : hermesSyntheticModel(name: service.config.name);
   final now = DateTime.now();
   // `local:` prefix keeps the OpenWebUI socket/Drift machinery out of this chat
   // (isTemporaryChat == true); the real session id lives in metadata + the
@@ -475,7 +365,7 @@ Future<void> openHermesSession(
       createdAt: now,
       updatedAt: session.updatedAt ?? now,
       model: hermesModel.id,
-      messages: messages,
+      messages: const [],
       metadata: {
         'backend': 'hermes',
         'hermesSessionId': session.id,
@@ -484,6 +374,12 @@ Future<void> openHermesSession(
       },
     ),
   );
+  ref.read(hermesActiveSessionProvider.notifier).set(session.id);
+  // Mark as a manual selection (same as startNewHermesChat) so the default-
+  // model restoration that fires on conversation-open can't race past this
+  // and overwrite the Hermes model with the user's OWUI default.
+  ref.read(isManualModelSelectionProvider.notifier).set(true);
+  ref.read(selectedModelProvider.notifier).set(hermesModel);
   ref.read(activeConversationProvider.notifier).set(conversation);
 
   if (ui.mounted) {
