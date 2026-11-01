@@ -575,6 +575,80 @@ final class _HermesDesktopAdministration {
     body: {'provider': provider},
   );
 
+  // --- Profiles (dashboard /api/profiles) -----------------------------------
+  //
+  // Verified against hermes_cli/web_routers/profiles.py (two routers, 20 routes):
+  // list is {profiles:[…]}, active is {active,current}, soul is {content,exists},
+  // and the writes answer {ok,…}. Descriptions and model changes are separate
+  // PUTs; nothing here deletes or renames in v1.
+
+  Future<List<HermesProfileSummary>> dashboardProfiles() async {
+    final data = await _owner._requestJson('GET', '/api/profiles');
+    return HermesProfileSummary.listFromJson(data);
+  }
+
+  Future<HermesProfileActive?> activeProfile() async {
+    final data = await _owner._requestJson('GET', '/api/profiles/active');
+    return HermesProfileActive.fromJson(data);
+  }
+
+  Future<void> setActiveProfile(String name) => _owner._requestJson(
+    'POST',
+    '/api/profiles/active',
+    body: {'name': name},
+  );
+
+  Future<HermesProfileSoul?> profileSoul(String name) async {
+    final data = await _owner._requestJson(
+      'GET',
+      '/api/profiles/${Uri.encodeComponent(name)}/soul',
+    );
+    return HermesProfileSoul.fromJson(data);
+  }
+
+  Future<void> updateProfileSoul({
+    required String name,
+    required String content,
+  }) => _owner._requestJson(
+    'PUT',
+    '/api/profiles/${Uri.encodeComponent(name)}/soul',
+    body: {'content': content},
+  );
+
+  Future<void> updateProfileDescription({
+    required String name,
+    required String description,
+  }) => _owner._requestJson(
+    'PUT',
+    '/api/profiles/${Uri.encodeComponent(name)}/description',
+    body: {'description': description},
+  );
+
+  Future<void> setProfileModel({
+    required String name,
+    required String provider,
+    required String model,
+  }) => _owner._requestJson(
+    'PUT',
+    '/api/profiles/${Uri.encodeComponent(name)}/model',
+    body: {'provider': provider, 'model': model},
+  );
+
+  Future<void> createProfile({
+    required String name,
+    String? cloneFrom,
+    String? soul,
+  }) => _owner._requestJson(
+    'POST',
+    '/api/profiles',
+    body: {
+      'name': name,
+      if (cloneFrom != null && cloneFrom.trim().isNotEmpty)
+        'clone_from': cloneFrom.trim(),
+      'soul': ?soul,
+    },
+  );
+
   // --- Toolsets (dashboard /api/tools) -------------------------------------
   //
   // Verified against hermes_cli/web_routers/tools.py: the list route returns a

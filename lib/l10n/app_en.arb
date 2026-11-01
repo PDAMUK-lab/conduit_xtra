@@ -6369,6 +6369,67 @@
   "@hermesToolsetSelectFailed": {
     "description": "Toolsets copy."
   },
+  "hermesProfilesTitle": "Profiles",
+  "@hermesProfilesTitle": {
+    "description": "Profiles copy."
+  },
+  "hermesProfilesSubtitle": "Separate agents, each with its own config, skills and soul.",
+  "@hermesProfilesSubtitle": {
+    "description": "Profiles copy."
+  },
+  "hermesProfilesLoadFailed": "Could not load profiles.",
+  "@hermesProfilesLoadFailed": {
+    "description": "Profiles copy."
+  },
+  "hermesProfileActive": "Active",
+  "@hermesProfileActive": {
+    "description": "Profiles copy."
+  },
+  "hermesProfileDefault": "Default",
+  "@hermesProfileDefault": {
+    "description": "Profiles copy."
+  },
+  "hermesProfileGatewayRunning": "Gateway running",
+  "@hermesProfileGatewayRunning": {
+    "description": "Profiles copy."
+  },
+  "hermesProfileSoul": "Soul",
+  "@hermesProfileSoul": {
+    "description": "Profiles copy."
+  },
+  "hermesProfileDescription": "Description",
+  "@hermesProfileDescription": {
+    "description": "Profiles copy."
+  },
+  "hermesProfileModel": "Model",
+  "@hermesProfileModel": {
+    "description": "Profiles copy."
+  },
+  "hermesProfileProvider": "Provider",
+  "@hermesProfileProvider": {
+    "description": "Profiles copy."
+  },
+  "hermesProfileSetActive": "Set as active",
+  "@hermesProfileSetActive": {
+    "description": "Profiles copy."
+  },
+  "hermesProfileSave": "Save",
+  "@hermesProfileSave": {
+    "description": "Profiles copy."
+  },
+  "hermesProfileSaved": "Profile saved.",
+  "@hermesProfileSaved": {
+    "description": "Profiles copy."
+  },
+  "hermesProfileSaveFailed": "Could not save the profile.",
+  "@hermesProfileSaveFailed": {
+    "description": "Profiles copy."
+  },
+  "hermesProfileSkills": "{count, plural, =1{1 skill} other{{count} skills}}",
+  "@hermesProfileSkills": {
+    "description": "Profile skill count.",
+    "placeholders": {"count": {"type": "int"}}
+  },
   "hermesApprovalRequired": "Approval required",
   "@hermesApprovalRequired": {
     "description": "Title of a Hermes human-approval request card."

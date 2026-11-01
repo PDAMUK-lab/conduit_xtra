@@ -58,6 +58,8 @@ class Routes {
   static const String hermesMemorySubject =
       '/profile/hermes/memory/subjects/:slug';
   static const String hermesMemoryDay = '/profile/hermes/memory/days/:date';
+  static const String hermesProfiles = '/profile/hermes/profiles';
+  static const String hermesProfile = '/profile/hermes/profiles/:name';
   static const String hermesToolsets = '/profile/hermes/toolsets';
   static const String hermesToolset = '/profile/hermes/toolsets/:name';
   static const String hermesFiles = '/profile/hermes/files';
@@ -83,6 +85,8 @@ class Routes {
       '/profile/hermes/memory/subjects/${Uri.encodeComponent(slug)}';
   static String hermesMemoryDayPath(String date) =>
       '/profile/hermes/memory/days/${Uri.encodeComponent(date)}';
+  static String hermesProfilePath(String name) =>
+      '/profile/hermes/profiles/${Uri.encodeComponent(name)}';
   static String hermesToolsetPath(String name) =>
       '/profile/hermes/toolsets/${Uri.encodeComponent(name)}';
   static String hermesFileEditorPath(String path) =>
@@ -134,6 +138,8 @@ class RouteNames {
   static const String hermesMemorySettings = 'hermes-memory-settings';
   static const String hermesMemorySubject = 'hermes-memory-subject';
   static const String hermesMemoryDay = 'hermes-memory-day';
+  static const String hermesProfiles = 'hermes-profiles';
+  static const String hermesProfile = 'hermes-profile';
   static const String hermesToolsets = 'hermes-toolsets';
   static const String hermesToolset = 'hermes-toolset';
   static const String hermesFiles = 'hermes-files';

@@ -144,6 +144,12 @@ before `flutter pub get`.
   Contract extracted by the laptop pool and verified against
   `tools.py` (12/12 routes, request models and response keys) and a live
   gated dashboard (27 toolsets, 16 providers, `needs_auth` status).
+- **M3.3 (Profiles):** list with model, default/active/gateway state and skill
+  count; per-profile SOUL.md editor, description, main model
+  (provider + id) and a set-active action. Rename/delete/export/import
+  are deliberately left to a desktop. Contract table delegated to the
+  laptop pool and checked against both routers in `profiles.py`
+  (16 + 4 = 20 routes; the first count missed `sessions_router`).
 
 ## APK delivery to the NAS
 

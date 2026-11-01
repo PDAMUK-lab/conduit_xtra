@@ -20,6 +20,7 @@ import 'package:conduit_core/features/hermes/models/hermes_config.dart';
 import 'package:conduit_core/features/hermes/models/hermes_fs.dart';
 import 'package:conduit_core/features/hermes/models/hermes_mcp.dart';
 import 'package:conduit_core/features/hermes/models/hermes_memory_wiki.dart';
+import 'package:conduit_core/features/hermes/models/hermes_profile.dart';
 import 'package:conduit_core/features/hermes/models/hermes_model.dart';
 import 'package:conduit_core/features/hermes/models/hermes_run_event.dart';
 import 'package:conduit_core/features/hermes/models/hermes_skill.dart';
@@ -501,6 +502,45 @@ final class HermesDesktopApiService
     required String content,
   }) => _administration.fsWriteText(path: path, content: content);
   Future<String?> fsGitRoot(String path) => _administration.fsGitRoot(path);
+
+  // Profiles (dashboard /api/profiles).
+  Future<List<HermesProfileSummary>> dashboardProfiles() =>
+      _administration.dashboardProfiles();
+  Future<HermesProfileActive?> activeProfile() =>
+      _administration.activeProfile();
+  Future<void> setActiveProfile(String name) =>
+      _administration.setActiveProfile(name);
+  Future<HermesProfileSoul?> profileSoul(String name) =>
+      _administration.profileSoul(name);
+  Future<void> updateProfileSoul({
+    required String name,
+    required String content,
+  }) => _administration.updateProfileSoul(name: name, content: content);
+  Future<void> updateProfileDescription({
+    required String name,
+    required String description,
+  }) => _administration.updateProfileDescription(
+    name: name,
+    description: description,
+  );
+  Future<void> setProfileModel({
+    required String name,
+    required String provider,
+    required String model,
+  }) => _administration.setProfileModel(
+    name: name,
+    provider: provider,
+    model: model,
+  );
+  Future<void> createProfile({
+    required String name,
+    String? cloneFrom,
+    String? soul,
+  }) => _administration.createProfile(
+    name: name,
+    cloneFrom: cloneFrom,
+    soul: soul,
+  );
 
   // Toolsets (dashboard /api/tools).
   Future<List<HermesToolsetSummary>> dashboardToolsets() =>

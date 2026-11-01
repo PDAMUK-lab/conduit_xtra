@@ -41,6 +41,7 @@ import 'package:conduit_core/features/hermes/models/hermes_job.dart';
 import 'package:conduit_core/features/hermes/models/hermes_memory.dart';
 import 'package:conduit_core/features/hermes/models/hermes_memory_wiki.dart';
 import 'package:conduit_core/features/hermes/models/hermes_model.dart';
+import 'package:conduit_core/features/hermes/models/hermes_profile.dart';
 import 'package:conduit_core/features/hermes/models/hermes_session.dart';
 import 'package:conduit_core/features/hermes/models/hermes_skill.dart';
 import 'package:conduit_core/features/hermes/models/hermes_toolset.dart';
@@ -2693,6 +2694,29 @@ final hermesFsTextProvider =
       final service = ref.watch(hermesApiServiceProvider);
       if (service is! HermesDesktopApiService) return null;
       return service.fsReadText(path);
+    });
+
+/// Profiles from the dashboard, with their model, description and state.
+final hermesProfileListProvider =
+    FutureProvider<List<HermesProfileSummary>>((ref) async {
+      final service = ref.watch(hermesApiServiceProvider);
+      if (service is! HermesDesktopApiService) return const [];
+      return service.dashboardProfiles();
+    });
+
+final hermesActiveProfileProvider =
+    FutureProvider<HermesProfileActive?>((ref) async {
+      final service = ref.watch(hermesApiServiceProvider);
+      if (service is! HermesDesktopApiService) return null;
+      return service.activeProfile();
+    });
+
+/// One profile's SOUL.md.
+final hermesProfileSoulProvider =
+    FutureProvider.family<HermesProfileSoul?, String>((ref, name) async {
+      final service = ref.watch(hermesApiServiceProvider);
+      if (service is! HermesDesktopApiService) return null;
+      return service.profileSoul(name);
     });
 
 /// Configurable toolsets from the dashboard (bare array from
