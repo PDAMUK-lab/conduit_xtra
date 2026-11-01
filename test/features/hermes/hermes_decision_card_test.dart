@@ -10,6 +10,7 @@ import 'package:conduit/features/hermes/widgets/hermes_message_interactions.dart
 import 'package:conduit/l10n/app_localizations.dart';
 import 'package:conduit/l10n/conduit_localizations.dart';
 import 'package:conduit/shared/theme/app_theme.dart';
+import 'package:conduit/shared/widgets/conduit_components.dart';
 import 'package:conduit/shared/theme/tweakcn_themes.dart';
 import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:material_ui/material_ui.dart';
@@ -334,6 +335,42 @@ void main() {
     expect(find.text('Short-lived prompt'), findsNothing);
   });
 
+  testWidgets('numbers its choices and accepts the number as the answer', (
+    tester,
+  ) async {
+    final submitted = <String>[];
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: conduitLocalizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Theme(
+          data: AppTheme.light(TweakcnThemes.t3Chat),
+          child: Scaffold(
+            body: HermesDecisionCard(
+              kind: HermesDecisionKind.clarification,
+              prompt: 'Proceed?',
+              choices: const ['Yes', 'No'],
+              onSubmit: (value) async {
+                submitted.add(value);
+                return true;
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Numbered like the TUI, so the order is addressable.
+    expect(find.text('1. Yes'), findsOneWidget);
+    expect(find.text('2. No'), findsOneWidget);
+
+    await tester.enterText(find.byType(TextField), '2');
+    await tester.tap(find.byType(ConduitButton).last);
+    await tester.pumpAndSettle();
+
+    expect(submitted, ['No'], reason: 'a typed number must answer that choice');
+  });
+
   testWidgets('renders its response field in a Cupertino tree', (tester) async {
     await tester.pumpWidget(
       CupertinoApp(
@@ -425,9 +462,10 @@ void main() {
       ),
     );
 
-    await tester.tap(find.text('alpha'));
+    // Choices are numbered (TUI parity), so the label carries the index.
+    await tester.tap(find.text('1. alpha'));
     await tester.pump();
-    await tester.tap(find.text('beta'));
+    await tester.tap(find.text('2. beta'));
     await tester.pump();
     await tester.tap(find.text('Send response'));
     await tester.pump();

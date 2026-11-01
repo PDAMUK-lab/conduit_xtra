@@ -52,7 +52,15 @@ final class _HermesDecisionCardState extends State<HermesDecisionCard> {
   }
 
   Future<void> _submit([String? override]) async {
-    final value = override ?? _controller.text;
+    var value = override ?? _controller.text;
+    if (override == null && widget.choices.isNotEmpty) {
+      // The TUI numbers its options and accepts the number; do the same here so
+      // "2" answers the second choice instead of being sent as the literal text.
+      final typed = int.tryParse(value.trim());
+      if (typed != null && typed >= 1 && typed <= widget.choices.length) {
+        value = widget.choices[typed - 1];
+      }
+    }
     if (value.trim().isEmpty || _submitting) return;
     setState(() => _submitting = true);
     final resolved = await widget.onSubmit(value);
@@ -132,9 +140,10 @@ final class _HermesDecisionCardState extends State<HermesDecisionCard> {
                   spacing: Spacing.xs,
                   runSpacing: Spacing.xs,
                   children: [
-                    for (final choice in widget.choices)
+                    for (final (index, choice)
+                        in widget.choices.indexed)
                       AdaptiveChip.filter(
-                        label: Text(choice),
+                        label: Text('${index + 1}. $choice'),
                         selected: _selectedChoices.contains(choice),
                         onSelected: _submitting
                             ? null
