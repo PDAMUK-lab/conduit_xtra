@@ -171,6 +171,13 @@ before `flutter pub get`.
   destructive confirmation; hooks are listed with their approval state.
   There is **no restore route** in the dashboard — restore stays a CLI job
   (`hermes checkpoints`), documented rather than faked.
+- **Run now: a timeout is not a failure.** The trigger waits for the refreshed
+  job, so a long run can outlive the client's timeout after the server has
+  already claimed it. That is now treated as started (and the list/runs
+  refreshed) instead of "Could not run scheduled job"; a real refusal keeps
+  the server's own detail, which the jobs page used to swallow in `catch (_)`.
+  Reproduced server-side with a throwaway no-agent job: the route fired and
+  returned the refreshed job, so the endpoint itself is healthy.
 - **Pull-to-refresh on detail pages.** `UtilityPageScaffold.settings` had no
   refresh indicator at all, so a pull did nothing on every settings page. The
   scaffold takes an optional `onRefresh` and wraps its list; Local models,

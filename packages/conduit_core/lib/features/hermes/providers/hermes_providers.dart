@@ -3008,7 +3008,16 @@ class HermesJobsController extends AsyncNotifier<List<HermesJob>> {
   }
 
   Future<void> runNow(String id) async {
-    await _service.runJob(id);
+    try {
+      await _service.runJob(id);
+    } catch (error) {
+      // `trigger` waits for the refreshed job. A long run can outlive the
+      // client's timeout after the server has already claimed and started it,
+      // so a timeout means "started", not "failed" — anything else (409, 404)
+      // still surfaces its own detail.
+      if (!hermesJobStartTimedOut(error)) rethrow;
+    }
+    ref.invalidateSelf();
     ref.invalidate(hermesJobRunsProvider(id));
   }
 
@@ -3018,6 +3027,15 @@ class HermesJobsController extends AsyncNotifier<List<HermesJob>> {
     ref.invalidateSelf();
   }
 }
+
+/// True when a manual cron trigger failed only because the answer took longer
+/// than the client waits (the job itself has already been fired server-side).
+@visibleForTesting
+bool hermesJobStartTimedOut(Object error) =>
+    error is DioException &&
+    (error.type == DioExceptionType.receiveTimeout ||
+        error.type == DioExceptionType.sendTimeout ||
+        error.type == DioExceptionType.connectionTimeout);
 
 /// The node's local model manager state (read-only in this build).
 final hermesLocalModelStatusProvider =

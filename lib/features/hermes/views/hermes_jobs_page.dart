@@ -38,9 +38,18 @@ Future<bool> runHermesJobMutation(
       UiUtils.showMessage(context, successMessage);
     }
     return true;
-  } catch (_) {
+  } catch (error) {
     if (context.mounted) {
-      UiUtils.showMessage(context, failureMessage, isError: true);
+      // The server says exactly why (409 "already running", 404 unknown job,
+      // 400 bad input). Swallowing that left only "could not run" to act on.
+      final detail = RegExp(r'"detail"\s*:\s*"([^"]{1,300})"')
+          .firstMatch(error.toString())
+          ?.group(1);
+      UiUtils.showMessage(
+        context,
+        detail ?? failureMessage,
+        isError: true,
+      );
     }
     return false;
   }
