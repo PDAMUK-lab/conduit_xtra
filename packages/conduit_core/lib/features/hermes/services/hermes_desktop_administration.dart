@@ -574,4 +574,95 @@ final class _HermesDesktopAdministration {
     '/api/memory/provider',
     body: {'provider': provider},
   );
+
+  // --- Memory Wiki (dashboard plugin) --------------------------------------
+  //
+  // The plugin mounts its router at /api/plugins/memory-wiki (manifest `api`),
+  // built from local session history: subjects, daily logs, the persistent
+  // memory entries, and a read-only provider archive. Shapes measured from
+  // memory-wiki 1.1.0's router and core module.
+
+  static const String _wikiBase = '/api/plugins/memory-wiki';
+
+  Future<HermesMemoryWikiOverview?> memoryWikiOverview({
+    int subjectLimit = 50,
+    int dayLimit = 30,
+  }) async {
+    final data = await _owner._requestJson(
+      'GET',
+      '$_wikiBase/overview',
+      query: {'subject_limit': subjectLimit, 'day_limit': dayLimit},
+    );
+    return HermesMemoryWikiOverview.fromJson(data);
+  }
+
+  Future<List<HermesWikiSubject>> memoryWikiSubjects({
+    String query = '',
+    int limit = 100,
+  }) async {
+    final data = _owner._object(
+      await _owner._requestJson(
+        'GET',
+        '$_wikiBase/subjects',
+        query: {'q': query, 'limit': limit},
+      ),
+    );
+    return HermesWikiSubject.listFromJson(data['subjects']);
+  }
+
+  Future<HermesWikiSubject?> memoryWikiSubject(String slug) async {
+    final data = _owner._object(
+      await _owner._requestJson(
+        'GET',
+        '$_wikiBase/subjects/${Uri.encodeComponent(slug)}',
+      ),
+    );
+    final subject = data['subject'];
+    return subject is Map
+        ? HermesWikiSubject.fromJson(Map<String, dynamic>.from(subject))
+        : null;
+  }
+
+  Future<List<HermesWikiDay>> memoryWikiDays({int limit = 60}) async {
+    final data = _owner._object(
+      await _owner._requestJson(
+        'GET',
+        '$_wikiBase/days',
+        query: {'limit': limit},
+      ),
+    );
+    return HermesWikiDay.listFromJson(data['daily_logs']);
+  }
+
+  Future<HermesWikiDay?> memoryWikiDay(String date) async {
+    final data = _owner._object(
+      await _owner._requestJson(
+        'GET',
+        '$_wikiBase/days/${Uri.encodeComponent(date)}',
+      ),
+    );
+    final day = data['daily_log'];
+    return day is Map
+        ? HermesWikiDay.fromJson(Map<String, dynamic>.from(day))
+        : null;
+  }
+
+  Future<HermesMemoryArchive?> memoryWikiArchive({
+    int limit = 25,
+    String? status,
+    String? target,
+    String query = '',
+  }) async {
+    final data = await _owner._requestJson(
+      'GET',
+      '$_wikiBase/archive',
+      query: {
+        'limit': limit,
+        if (status != null && status.isNotEmpty) 'status': status,
+        if (target != null && target.isNotEmpty) 'target': target,
+        if (query.isNotEmpty) 'q': query,
+      },
+    );
+    return HermesMemoryArchive.fromJson(data);
+  }
 }

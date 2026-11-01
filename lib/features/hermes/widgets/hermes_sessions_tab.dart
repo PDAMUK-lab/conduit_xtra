@@ -538,12 +538,9 @@ class _MemoryTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final status = ref.watch(hermesMemoryStatusProvider).asData?.value;
     final theme = context.conduitTheme;
     final l10n = AppLocalizations.of(context)!;
-    final subtitle = status == null || status.active.isEmpty
-        ? l10n.hermesMemorySubtitle
-        : status.active;
+    final subtitle = l10n.hermesWikiSubtitle;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(
@@ -583,7 +580,7 @@ class _MemoryTile extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      l10n.hermesMemoryTitle,
+                      l10n.hermesWikiTitle,
                       style: AppTypography.bodyMediumStyle.copyWith(
                         color: theme.textPrimary,
                         fontWeight: FontWeight.w600,

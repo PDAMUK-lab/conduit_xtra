@@ -53,6 +53,11 @@ class Routes {
   static const String hermesApprovals = '/profile/hermes/approvals';
   static const String hermesSkills = '/profile/hermes/skills';
   static const String hermesMemory = '/profile/hermes/memory';
+  static const String hermesMemorySettings =
+      '/profile/hermes/memory/settings';
+  static const String hermesMemorySubject =
+      '/profile/hermes/memory/subjects/:slug';
+  static const String hermesMemoryDay = '/profile/hermes/memory/days/:date';
   static const String hermesSkillEditor = '/profile/hermes/skills/new';
   static const String hermesMcp = '/profile/hermes/mcp';
   static const String about = '/profile/about';
@@ -70,6 +75,10 @@ class Routes {
       '/profile/hermes/connections/${Uri.encodeComponent(id)}';
   static String hermesSkillEditorPath(String name) =>
       '/profile/hermes/skills/${Uri.encodeComponent(name)}';
+  static String hermesMemorySubjectPath(String slug) =>
+      '/profile/hermes/memory/subjects/${Uri.encodeComponent(slug)}';
+  static String hermesMemoryDayPath(String date) =>
+      '/profile/hermes/memory/days/${Uri.encodeComponent(date)}';
 }
 
 /// Friendly names for GoRouter routes to support context.pushNamed.
@@ -114,6 +123,9 @@ class RouteNames {
   static const String hermesApprovals = 'hermes-approvals';
   static const String hermesSkills = 'hermes-skills';
   static const String hermesMemory = 'hermes-memory';
+  static const String hermesMemorySettings = 'hermes-memory-settings';
+  static const String hermesMemorySubject = 'hermes-memory-subject';
+  static const String hermesMemoryDay = 'hermes-memory-day';
   static const String hermesSkillEditor = 'hermes-skill-editor';
   static const String hermesMcp = 'hermes-mcp';
   static const String about = 'about';

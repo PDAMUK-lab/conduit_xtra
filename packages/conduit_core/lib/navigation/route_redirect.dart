@@ -65,7 +65,7 @@ bool _isAccountlessBackendLocation(String location) {
       location == Routes.hermesJobs ||
       location == Routes.hermesApprovals ||
       isHermesSkillsLocation(location) ||
-      location == Routes.hermesMemory ||
+      isHermesMemoryLocation(location) ||
       location == Routes.about;
 }
 
@@ -73,6 +73,12 @@ bool _isAccountlessBackendLocation(String location) {
 bool isHermesSettingsLocation(String location) =>
     location == Routes.hermesSettings ||
     location.startsWith('${Routes.hermesSettings}/connections/');
+
+/// The memory wiki and its sub-pages, plus the provider settings they link
+/// to. Every one of them is device-local until a connection exists.
+bool isHermesMemoryLocation(String location) =>
+    location == Routes.hermesMemory ||
+    location.startsWith('${Routes.hermesMemory}/');
 
 /// The skills browser and one skill's editor.
 bool isHermesSkillsLocation(String location) =>

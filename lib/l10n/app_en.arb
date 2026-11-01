@@ -6178,6 +6178,81 @@
   "@hermesMemoryNone": {
     "description": "Hermes memory settings copy."
   },
+  "hermesWikiTitle": "Memory Wiki",
+  "@hermesWikiTitle": {
+    "description": "Memory Wiki copy."
+  },
+  "hermesWikiSubtitle": "Subjects, daily logs, and the memory the agent carries.",
+  "@hermesWikiSubtitle": {
+    "description": "Memory Wiki copy."
+  },
+  "hermesWikiPersistent": "Persistent memory",
+  "@hermesWikiPersistent": {
+    "description": "Memory Wiki copy."
+  },
+  "hermesWikiSubjects": "Subjects",
+  "@hermesWikiSubjects": {
+    "description": "Memory Wiki copy."
+  },
+  "hermesWikiDays": "Daily logs",
+  "@hermesWikiDays": {
+    "description": "Memory Wiki copy."
+  },
+  "hermesWikiArchive": "Archive",
+  "@hermesWikiArchive": {
+    "description": "Memory Wiki copy."
+  },
+  "hermesWikiSearchSubjects": "Search subjects",
+  "@hermesWikiSearchSubjects": {
+    "description": "Memory Wiki copy."
+  },
+  "hermesWikiNoSubjects": "No subjects yet.",
+  "@hermesWikiNoSubjects": {
+    "description": "Memory Wiki copy."
+  },
+  "hermesWikiNoDays": "No daily logs yet.",
+  "@hermesWikiNoDays": {
+    "description": "Memory Wiki copy."
+  },
+  "hermesWikiArchiveUnavailable": "No archive for this provider.",
+  "@hermesWikiArchiveUnavailable": {
+    "description": "Memory Wiki copy."
+  },
+  "hermesWikiSettings": "Memory settings",
+  "@hermesWikiSettings": {
+    "description": "Memory Wiki copy."
+  },
+  "hermesWikiLoadFailed": "Could not load the memory wiki.",
+  "@hermesWikiLoadFailed": {
+    "description": "Memory Wiki copy."
+  },
+  "hermesWikiKeywords": "Keywords",
+  "@hermesWikiKeywords": {
+    "description": "Memory Wiki copy."
+  },
+  "hermesWikiMentions": "Mentions",
+  "@hermesWikiMentions": {
+    "description": "Memory Wiki copy."
+  },
+  "hermesWikiWork": "Work",
+  "@hermesWikiWork": {
+    "description": "Memory Wiki copy."
+  },
+  "hermesWikiEntries": "{count, plural, =1{1 entry} other{{count} entries}}",
+  "@hermesWikiEntries": {
+    "description": "Memory Wiki counts.",
+    "placeholders": {"count": {"type": "int"}}
+  },
+  "hermesWikiSessions": "{count, plural, =1{1 session} other{{count} sessions}}",
+  "@hermesWikiSessions": {
+    "description": "Memory Wiki counts.",
+    "placeholders": {"count": {"type": "int"}}
+  },
+  "hermesWikiMessages": "{count, plural, =1{1 message} other{{count} messages}}",
+  "@hermesWikiMessages": {
+    "description": "Memory Wiki counts.",
+    "placeholders": {"count": {"type": "int"}}
+  },
   "hermesApprovalRequired": "Approval required",
   "@hermesApprovalRequired": {
     "description": "Title of a Hermes human-approval request card."

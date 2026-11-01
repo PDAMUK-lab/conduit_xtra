@@ -18,6 +18,7 @@ import 'package:conduit_core/features/hermes/models/hermes_bot.dart';
 import 'package:conduit_core/features/hermes/models/hermes_chat_input.dart';
 import 'package:conduit_core/features/hermes/models/hermes_config.dart';
 import 'package:conduit_core/features/hermes/models/hermes_mcp.dart';
+import 'package:conduit_core/features/hermes/models/hermes_memory_wiki.dart';
 import 'package:conduit_core/features/hermes/models/hermes_model.dart';
 import 'package:conduit_core/features/hermes/models/hermes_run_event.dart';
 import 'package:conduit_core/features/hermes/models/hermes_skill.dart';
@@ -485,6 +486,36 @@ final class HermesDesktopApiService
       _administration.memoryStatus();
   Future<void> setMemoryProvider(String provider) =>
       _administration.setMemoryProvider(provider);
+
+  // Memory Wiki (dashboard plugin): subjects, days, notes, archive.
+  Future<HermesMemoryWikiOverview?> memoryWikiOverview({
+    int subjectLimit = 50,
+    int dayLimit = 30,
+  }) => _administration.memoryWikiOverview(
+    subjectLimit: subjectLimit,
+    dayLimit: dayLimit,
+  );
+  Future<List<HermesWikiSubject>> memoryWikiSubjects({
+    String query = '',
+    int limit = 100,
+  }) => _administration.memoryWikiSubjects(query: query, limit: limit);
+  Future<HermesWikiSubject?> memoryWikiSubject(String slug) =>
+      _administration.memoryWikiSubject(slug);
+  Future<List<HermesWikiDay>> memoryWikiDays({int limit = 60}) =>
+      _administration.memoryWikiDays(limit: limit);
+  Future<HermesWikiDay?> memoryWikiDay(String date) =>
+      _administration.memoryWikiDay(date);
+  Future<HermesMemoryArchive?> memoryWikiArchive({
+    int limit = 25,
+    String? status,
+    String? target,
+    String query = '',
+  }) => _administration.memoryWikiArchive(
+    limit: limit,
+    status: status,
+    target: target,
+    query: query,
+  );
 
   @override
   Future<List<Map<String, dynamic>>> listToolsets() =>

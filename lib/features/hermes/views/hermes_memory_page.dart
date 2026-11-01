@@ -35,7 +35,7 @@ class _HermesMemoryPageState extends ConsumerState<HermesMemoryPage> {
     final statusAsync = ref.watch(hermesMemoryStatusProvider);
 
     return UtilityPageScaffold.settings(
-      title: l10n.hermesMemoryTitle,
+      title: l10n.hermesWikiSettings,
       children: [
         Text(
           l10n.hermesMemorySubtitle,

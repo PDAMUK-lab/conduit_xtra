@@ -38,6 +38,7 @@ import 'package:conduit_core/features/hermes/models/hermes_config.dart';
 import 'package:conduit_core/features/hermes/models/hermes_connection_profile.dart';
 import 'package:conduit_core/features/hermes/models/hermes_job.dart';
 import 'package:conduit_core/features/hermes/models/hermes_memory.dart';
+import 'package:conduit_core/features/hermes/models/hermes_memory_wiki.dart';
 import 'package:conduit_core/features/hermes/models/hermes_model.dart';
 import 'package:conduit_core/features/hermes/models/hermes_session.dart';
 import 'package:conduit_core/features/hermes/models/hermes_skill.dart';
@@ -2633,6 +2634,40 @@ final hermesMemoryStatusProvider = FutureProvider<HermesMemoryStatus?>((
   if (service is! HermesDesktopApiService) return null;
   return HermesMemoryStatus.fromJson(await service.memoryStatus());
 });
+
+/// Memory Wiki overview: subjects, daily logs, persistent-memory entries and
+/// recent sessions, all derived from local session history by the plugin.
+final hermesMemoryWikiOverviewProvider =
+    FutureProvider<HermesMemoryWikiOverview?>((ref) async {
+      final service = ref.watch(hermesApiServiceProvider);
+      if (service is! HermesDesktopApiService) return null;
+      return service.memoryWikiOverview();
+    });
+
+/// The active provider's read-only archive (hermesmemory: replaced/removed
+/// entries and dated notes).
+final hermesMemoryWikiArchiveProvider =
+    FutureProvider<HermesMemoryArchive?>((ref) async {
+      final service = ref.watch(hermesApiServiceProvider);
+      if (service is! HermesDesktopApiService) return null;
+      return service.memoryWikiArchive();
+    });
+
+/// One subject's aggregated page.
+final hermesMemoryWikiSubjectProvider =
+    FutureProvider.family<HermesWikiSubject?, String>((ref, slug) async {
+      final service = ref.watch(hermesApiServiceProvider);
+      if (service is! HermesDesktopApiService) return null;
+      return service.memoryWikiSubject(slug);
+    });
+
+/// One daily log.
+final hermesMemoryWikiDayProvider =
+    FutureProvider.family<HermesWikiDay?, String>((ref, date) async {
+      final service = ref.watch(hermesApiServiceProvider);
+      if (service is! HermesDesktopApiService) return null;
+      return service.memoryWikiDay(date);
+    });
 
 /// Synchronous best-effort view of capabilities for gating UI (optimistic
 /// default while loading / on error).
