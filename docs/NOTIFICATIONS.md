@@ -83,3 +83,20 @@ on unlock). What is still missing is the lock-screen notification.
 - The earlier session-pause bug came from clients that *disconnect* under
   another runtime; a keepalive that flaps makes that worse, so this must be a
   stable long-lived socket, not a reconnect loop.
+
+## Confirmed cause of the silent turn alert (2026-11-02)
+
+The alert sink was installed from `_runPostAuthenticationStartup`, whose first
+line is `if (!_hasAuthenticatedSession()) return;`. Any launch without a session
+— every `adb install -r`, every expired dashboard token — skipped the install, so
+`HermesBackgroundAlerts.onReplyReady` stayed null and the watch tick's
+`replyReady(storedId)` was a silent no-op. Device logcat showed the shape
+exactly: `HERMES_WATCH tick` and `HERMES_WATCH new-tail newest=… known=…`
+every 8 s with no `HERMES_SINK` line at all.
+
+Fix: read `hermesTurnNotificationListenerProvider` in `main.dart` beside
+`hermesSocketKeepaliveProvider`, before `runApp` — unconditional — and print
+`HERMES_SINK installed` at install time. Proven on device: `HERMES_SINK
+installed` logged on the first launch after install. The tick also now alerts
+once per new row (`_alertedTailIds`): the transcript merge can lag the probe, so
+an unguarded call re-alerted on the same row every tick.
