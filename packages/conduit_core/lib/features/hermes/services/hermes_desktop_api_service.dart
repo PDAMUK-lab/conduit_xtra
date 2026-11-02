@@ -287,6 +287,10 @@ final class HermesDesktopApiService
   final Map<String, int> _bindingSocketGenerations = {};
   final Set<String> _freshSessionIds = {};
   final Map<String, List<Map<String, dynamic>>> _lastTranscripts = {};
+  /// Newest row already alerted on, per stored session id. The transcript merge
+  /// can lag the probe (a resume can be refused while signed out), so without
+  /// this the same new tail is rediscovered every tick and alerts every time.
+  final Map<String, String> _alertedTailIds = {};
   final Map<String, String> _appliedSessionOptions = {};
 
   /// Sessions owned by another profile (Bot Mode chats), keyed by stored id.

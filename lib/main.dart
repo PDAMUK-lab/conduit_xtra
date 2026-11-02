@@ -147,6 +147,7 @@ import 'package:conduit/l10n/app_localizations.dart';
 
 import 'platform/quick_actions_service.dart';
 import 'core/providers/app_startup_providers.dart';
+import 'features/notifications/providers/hermes_turn_notification_listener.dart';
 import 'features/notifications/services/local_notification_service.dart';
 import 'shared/widgets/sign_out_options_dialog.dart';
 import 'shared/theme/theme_extensions.dart';
@@ -535,6 +536,12 @@ void main() {
       // Hold a socket lease while backgrounded so a locked phone still receives
       // the turn it is waiting on (released on resume).
       providerContainer.read(hermesSocketKeepaliveProvider);
+
+      // Install the turn-alert sink here, not in post-authentication startup:
+      // that path returns early without a session, which left
+      // `HermesBackgroundAlerts.onReplyReady` null and made every background
+      // alert a silent no-op.
+      providerContainer.read(hermesTurnNotificationListenerProvider);
 
       installConduitErrorWidgetBuilder();
 

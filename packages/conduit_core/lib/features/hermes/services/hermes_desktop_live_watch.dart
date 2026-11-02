@@ -170,8 +170,13 @@ extension _HermesDesktopLiveWatch on HermesDesktopApiService {
       _queueTranscriptChange(storedId);
       // A new tail while the app is not looking is exactly the case the socket
       // event was supposed to report and did not. Fire the alert from the poll
-      // that provably ran, not from a frame that never arrived.
-      if (!_foreground) HermesBackgroundAlerts.replyReady(storedId);
+      // that provably ran, not from a frame that never arrived — once per row:
+      // the transcript merge lags the probe, so an unguarded call re-alerts on
+      // the same row every tick until the merge catches up.
+      if (!_foreground && _alertedTailIds[storedId] != newestId) {
+        _alertedTailIds[storedId] = newestId;
+        HermesBackgroundAlerts.replyReady(storedId);
+      }
     } catch (_) {
       // Transient: the next tick asks again.
     }

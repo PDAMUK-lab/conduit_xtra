@@ -89,6 +89,9 @@ final hermesTurnNotificationListenerProvider = Provider<void>((ref) {
           );
         };
 
+  // ignore: avoid_print
+  print('HERMES_SINK installed');
+
   ref.onDispose(() {
     lifecycleSubscription.cancel();
     HermesBackgroundAlerts.onReplyReady = null;
