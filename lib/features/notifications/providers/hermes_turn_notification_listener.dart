@@ -27,6 +27,14 @@ import 'notification_socket_listener.dart' show notificationRouterProvider;
 /// The sink must outlive provider invalidation, so it is installed here against
 /// the container and reads current state at call time instead of capturing it.
 void installHermesTurnAlertSink(ProviderContainer container) {
+  // Two paths call this for the same reply: the socket's message.complete
+  // handler (fast, but the frame is often dropped while the screen is off) and
+  // the live-watch poll (slower, cannot be missed). They land within a second of
+  // each other, so a short per-session window collapses them into one alert
+  // instead of two notifications for one answer.
+  final lastAlertAt = <String, DateTime>{};
+  const duplicateWindow = Duration(seconds: 3);
+
   HermesBackgroundAlerts.onReplyReady = (storedId) {
     final live = container.read(hermesConfigProvider);
     // ignore: avoid_print
@@ -45,6 +53,14 @@ void installHermesTurnAlertSink(ProviderContainer container) {
     // ignore: avoid_print
     print('HERMES_ALERT_SINK fired stored=$storedId foreground=$foreground');
     if (foreground) return;
+    final now = DateTime.now();
+    final previous = lastAlertAt[storedId];
+    if (previous != null && now.difference(previous) < duplicateWindow) {
+      // ignore: avoid_print
+      print('HERMES_ALERT_SINK suppressed duplicate stored=$storedId');
+      return;
+    }
+    lastAlertAt[storedId] = now;
     unawaited(
       container
           .read(notificationRouterProvider)
