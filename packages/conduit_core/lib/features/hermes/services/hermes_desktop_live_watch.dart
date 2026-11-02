@@ -122,6 +122,12 @@ extension _HermesDesktopLiveWatch on HermesDesktopApiService {
     } else {
       _liveWatchAbsences = 0;
     }
+    // Probe before the state refresh. A finished turn flips `running`, which
+    // queues a transcript reload; that reload advances the local tail before the
+    // probe runs, the probe then sees newest == known, and the reply never
+    // alerts — the failure looked like "no notification" on some turns and a
+    // working alert on others, depending on which ran first.
+    await _probeNewestRow(storedId);
     if (row != null || _liveWatchAbsences >= 3) {
       final status = row?['status']?.toString() ?? '';
       final running =
@@ -133,11 +139,6 @@ extension _HermesDesktopLiveWatch on HermesDesktopApiService {
       );
       if (changed) _queueTranscriptChange(storedId);
     }
-    // The row probe is one row and has no side effects, so it runs every tick.
-    // Gating it behind the three-absence verdict delayed a locked-phone alert by
-    // three ticks (~24 s) for no benefit: that gate exists to protect the turn
-    // state, not the probe.
-    await _probeNewestRow(storedId);
   }
 
   /// Asks for the session's newest row and reloads when it is not the one this
