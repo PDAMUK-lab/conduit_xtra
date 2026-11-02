@@ -1,7 +1,26 @@
 # Notifications while the phone is locked — design and first step
 
-Status: **keepalive shipped and verified on device (2026-11-02); the
-notification itself is not built.** The phone now receives a reply while locked —
+Status: **root cause found (2026-11-02): the router's first gate was shut.**
+`AppSettings.notificationsEnabled` defaulted to `false`, and nothing ever wrote
+that preference, so `NotificationRouter.route()` returned `suppressed` before it
+chose any surface — for every kind, including approvals. Measured on the phone:
+`FlutterSharedPreferences.xml` held no `notifications_enabled` key at all, and
+`dumpsys notification` had never held a single Conduit message notification.
+
+Fix (4.2.2, `606ed6a0`): default it `true`, ask for `POST_NOTIFICATIONS` at
+startup when enabled, bring the `conduit_messages` channel up at startup
+(`7060c8b1`), treat lifecycle `inactive` as backgrounded on MIUI locks, and fire
+the turn alert from the live-watch poll that provably runs while backgrounded.
+A regression test (`notification_router_test.dart` › `shipped defaults`) pins
+the whole claim: const defaults + backgrounded ⇒ `NotificationSurface.system`.
+
+Verified on an Android 14 emulator: startup created `conduit_messages`, the
+permission sheet appeared and was granted. **Not yet verified on the phone**: it
+signed itself out when the dashboard restarted (native tokens invalidated) and
+MIUI blocks input injection, so re-authenticating needs the operator.
+
+Status of the older keepalive work: **shipped and verified on device
+(2026-11-02).** The phone now receives a reply while locked —
 verified with the socket held open through a lock (server log: accepted 02:33:58,
 still ESTAB at 02:35:41, no close event; operator confirmed the reply was waiting
 on unlock). What is still missing is the lock-screen notification.
