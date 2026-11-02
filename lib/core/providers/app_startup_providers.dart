@@ -42,7 +42,6 @@ import 'package:conduit_core/services/api_service.dart';
 import 'package:conduit_core/models/conversation.dart';
 
 import '../services/background_streaming_handler.dart';
-import '../../features/notifications/providers/hermes_turn_notification_listener.dart';
 import 'package:conduit_core/ports/app_lifecycle.dart';
 import 'package:conduit_core/providers/host_ports.dart';
 
@@ -1215,7 +1214,8 @@ class AppStartupFlow extends _$AppStartupFlow {
     // while the app is backgrounded posts an OS notification whose tap opens
     // the inbox. Primed, so an old approval does not alert on launch.
     ref.read(hermesApprovalNotificationListenerProvider);
-    ref.read(hermesTurnNotificationListenerProvider);
+    // The turn-alert sink is installed in main() against the container: it must
+    // survive `ref.invalidate(hermesConfigProvider)` on the sign-out path.
     unawaited(
       ref.read(notificationSocketListenerProvider.notifier).handleLaunchTap(),
     );

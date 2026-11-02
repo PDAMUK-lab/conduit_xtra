@@ -538,10 +538,11 @@ void main() {
       providerContainer.read(hermesSocketKeepaliveProvider);
 
       // Install the turn-alert sink here, not in post-authentication startup:
-      // that path returns early without a session, which left
-      // `HermesBackgroundAlerts.onReplyReady` null and made every background
-      // alert a silent no-op.
-      providerContainer.read(hermesTurnNotificationListenerProvider);
+      // that path returns early without a session, and a provider that watches
+      // the Hermes config is disposed when sign-out invalidates it — either way
+      // `HermesBackgroundAlerts.onReplyReady` ended up null and every background
+      // alert was a silent no-op.
+      installHermesTurnAlertSink(providerContainer);
 
       installConduitErrorWidgetBuilder();
 
