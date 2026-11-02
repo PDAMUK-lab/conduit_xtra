@@ -177,8 +177,12 @@ extension _HermesDesktopLiveWatch on HermesDesktopApiService {
         _alertedTailIds[storedId] = newestId;
         HermesBackgroundAlerts.replyReady(storedId);
       }
-    } catch (_) {
-      // Transient: the next tick asks again.
+    } catch (e) {
+      // Transient network failures are expected; anything else here used to be
+      // invisible, which is how a type error in the alert guard went unnoticed
+      // for a whole build.
+      // ignore: avoid_print
+      print('HERMES_WATCH probe error: $e');
     }
   }
 
