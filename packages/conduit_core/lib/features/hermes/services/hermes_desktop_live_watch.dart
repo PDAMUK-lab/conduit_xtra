@@ -166,19 +166,29 @@ extension _HermesDesktopLiveWatch on HermesDesktopApiService {
         'messages',
       );
       if (_closed || probe.isEmpty) return;
-      final newestId = probe.last['id'];
+      final newestRow = probe.last;
+      final newestId = newestRow['id'];
+      final newestRole = newestRow['role']?.toString();
+      final toolCalls = newestRow['tool_calls'];
+      final isReply = newestRole == 'assistant' &&
+          !(toolCalls is List && toolCalls.isNotEmpty);
       final knownId = local == null || local.isEmpty ? null : local.last['id'];
       // No tail at all (a chat opened before it had rows) counts as stale too.
       if (newestId == null || newestId == knownId) return;
       // ignore: avoid_print
-      print('HERMES_WATCH new-tail newest=$newestId known=$knownId fg=$_foreground');
+      print('HERMES_WATCH new-tail newest=$newestId role=$newestRole '
+          'known=$knownId fg=$_foreground');
       _queueTranscriptChange(storedId);
       // A new tail while the app is not looking is exactly the case the socket
       // event was supposed to report and did not. Fire the alert from the poll
       // that provably ran, not from a frame that never arrived — once per row:
       // the transcript merge lags the probe, so an unguarded call re-alerts on
       // the same row every tick until the merge catches up.
-      if (!_foreground && _alertedTailIds[storedId] != newestId) {
+      // Only an assistant row is a reply. A turn appends tool rows as it works,
+      // and alerting on those posted "Reply ready" mid-turn — the operator saw
+      // two notifications for one answer. The transcript still refreshes on any
+      // new row; only the alert is restricted.
+      if (!_foreground && isReply && _alertedTailIds[storedId] != newestId) {
         _alertedTailIds[storedId] = newestId;
         HermesBackgroundAlerts.replyReady(storedId);
       }
