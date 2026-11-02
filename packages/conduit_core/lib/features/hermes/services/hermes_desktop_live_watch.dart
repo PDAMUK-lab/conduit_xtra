@@ -119,19 +119,24 @@ extension _HermesDesktopLiveWatch on HermesDesktopApiService {
       // live turn (the operator saw exactly that). Only a sustained absence —
       // three ticks — means the gateway really has no turn for this session.
       _liveWatchAbsences++;
-      if (_liveWatchAbsences < 3) return;
     } else {
       _liveWatchAbsences = 0;
     }
-    final status = row?['status']?.toString() ?? '';
-    final running =
-        status == 'working' || status == 'starting' || status == 'waiting';
-    final changed = _applyAuthoritativeRunning(
-      running,
-      storedId: storedId,
-      runtimeId: binding.runtimeId,
-    );
-    if (changed) _queueTranscriptChange(storedId);
+    if (row != null || _liveWatchAbsences >= 3) {
+      final status = row?['status']?.toString() ?? '';
+      final running =
+          status == 'working' || status == 'starting' || status == 'waiting';
+      final changed = _applyAuthoritativeRunning(
+        running,
+        storedId: storedId,
+        runtimeId: binding.runtimeId,
+      );
+      if (changed) _queueTranscriptChange(storedId);
+    }
+    // The row probe is one row and has no side effects, so it runs every tick.
+    // Gating it behind the three-absence verdict delayed a locked-phone alert by
+    // three ticks (~24 s) for no benefit: that gate exists to protect the turn
+    // state, not the probe.
     await _probeNewestRow(storedId);
   }
 
