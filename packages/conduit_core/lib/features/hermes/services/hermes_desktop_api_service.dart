@@ -44,6 +44,7 @@ import 'package:conduit_core/features/hermes/services/hermes_desktop_transport.d
 import 'package:conduit_core/features/hermes/services/hermes_identifier.dart';
 import 'package:conduit_core/features/hermes/services/hermes_json_guard.dart';
 import 'package:conduit_core/features/hermes/services/hermes_pending_decision_store.dart';
+import 'hermes_background_alerts.dart';
 
 part 'hermes_desktop_administration.dart';
 part 'hermes_desktop_audio.dart';

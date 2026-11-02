@@ -90,6 +90,10 @@ extension _HermesDesktopLiveRuntime on HermesDesktopApiService {
           event.type == 'message.complete' || event.type.endsWith('.request');
       if (terminalEvent && eventStoredId != null) {
         _queueTranscriptChange(eventStoredId);
+        // The app is not looking at this screen: the reply is the only thing the
+        // user can act on, so hand it to the alert sink. Fired here, in the
+        // handler that provably runs, not from a stream the UI may be driving.
+        if (!_foreground) HermesBackgroundAlerts.replyReady(eventStoredId);
       } else if (terminalEvent &&
           event.sessionId != null &&
           event.sessionId!.isNotEmpty) {
