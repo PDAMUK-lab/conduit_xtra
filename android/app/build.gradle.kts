@@ -26,7 +26,11 @@ android {
         versionName = flutter.versionName
         // Flutter adds x86_64 by default for non-split builds. Ship only ARM ABIs.
         // Split builds set their ABIs through --target-platform instead.
-        if (providers.gradleProperty("split-per-abi").orNull != "true") {
+        // EMULATOR_ABI=true keeps x86_64 in the debug build: the emulator cannot run
+        // an ARM-only APK, and without this the engine library is stripped and the
+        // app dies at startup inside relinker. Release builds stay ARM-only.
+        if (providers.gradleProperty("split-per-abi").orNull != "true" &&
+            System.getenv("EMULATOR_ABI") != "true") {
             ndk {
                 abiFilters.clear()
                 abiFilters.addAll(listOf("armeabi-v7a", "arm64-v8a"))
