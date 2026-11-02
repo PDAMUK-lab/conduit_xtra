@@ -290,10 +290,13 @@ final class HermesDesktopApiService
   /// Newest row already alerted on, per stored session id. The transcript merge
   /// can lag the probe (a resume can be refused while signed out), so without
   /// this the same new tail is rediscovered every tick and alerts every time.
-  /// Row ids are ints in the transcript payload, not strings: typing this
-  /// `Map<String, String>` made the write throw, the surrounding catch swallowed
-  /// it, and the alert was never reached while the map stayed empty.
-  final Map<String, Object?> _alertedTailIds = {};
+  /// Newest reply row this watcher has observed, per stored session id.
+  ///
+  /// Deliberately independent of `_lastTranscripts`: every transcript refresh
+  /// (socket event, state flip, page reload) advances the local tail, so a probe
+  /// that compared against the transcript saw `newest == known` and never
+  /// alerted. Row ids are ints, hence `Object?`.
+  final Map<String, Object?> _lastReplyIds = {};
   final Map<String, String> _appliedSessionOptions = {};
 
   /// Sessions owned by another profile (Bot Mode chats), keyed by stored id.

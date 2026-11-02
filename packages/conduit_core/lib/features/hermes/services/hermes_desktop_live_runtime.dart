@@ -852,11 +852,11 @@ extension _HermesDesktopLiveRuntime on HermesDesktopApiService {
         (alias, _) => !_bindings.containsKey(alias),
       );
       _lastTranscripts.remove(binding.storedId);
-      _alertedTailIds.remove(binding.storedId);
+      _lastReplyIds.remove(binding.storedId);
       _sessionProfiles.remove(binding.storedId);
     }
     _lastTranscripts.remove(id);
-    _alertedTailIds.remove(id);
+    _lastReplyIds.remove(id);
     _sessionProfiles.remove(id);
     await HermesPendingDecisionStore.clearSession(
       origin: _origin,

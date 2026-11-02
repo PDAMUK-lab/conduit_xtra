@@ -174,8 +174,12 @@ extension _HermesDesktopLiveWatch on HermesDesktopApiService {
       if (_closed || probe.isEmpty) return;
       final newestId = probe.last['id'];
       final knownId = local == null || local.isEmpty ? null : local.last['id'];
-      // No tail at all (a chat opened before it had rows) counts as stale too.
-      if (newestId == null || newestId == knownId) return;
+      if (newestId != null && newestId != knownId) {
+        // ignore: avoid_print
+        print('HERMES_WATCH new-tail newest=$newestId known=$knownId '
+            'fg=$_foreground');
+        _queueTranscriptChange(storedId);
+      }
       // The answer is the newest assistant row that carries no tool calls.
       Map<String, dynamic>? replyRow;
       for (final row in probe.reversed) {
@@ -187,25 +191,20 @@ extension _HermesDesktopLiveWatch on HermesDesktopApiService {
         }
       }
       final replyId = replyRow?['id'];
+      if (replyId == null) return;
+      // Compare with the last reply this watcher saw, never with the transcript:
+      // any refresh (socket event, state flip, page reload) advances the local
+      // tail and would swallow the answer before this probe runs.
+      final seenReply = _lastReplyIds[storedId];
+      if (seenReply == replyId) return;
+      _lastReplyIds[storedId] = replyId;
+      // First look at this chat: remember where it stands, but never announce a
+      // reply the user is already looking at.
+      if (seenReply == null) return;
       // ignore: avoid_print
-      print('HERMES_WATCH new-tail newest=$newestId known=$knownId '
-          'reply=$replyId fg=$_foreground');
-      _queueTranscriptChange(storedId);
-      // A new tail while the app is not looking is exactly the case the socket
-      // event was supposed to report and did not. Fire the alert from the poll
-      // that provably ran, not from a frame that never arrived — once per row:
-      // the transcript merge lags the probe, so an unguarded call re-alerts on
-      // the same row every tick until the merge catches up.
-      // Only a real answer alerts: an assistant row with no tool calls. Never on
-      // the first load of a chat (knownId null) — that would announce a reply the
-      // user is already looking at.
-      if (!_foreground &&
-          knownId != null &&
-          replyId != null &&
-          _alertedTailIds[storedId] != replyId) {
-        _alertedTailIds[storedId] = replyId;
-        HermesBackgroundAlerts.replyReady(storedId);
-      }
+      print('HERMES_WATCH new-reply id=$replyId previous=$seenReply '
+          'fg=$_foreground');
+      if (!_foreground) HermesBackgroundAlerts.replyReady(storedId);
     } catch (e) {
       // Transient network failures are expected; anything else here used to be
       // invisible, which is how a type error in the alert guard went unnoticed
