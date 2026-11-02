@@ -9,7 +9,12 @@ import 'package:meta/meta.dart';
 
 enum BackgroundStreamKind {
   chat('chat'),
-  voice('voice');
+  voice('voice'),
+
+  /// A socket with no stream behind it: the app asks the platform to keep the
+  /// process alive so a Hermes connection can still deliver a turn or an
+  /// approval while the phone is locked. Carries no audio and no visible stream.
+  socket('socket');
 
   const BackgroundStreamKind(this.platformValue);
 
@@ -18,6 +23,7 @@ enum BackgroundStreamKind {
   PlatformBackgroundStreamKind get platformKind => switch (this) {
     BackgroundStreamKind.chat => PlatformBackgroundStreamKind.chat,
     BackgroundStreamKind.voice => PlatformBackgroundStreamKind.voice,
+    BackgroundStreamKind.socket => PlatformBackgroundStreamKind.socket,
   };
 }
 
@@ -97,14 +103,20 @@ List<BackgroundStreamLease> _buildBackgroundStreamLeases(
 }) {
   return <BackgroundStreamLease>[
     for (final streamId in streamIds)
-      if (streamId != BackgroundStreamingHandler.socketKeepaliveId)
-        BackgroundStreamLease(
-          id: streamId,
-          kind: kind,
-          requiresMicrophone: requiresMicrophone,
-          startedAt: startedAt,
-          isReply: isReply,
-        ),
+      // The keepalive is a lease like any other; it used to be filtered out here,
+      // which is why `startBackgroundExecution([socketKeepaliveId])` started
+      // nothing at all. It carries no stream and never asks for the microphone.
+      BackgroundStreamLease(
+        id: streamId,
+        kind: streamId == BackgroundStreamingHandler.socketKeepaliveId
+            ? BackgroundStreamKind.socket
+            : kind,
+        requiresMicrophone: streamId == BackgroundStreamingHandler.socketKeepaliveId
+            ? false
+            : requiresMicrophone,
+        startedAt: startedAt,
+        isReply: isReply,
+      ),
   ];
 }
 

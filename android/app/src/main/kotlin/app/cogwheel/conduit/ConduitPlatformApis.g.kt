@@ -197,7 +197,8 @@ class FlutterError (
 
 enum class PlatformBackgroundStreamKind(val raw: Int) {
   CHAT(0),
-  VOICE(1);
+  VOICE(1),
+  SOCKET(2);
 
   companion object {
     fun ofRaw(raw: Int): PlatformBackgroundStreamKind? {

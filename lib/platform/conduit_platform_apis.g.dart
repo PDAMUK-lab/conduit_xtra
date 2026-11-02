@@ -10,9 +10,9 @@ import 'package:flutter/services.dart';
 import 'package:meta/meta.dart' show immutable, protected, visibleForTesting;
 
 Object? _extractReplyValueOrThrow(
-  List<Object?>? replyList,
-  String channelName, {
-  required bool isNullValid,
+    List<Object?>? replyList,
+    String channelName, {
+    required bool isNullValid,
 }) {
   if (replyList == null) {
     throw PlatformException(
@@ -34,11 +34,8 @@ Object? _extractReplyValueOrThrow(
   return replyList.firstOrNull;
 }
 
-List<Object?> wrapResponse({
-  Object? result,
-  PlatformException? error,
-  bool empty = false,
-}) {
+
+List<Object?> wrapResponse({Object? result, PlatformException? error, bool empty = false}) {
   if (empty) {
     return <Object?>[];
   }
@@ -47,7 +44,6 @@ List<Object?> wrapResponse({
   }
   return <Object?>[error.code, error.message, error.details];
 }
-
 bool _deepEquals(Object? a, Object? b) {
   if (identical(a, b)) {
     return true;
@@ -60,9 +56,8 @@ bool _deepEquals(Object? a, Object? b) {
   }
   if (a is List && b is List) {
     return a.length == b.length &&
-        a.indexed.every(
-          ((int, dynamic) item) => _deepEquals(item.$2, b[item.$1]),
-        );
+        a.indexed
+            .every(((int, dynamic) item) => _deepEquals(item.$2, b[item.$1]));
   }
   if (a is Map && b is Map) {
     if (a.length != b.length) {
@@ -111,13 +106,29 @@ int _deepHash(Object? value) {
   return value.hashCode;
 }
 
-enum PlatformBackgroundStreamKind { chat, voice }
 
-enum PlatformNativePasteKind { text, images, unsupported }
+enum PlatformBackgroundStreamKind {
+  chat,
+  voice,
+  socket,
+}
 
-enum PlatformPccAvailability { available, unavailable, unsupported }
+enum PlatformNativePasteKind {
+  text,
+  images,
+  unsupported,
+}
 
-enum PlatformAppleModel { onDevice, privateCloudCompute }
+enum PlatformPccAvailability {
+  available,
+  unavailable,
+  unsupported,
+}
+
+enum PlatformAppleModel {
+  onDevice,
+  privateCloudCompute,
+}
 
 enum PlatformPccQuotaStatus {
   belowLimit,
@@ -126,7 +137,13 @@ enum PlatformPccQuotaStatus {
   unknown,
 }
 
-enum PlatformPccEventKind { content, usage, fallback, error, done }
+enum PlatformPccEventKind {
+  content,
+  usage,
+  fallback,
+  error,
+  done,
+}
 
 enum PlatformNativeSheetItemKind {
   navigation,
@@ -146,7 +163,10 @@ enum PlatformNativeSheetItemKind {
 
 /// Whether a keyboard attachment row turns an option on and off, or runs a
 /// command (attaching a file, opening a sheet).
-enum PlatformKeyboardAttachmentActionKind { toggle, command }
+enum PlatformKeyboardAttachmentActionKind {
+  toggle,
+  command,
+}
 
 class PlatformBackgroundStreamLease {
   PlatformBackgroundStreamLease({
@@ -165,12 +185,16 @@ class PlatformBackgroundStreamLease {
   int startedAtMillis;
 
   List<Object?> _toList() {
-    return <Object?>[id, kind, requiresMicrophone, startedAtMillis];
+    return <Object?>[
+      id,
+      kind,
+      requiresMicrophone,
+      startedAtMillis,
+    ];
   }
 
   Object encode() {
-    return _toList();
-  }
+    return _toList();  }
 
   static PlatformBackgroundStreamLease decode(Object result) {
     result as List<Object?>;
@@ -185,17 +209,13 @@ class PlatformBackgroundStreamLease {
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
   bool operator ==(Object other) {
-    if (other is! PlatformBackgroundStreamLease ||
-        other.runtimeType != runtimeType) {
+    if (other is! PlatformBackgroundStreamLease || other.runtimeType != runtimeType) {
       return false;
     }
     if (identical(this, other)) {
       return true;
     }
-    return _deepEquals(id, other.id) &&
-        _deepEquals(kind, other.kind) &&
-        _deepEquals(requiresMicrophone, other.requiresMicrophone) &&
-        _deepEquals(startedAtMillis, other.startedAtMillis);
+    return _deepEquals(id, other.id) && _deepEquals(kind, other.kind) && _deepEquals(requiresMicrophone, other.requiresMicrophone) && _deepEquals(startedAtMillis, other.startedAtMillis);
   }
 
   @override
@@ -222,36 +242,35 @@ class PlatformBackgroundStartRequest {
   List<PlatformBackgroundStreamLease> leases;
 
   List<Object?> _toList() {
-    return <Object?>[streamIds, requiresMicrophone, leases];
+    return <Object?>[
+      streamIds,
+      requiresMicrophone,
+      leases,
+    ];
   }
 
   Object encode() {
-    return _toList();
-  }
+    return _toList();  }
 
   static PlatformBackgroundStartRequest decode(Object result) {
     result as List<Object?>;
     return PlatformBackgroundStartRequest(
       streamIds: (result[0]! as List<Object?>).cast<String>(),
       requiresMicrophone: result[1]! as bool,
-      leases: (result[2]! as List<Object?>)
-          .cast<PlatformBackgroundStreamLease>(),
+      leases: (result[2]! as List<Object?>).cast<PlatformBackgroundStreamLease>(),
     );
   }
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
   bool operator ==(Object other) {
-    if (other is! PlatformBackgroundStartRequest ||
-        other.runtimeType != runtimeType) {
+    if (other is! PlatformBackgroundStartRequest || other.runtimeType != runtimeType) {
       return false;
     }
     if (identical(this, other)) {
       return true;
     }
-    return _deepEquals(streamIds, other.streamIds) &&
-        _deepEquals(requiresMicrophone, other.requiresMicrophone) &&
-        _deepEquals(leases, other.leases);
+    return _deepEquals(streamIds, other.streamIds) && _deepEquals(requiresMicrophone, other.requiresMicrophone) && _deepEquals(leases, other.leases);
   }
 
   @override
@@ -265,17 +284,20 @@ class PlatformBackgroundStartRequest {
 }
 
 class PlatformBackgroundStopRequest {
-  PlatformBackgroundStopRequest({required this.streamIds});
+  PlatformBackgroundStopRequest({
+    required this.streamIds,
+  });
 
   List<String> streamIds;
 
   List<Object?> _toList() {
-    return <Object?>[streamIds];
+    return <Object?>[
+      streamIds,
+    ];
   }
 
   Object encode() {
-    return _toList();
-  }
+    return _toList();  }
 
   static PlatformBackgroundStopRequest decode(Object result) {
     result as List<Object?>;
@@ -287,8 +309,7 @@ class PlatformBackgroundStopRequest {
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
   bool operator ==(Object other) {
-    if (other is! PlatformBackgroundStopRequest ||
-        other.runtimeType != runtimeType) {
+    if (other is! PlatformBackgroundStopRequest || other.runtimeType != runtimeType) {
       return false;
     }
     if (identical(this, other)) {
@@ -318,34 +339,33 @@ class PlatformBackgroundKeepAliveRequest {
   List<PlatformBackgroundStreamLease> leases;
 
   List<Object?> _toList() {
-    return <Object?>[streamCount, leases];
+    return <Object?>[
+      streamCount,
+      leases,
+    ];
   }
 
   Object encode() {
-    return _toList();
-  }
+    return _toList();  }
 
   static PlatformBackgroundKeepAliveRequest decode(Object result) {
     result as List<Object?>;
     return PlatformBackgroundKeepAliveRequest(
       streamCount: result[0]! as int,
-      leases: (result[1]! as List<Object?>)
-          .cast<PlatformBackgroundStreamLease>(),
+      leases: (result[1]! as List<Object?>).cast<PlatformBackgroundStreamLease>(),
     );
   }
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
   bool operator ==(Object other) {
-    if (other is! PlatformBackgroundKeepAliveRequest ||
-        other.runtimeType != runtimeType) {
+    if (other is! PlatformBackgroundKeepAliveRequest || other.runtimeType != runtimeType) {
       return false;
     }
     if (identical(this, other)) {
       return true;
     }
-    return _deepEquals(streamCount, other.streamCount) &&
-        _deepEquals(leases, other.leases);
+    return _deepEquals(streamCount, other.streamCount) && _deepEquals(leases, other.leases);
   }
 
   @override
@@ -359,17 +379,20 @@ class PlatformBackgroundKeepAliveRequest {
 }
 
 class PlatformBackgroundAudioSessionOwnerRequest {
-  PlatformBackgroundAudioSessionOwnerRequest({required this.isExternal});
+  PlatformBackgroundAudioSessionOwnerRequest({
+    required this.isExternal,
+  });
 
   bool isExternal;
 
   List<Object?> _toList() {
-    return <Object?>[isExternal];
+    return <Object?>[
+      isExternal,
+    ];
   }
 
   Object encode() {
-    return _toList();
-  }
+    return _toList();  }
 
   static PlatformBackgroundAudioSessionOwnerRequest decode(Object result) {
     result as List<Object?>;
@@ -381,8 +404,7 @@ class PlatformBackgroundAudioSessionOwnerRequest {
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
   bool operator ==(Object other) {
-    if (other is! PlatformBackgroundAudioSessionOwnerRequest ||
-        other.runtimeType != runtimeType) {
+    if (other is! PlatformBackgroundAudioSessionOwnerRequest || other.runtimeType != runtimeType) {
       return false;
     }
     if (identical(this, other)) {
@@ -415,12 +437,15 @@ class PlatformServiceFailureEvent {
   List<String> streamIds;
 
   List<Object?> _toList() {
-    return <Object?>[error, errorType, streamIds];
+    return <Object?>[
+      error,
+      errorType,
+      streamIds,
+    ];
   }
 
   Object encode() {
-    return _toList();
-  }
+    return _toList();  }
 
   static PlatformServiceFailureEvent decode(Object result) {
     result as List<Object?>;
@@ -434,16 +459,13 @@ class PlatformServiceFailureEvent {
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
   bool operator ==(Object other) {
-    if (other is! PlatformServiceFailureEvent ||
-        other.runtimeType != runtimeType) {
+    if (other is! PlatformServiceFailureEvent || other.runtimeType != runtimeType) {
       return false;
     }
     if (identical(this, other)) {
       return true;
     }
-    return _deepEquals(error, other.error) &&
-        _deepEquals(errorType, other.errorType) &&
-        _deepEquals(streamIds, other.streamIds);
+    return _deepEquals(error, other.error) && _deepEquals(errorType, other.errorType) && _deepEquals(streamIds, other.streamIds);
   }
 
   @override
@@ -457,28 +479,32 @@ class PlatformServiceFailureEvent {
 }
 
 class PlatformTimeLimitWarningEvent {
-  PlatformTimeLimitWarningEvent({required this.remainingMinutes});
+  PlatformTimeLimitWarningEvent({
+    required this.remainingMinutes,
+  });
 
   int remainingMinutes;
 
   List<Object?> _toList() {
-    return <Object?>[remainingMinutes];
+    return <Object?>[
+      remainingMinutes,
+    ];
   }
 
   Object encode() {
-    return _toList();
-  }
+    return _toList();  }
 
   static PlatformTimeLimitWarningEvent decode(Object result) {
     result as List<Object?>;
-    return PlatformTimeLimitWarningEvent(remainingMinutes: result[0]! as int);
+    return PlatformTimeLimitWarningEvent(
+      remainingMinutes: result[0]! as int,
+    );
   }
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
   bool operator ==(Object other) {
-    if (other is! PlatformTimeLimitWarningEvent ||
-        other.runtimeType != runtimeType) {
+    if (other is! PlatformTimeLimitWarningEvent || other.runtimeType != runtimeType) {
       return false;
     }
     if (identical(this, other)) {
@@ -508,12 +534,14 @@ class PlatformStreamsSuspendingEvent {
   String reason;
 
   List<Object?> _toList() {
-    return <Object?>[streamIds, reason];
+    return <Object?>[
+      streamIds,
+      reason,
+    ];
   }
 
   Object encode() {
-    return _toList();
-  }
+    return _toList();  }
 
   static PlatformStreamsSuspendingEvent decode(Object result) {
     result as List<Object?>;
@@ -526,15 +554,13 @@ class PlatformStreamsSuspendingEvent {
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
   bool operator ==(Object other) {
-    if (other is! PlatformStreamsSuspendingEvent ||
-        other.runtimeType != runtimeType) {
+    if (other is! PlatformStreamsSuspendingEvent || other.runtimeType != runtimeType) {
       return false;
     }
     if (identical(this, other)) {
       return true;
     }
-    return _deepEquals(streamIds, other.streamIds) &&
-        _deepEquals(reason, other.reason);
+    return _deepEquals(streamIds, other.streamIds) && _deepEquals(reason, other.reason);
   }
 
   @override
@@ -558,12 +584,14 @@ class PlatformBackgroundTaskExtendedEvent {
   int estimatedTime;
 
   List<Object?> _toList() {
-    return <Object?>[streamIds, estimatedTime];
+    return <Object?>[
+      streamIds,
+      estimatedTime,
+    ];
   }
 
   Object encode() {
-    return _toList();
-  }
+    return _toList();  }
 
   static PlatformBackgroundTaskExtendedEvent decode(Object result) {
     result as List<Object?>;
@@ -576,15 +604,13 @@ class PlatformBackgroundTaskExtendedEvent {
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
   bool operator ==(Object other) {
-    if (other is! PlatformBackgroundTaskExtendedEvent ||
-        other.runtimeType != runtimeType) {
+    if (other is! PlatformBackgroundTaskExtendedEvent || other.runtimeType != runtimeType) {
       return false;
     }
     if (identical(this, other)) {
       return true;
     }
-    return _deepEquals(streamIds, other.streamIds) &&
-        _deepEquals(estimatedTime, other.estimatedTime);
+    return _deepEquals(streamIds, other.streamIds) && _deepEquals(estimatedTime, other.estimatedTime);
   }
 
   @override
@@ -608,12 +634,14 @@ class PlatformAppIntentImagePayload {
   String filePath;
 
   List<Object?> _toList() {
-    return <Object?>[filename, filePath];
+    return <Object?>[
+      filename,
+      filePath,
+    ];
   }
 
   Object encode() {
-    return _toList();
-  }
+    return _toList();  }
 
   static PlatformAppIntentImagePayload decode(Object result) {
     result as List<Object?>;
@@ -626,15 +654,13 @@ class PlatformAppIntentImagePayload {
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
   bool operator ==(Object other) {
-    if (other is! PlatformAppIntentImagePayload ||
-        other.runtimeType != runtimeType) {
+    if (other is! PlatformAppIntentImagePayload || other.runtimeType != runtimeType) {
       return false;
     }
     if (identical(this, other)) {
       return true;
     }
-    return _deepEquals(filename, other.filename) &&
-        _deepEquals(filePath, other.filePath);
+    return _deepEquals(filename, other.filename) && _deepEquals(filePath, other.filePath);
   }
 
   @override
@@ -664,12 +690,16 @@ class PlatformAppIntentResponse {
   String? ownedFilePath;
 
   List<Object?> _toList() {
-    return <Object?>[success, value, error, ownedFilePath];
+    return <Object?>[
+      success,
+      value,
+      error,
+      ownedFilePath,
+    ];
   }
 
   Object encode() {
-    return _toList();
-  }
+    return _toList();  }
 
   static PlatformAppIntentResponse decode(Object result) {
     result as List<Object?>;
@@ -684,17 +714,13 @@ class PlatformAppIntentResponse {
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
   bool operator ==(Object other) {
-    if (other is! PlatformAppIntentResponse ||
-        other.runtimeType != runtimeType) {
+    if (other is! PlatformAppIntentResponse || other.runtimeType != runtimeType) {
       return false;
     }
     if (identical(this, other)) {
       return true;
     }
-    return _deepEquals(success, other.success) &&
-        _deepEquals(value, other.value) &&
-        _deepEquals(error, other.error) &&
-        _deepEquals(ownedFilePath, other.ownedFilePath);
+    return _deepEquals(success, other.success) && _deepEquals(value, other.value) && _deepEquals(error, other.error) && _deepEquals(ownedFilePath, other.ownedFilePath);
   }
 
   @override
@@ -718,12 +744,14 @@ class PlatformNativePasteImageItem {
   String filePath;
 
   List<Object?> _toList() {
-    return <Object?>[mimeType, filePath];
+    return <Object?>[
+      mimeType,
+      filePath,
+    ];
   }
 
   Object encode() {
-    return _toList();
-  }
+    return _toList();  }
 
   static PlatformNativePasteImageItem decode(Object result) {
     result as List<Object?>;
@@ -736,15 +764,13 @@ class PlatformNativePasteImageItem {
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
   bool operator ==(Object other) {
-    if (other is! PlatformNativePasteImageItem ||
-        other.runtimeType != runtimeType) {
+    if (other is! PlatformNativePasteImageItem || other.runtimeType != runtimeType) {
       return false;
     }
     if (identical(this, other)) {
       return true;
     }
-    return _deepEquals(mimeType, other.mimeType) &&
-        _deepEquals(filePath, other.filePath);
+    return _deepEquals(mimeType, other.mimeType) && _deepEquals(filePath, other.filePath);
   }
 
   @override
@@ -774,20 +800,23 @@ class PlatformNativePastePayload {
   String? deliveryId;
 
   List<Object?> _toList() {
-    return <Object?>[kind, text, items, deliveryId];
+    return <Object?>[
+      kind,
+      text,
+      items,
+      deliveryId,
+    ];
   }
 
   Object encode() {
-    return _toList();
-  }
+    return _toList();  }
 
   static PlatformNativePastePayload decode(Object result) {
     result as List<Object?>;
     return PlatformNativePastePayload(
       kind: result[0]! as PlatformNativePasteKind,
       text: result[1] as String?,
-      items: (result[2] as List<Object?>?)
-          ?.cast<PlatformNativePasteImageItem>(),
+      items: (result[2] as List<Object?>?)?.cast<PlatformNativePasteImageItem>(),
       deliveryId: result[3] as String?,
     );
   }
@@ -795,17 +824,13 @@ class PlatformNativePastePayload {
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
   bool operator ==(Object other) {
-    if (other is! PlatformNativePastePayload ||
-        other.runtimeType != runtimeType) {
+    if (other is! PlatformNativePastePayload || other.runtimeType != runtimeType) {
       return false;
     }
     if (identical(this, other)) {
       return true;
     }
-    return _deepEquals(kind, other.kind) &&
-        _deepEquals(text, other.text) &&
-        _deepEquals(items, other.items) &&
-        _deepEquals(deliveryId, other.deliveryId);
+    return _deepEquals(kind, other.kind) && _deepEquals(text, other.text) && _deepEquals(items, other.items) && _deepEquals(deliveryId, other.deliveryId);
   }
 
   @override
@@ -874,8 +899,7 @@ class PlatformKeyboardAttachmentActionConfig {
   }
 
   Object encode() {
-    return _toList();
-  }
+    return _toList();  }
 
   static PlatformKeyboardAttachmentActionConfig decode(Object result) {
     result as List<Object?>;
@@ -897,24 +921,13 @@ class PlatformKeyboardAttachmentActionConfig {
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
   bool operator ==(Object other) {
-    if (other is! PlatformKeyboardAttachmentActionConfig ||
-        other.runtimeType != runtimeType) {
+    if (other is! PlatformKeyboardAttachmentActionConfig || other.runtimeType != runtimeType) {
       return false;
     }
     if (identical(this, other)) {
       return true;
     }
-    return _deepEquals(id, other.id) &&
-        _deepEquals(label, other.label) &&
-        _deepEquals(subtitle, other.subtitle) &&
-        _deepEquals(sfSymbol, other.sfSymbol) &&
-        _deepEquals(section, other.section) &&
-        _deepEquals(sectionTitle, other.sectionTitle) &&
-        _deepEquals(kind, other.kind) &&
-        _deepEquals(stateLabel, other.stateLabel) &&
-        _deepEquals(enabled, other.enabled) &&
-        _deepEquals(selected, other.selected) &&
-        _deepEquals(dismissesKeyboard, other.dismissesKeyboard);
+    return _deepEquals(id, other.id) && _deepEquals(label, other.label) && _deepEquals(subtitle, other.subtitle) && _deepEquals(sfSymbol, other.sfSymbol) && _deepEquals(section, other.section) && _deepEquals(sectionTitle, other.sectionTitle) && _deepEquals(kind, other.kind) && _deepEquals(stateLabel, other.stateLabel) && _deepEquals(enabled, other.enabled) && _deepEquals(selected, other.selected) && _deepEquals(dismissesKeyboard, other.dismissesKeyboard);
   }
 
   @override
@@ -928,31 +941,32 @@ class PlatformKeyboardAttachmentActionConfig {
 }
 
 class PlatformKeyboardAttachmentConfig {
-  PlatformKeyboardAttachmentConfig({required this.actions});
+  PlatformKeyboardAttachmentConfig({
+    required this.actions,
+  });
 
   List<PlatformKeyboardAttachmentActionConfig> actions;
 
   List<Object?> _toList() {
-    return <Object?>[actions];
+    return <Object?>[
+      actions,
+    ];
   }
 
   Object encode() {
-    return _toList();
-  }
+    return _toList();  }
 
   static PlatformKeyboardAttachmentConfig decode(Object result) {
     result as List<Object?>;
     return PlatformKeyboardAttachmentConfig(
-      actions: (result[0]! as List<Object?>)
-          .cast<PlatformKeyboardAttachmentActionConfig>(),
+      actions: (result[0]! as List<Object?>).cast<PlatformKeyboardAttachmentActionConfig>(),
     );
   }
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
   bool operator ==(Object other) {
-    if (other is! PlatformKeyboardAttachmentConfig ||
-        other.runtimeType != runtimeType) {
+    if (other is! PlatformKeyboardAttachmentConfig || other.runtimeType != runtimeType) {
       return false;
     }
     if (identical(this, other)) {
@@ -972,28 +986,32 @@ class PlatformKeyboardAttachmentConfig {
 }
 
 class PlatformKeyboardAttachmentActionEvent {
-  PlatformKeyboardAttachmentActionEvent({required this.id});
+  PlatformKeyboardAttachmentActionEvent({
+    required this.id,
+  });
 
   String id;
 
   List<Object?> _toList() {
-    return <Object?>[id];
+    return <Object?>[
+      id,
+    ];
   }
 
   Object encode() {
-    return _toList();
-  }
+    return _toList();  }
 
   static PlatformKeyboardAttachmentActionEvent decode(Object result) {
     result as List<Object?>;
-    return PlatformKeyboardAttachmentActionEvent(id: result[0]! as String);
+    return PlatformKeyboardAttachmentActionEvent(
+      id: result[0]! as String,
+    );
   }
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
   bool operator ==(Object other) {
-    if (other is! PlatformKeyboardAttachmentActionEvent ||
-        other.runtimeType != runtimeType) {
+    if (other is! PlatformKeyboardAttachmentActionEvent || other.runtimeType != runtimeType) {
       return false;
     }
     if (identical(this, other)) {
@@ -1013,17 +1031,20 @@ class PlatformKeyboardAttachmentActionEvent {
 }
 
 class PlatformKeyboardAttachmentVisibilityEvent {
-  PlatformKeyboardAttachmentVisibilityEvent({required this.visible});
+  PlatformKeyboardAttachmentVisibilityEvent({
+    required this.visible,
+  });
 
   bool visible;
 
   List<Object?> _toList() {
-    return <Object?>[visible];
+    return <Object?>[
+      visible,
+    ];
   }
 
   Object encode() {
-    return _toList();
-  }
+    return _toList();  }
 
   static PlatformKeyboardAttachmentVisibilityEvent decode(Object result) {
     result as List<Object?>;
@@ -1035,8 +1056,7 @@ class PlatformKeyboardAttachmentVisibilityEvent {
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
   bool operator ==(Object other) {
-    if (other is! PlatformKeyboardAttachmentVisibilityEvent ||
-        other.runtimeType != runtimeType) {
+    if (other is! PlatformKeyboardAttachmentVisibilityEvent || other.runtimeType != runtimeType) {
       return false;
     }
     if (identical(this, other)) {
@@ -1072,12 +1092,16 @@ class PlatformRect {
   double height;
 
   List<Object?> _toList() {
-    return <Object?>[x, y, width, height];
+    return <Object?>[
+      x,
+      y,
+      width,
+      height,
+    ];
   }
 
   Object encode() {
-    return _toList();
-  }
+    return _toList();  }
 
   static PlatformRect decode(Object result) {
     result as List<Object?>;
@@ -1098,10 +1122,7 @@ class PlatformRect {
     if (identical(this, other)) {
       return true;
     }
-    return _deepEquals(x, other.x) &&
-        _deepEquals(y, other.y) &&
-        _deepEquals(width, other.width) &&
-        _deepEquals(height, other.height);
+    return _deepEquals(x, other.x) && _deepEquals(y, other.y) && _deepEquals(width, other.width) && _deepEquals(height, other.height);
   }
 
   @override
@@ -1137,12 +1158,18 @@ class PlatformDropdownOption {
   bool destructive;
 
   List<Object?> _toList() {
-    return <Object?>[id, label, subtitle, sfSymbol, enabled, destructive];
+    return <Object?>[
+      id,
+      label,
+      subtitle,
+      sfSymbol,
+      enabled,
+      destructive,
+    ];
   }
 
   Object encode() {
-    return _toList();
-  }
+    return _toList();  }
 
   static PlatformDropdownOption decode(Object result) {
     result as List<Object?>;
@@ -1165,12 +1192,7 @@ class PlatformDropdownOption {
     if (identical(this, other)) {
       return true;
     }
-    return _deepEquals(id, other.id) &&
-        _deepEquals(label, other.label) &&
-        _deepEquals(subtitle, other.subtitle) &&
-        _deepEquals(sfSymbol, other.sfSymbol) &&
-        _deepEquals(enabled, other.enabled) &&
-        _deepEquals(destructive, other.destructive);
+    return _deepEquals(id, other.id) && _deepEquals(label, other.label) && _deepEquals(subtitle, other.subtitle) && _deepEquals(sfSymbol, other.sfSymbol) && _deepEquals(enabled, other.enabled) && _deepEquals(destructive, other.destructive);
   }
 
   @override
@@ -1184,19 +1206,24 @@ class PlatformDropdownOption {
 }
 
 class PlatformImageViewerItem {
-  PlatformImageViewerItem({required this.path, this.title});
+  PlatformImageViewerItem({
+    required this.path,
+    this.title,
+  });
 
   String path;
 
   String? title;
 
   List<Object?> _toList() {
-    return <Object?>[path, title];
+    return <Object?>[
+      path,
+      title,
+    ];
   }
 
   Object encode() {
-    return _toList();
-  }
+    return _toList();  }
 
   static PlatformImageViewerItem decode(Object result) {
     result as List<Object?>;
@@ -1243,12 +1270,15 @@ class PlatformImageViewerRequest {
   PlatformRect? sourceRect;
 
   List<Object?> _toList() {
-    return <Object?>[items, initialIndex, sourceRect];
+    return <Object?>[
+      items,
+      initialIndex,
+      sourceRect,
+    ];
   }
 
   Object encode() {
-    return _toList();
-  }
+    return _toList();  }
 
   static PlatformImageViewerRequest decode(Object result) {
     result as List<Object?>;
@@ -1262,16 +1292,13 @@ class PlatformImageViewerRequest {
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
   bool operator ==(Object other) {
-    if (other is! PlatformImageViewerRequest ||
-        other.runtimeType != runtimeType) {
+    if (other is! PlatformImageViewerRequest || other.runtimeType != runtimeType) {
       return false;
     }
     if (identical(this, other)) {
       return true;
     }
-    return _deepEquals(items, other.items) &&
-        _deepEquals(initialIndex, other.initialIndex) &&
-        _deepEquals(sourceRect, other.sourceRect);
+    return _deepEquals(items, other.items) && _deepEquals(initialIndex, other.initialIndex) && _deepEquals(sourceRect, other.sourceRect);
   }
 
   @override
@@ -1304,12 +1331,17 @@ class PlatformDropdownRequest {
   PlatformRect? sourceRect;
 
   List<Object?> _toList() {
-    return <Object?>[title, message, cancelLabel, options, sourceRect];
+    return <Object?>[
+      title,
+      message,
+      cancelLabel,
+      options,
+      sourceRect,
+    ];
   }
 
   Object encode() {
-    return _toList();
-  }
+    return _toList();  }
 
   static PlatformDropdownRequest decode(Object result) {
     result as List<Object?>;
@@ -1331,11 +1363,7 @@ class PlatformDropdownRequest {
     if (identical(this, other)) {
       return true;
     }
-    return _deepEquals(title, other.title) &&
-        _deepEquals(message, other.message) &&
-        _deepEquals(cancelLabel, other.cancelLabel) &&
-        _deepEquals(options, other.options) &&
-        _deepEquals(sourceRect, other.sourceRect);
+    return _deepEquals(title, other.title) && _deepEquals(message, other.message) && _deepEquals(cancelLabel, other.cancelLabel) && _deepEquals(options, other.options) && _deepEquals(sourceRect, other.sourceRect);
   }
 
   @override
@@ -1394,8 +1422,7 @@ class PlatformNativeSheetOption {
   }
 
   Object encode() {
-    return _toList();
-  }
+    return _toList();  }
 
   static PlatformNativeSheetOption decode(Object result) {
     result as List<Object?>;
@@ -1415,22 +1442,13 @@ class PlatformNativeSheetOption {
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
   bool operator ==(Object other) {
-    if (other is! PlatformNativeSheetOption ||
-        other.runtimeType != runtimeType) {
+    if (other is! PlatformNativeSheetOption || other.runtimeType != runtimeType) {
       return false;
     }
     if (identical(this, other)) {
       return true;
     }
-    return _deepEquals(id, other.id) &&
-        _deepEquals(label, other.label) &&
-        _deepEquals(subtitle, other.subtitle) &&
-        _deepEquals(sfSymbol, other.sfSymbol) &&
-        _deepEquals(enabled, other.enabled) &&
-        _deepEquals(destructive, other.destructive) &&
-        _deepEquals(ancestorHasMoreSiblings, other.ancestorHasMoreSiblings) &&
-        _deepEquals(showBranch, other.showBranch) &&
-        _deepEquals(hasMoreSiblings, other.hasMoreSiblings);
+    return _deepEquals(id, other.id) && _deepEquals(label, other.label) && _deepEquals(subtitle, other.subtitle) && _deepEquals(sfSymbol, other.sfSymbol) && _deepEquals(enabled, other.enabled) && _deepEquals(destructive, other.destructive) && _deepEquals(ancestorHasMoreSiblings, other.ancestorHasMoreSiblings) && _deepEquals(showBranch, other.showBranch) && _deepEquals(hasMoreSiblings, other.hasMoreSiblings);
   }
 
   @override
@@ -1501,8 +1519,7 @@ class PlatformNativeSheetTheme {
   }
 
   Object encode() {
-    return _toList();
-  }
+    return _toList();  }
 
   static PlatformNativeSheetTheme decode(Object result) {
     result as List<Object?>;
@@ -1525,25 +1542,13 @@ class PlatformNativeSheetTheme {
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
   bool operator ==(Object other) {
-    if (other is! PlatformNativeSheetTheme ||
-        other.runtimeType != runtimeType) {
+    if (other is! PlatformNativeSheetTheme || other.runtimeType != runtimeType) {
       return false;
     }
     if (identical(this, other)) {
       return true;
     }
-    return _deepEquals(isDark, other.isDark) &&
-        _deepEquals(backgroundArgb, other.backgroundArgb) &&
-        _deepEquals(surfaceArgb, other.surfaceArgb) &&
-        _deepEquals(elevatedSurfaceArgb, other.elevatedSurfaceArgb) &&
-        _deepEquals(inputArgb, other.inputArgb) &&
-        _deepEquals(foregroundArgb, other.foregroundArgb) &&
-        _deepEquals(secondaryForegroundArgb, other.secondaryForegroundArgb) &&
-        _deepEquals(iconArgb, other.iconArgb) &&
-        _deepEquals(borderArgb, other.borderArgb) &&
-        _deepEquals(accentArgb, other.accentArgb) &&
-        _deepEquals(onAccentArgb, other.onAccentArgb) &&
-        _deepEquals(destructiveArgb, other.destructiveArgb);
+    return _deepEquals(isDark, other.isDark) && _deepEquals(backgroundArgb, other.backgroundArgb) && _deepEquals(surfaceArgb, other.surfaceArgb) && _deepEquals(elevatedSurfaceArgb, other.elevatedSurfaceArgb) && _deepEquals(inputArgb, other.inputArgb) && _deepEquals(foregroundArgb, other.foregroundArgb) && _deepEquals(secondaryForegroundArgb, other.secondaryForegroundArgb) && _deepEquals(iconArgb, other.iconArgb) && _deepEquals(borderArgb, other.borderArgb) && _deepEquals(accentArgb, other.accentArgb) && _deepEquals(onAccentArgb, other.onAccentArgb) && _deepEquals(destructiveArgb, other.destructiveArgb);
   }
 
   @override
@@ -1700,8 +1705,7 @@ class PlatformNativeSheetItem {
   }
 
   Object encode() {
-    return _toList();
-  }
+    return _toList();  }
 
   static PlatformNativeSheetItem decode(Object result) {
     result as List<Object?>;
@@ -1750,38 +1754,7 @@ class PlatformNativeSheetItem {
     if (identical(this, other)) {
       return true;
     }
-    return _deepEquals(id, other.id) &&
-        _deepEquals(title, other.title) &&
-        _deepEquals(subtitle, other.subtitle) &&
-        _deepEquals(sfSymbol, other.sfSymbol) &&
-        _deepEquals(iconAsset, other.iconAsset) &&
-        _deepEquals(iconSize, other.iconSize) &&
-        _deepEquals(showsDisclosure, other.showsDisclosure) &&
-        _deepEquals(destructive, other.destructive) &&
-        _deepEquals(dismissOnSelect, other.dismissOnSelect) &&
-        _deepEquals(actionId, other.actionId) &&
-        _deepEquals(actionValue, other.actionValue) &&
-        _deepEquals(url, other.url) &&
-        _deepEquals(kind, other.kind) &&
-        _deepEquals(value, other.value) &&
-        _deepEquals(placeholder, other.placeholder) &&
-        _deepEquals(options, other.options) &&
-        _deepEquals(sourceIndex, other.sourceIndex) &&
-        _deepEquals(sourceUrl, other.sourceUrl) &&
-        _deepEquals(sourceType, other.sourceType) &&
-        _deepEquals(snippet, other.snippet) &&
-        _deepEquals(faviconUrl, other.faviconUrl) &&
-        _deepEquals(queries, other.queries) &&
-        _deepEquals(links, other.links) &&
-        _deepEquals(pending, other.pending) &&
-        _deepEquals(min, other.min) &&
-        _deepEquals(max, other.max) &&
-        _deepEquals(divisions, other.divisions) &&
-        _deepEquals(avatarName, other.avatarName) &&
-        _deepEquals(avatarBytes, other.avatarBytes) &&
-        _deepEquals(checked, other.checked) &&
-        _deepEquals(accent, other.accent) &&
-        _deepEquals(usesProfileAvatar, other.usesProfileAvatar);
+    return _deepEquals(id, other.id) && _deepEquals(title, other.title) && _deepEquals(subtitle, other.subtitle) && _deepEquals(sfSymbol, other.sfSymbol) && _deepEquals(iconAsset, other.iconAsset) && _deepEquals(iconSize, other.iconSize) && _deepEquals(showsDisclosure, other.showsDisclosure) && _deepEquals(destructive, other.destructive) && _deepEquals(dismissOnSelect, other.dismissOnSelect) && _deepEquals(actionId, other.actionId) && _deepEquals(actionValue, other.actionValue) && _deepEquals(url, other.url) && _deepEquals(kind, other.kind) && _deepEquals(value, other.value) && _deepEquals(placeholder, other.placeholder) && _deepEquals(options, other.options) && _deepEquals(sourceIndex, other.sourceIndex) && _deepEquals(sourceUrl, other.sourceUrl) && _deepEquals(sourceType, other.sourceType) && _deepEquals(snippet, other.snippet) && _deepEquals(faviconUrl, other.faviconUrl) && _deepEquals(queries, other.queries) && _deepEquals(links, other.links) && _deepEquals(pending, other.pending) && _deepEquals(min, other.min) && _deepEquals(max, other.max) && _deepEquals(divisions, other.divisions) && _deepEquals(avatarName, other.avatarName) && _deepEquals(avatarBytes, other.avatarBytes) && _deepEquals(checked, other.checked) && _deepEquals(accent, other.accent) && _deepEquals(usesProfileAvatar, other.usesProfileAvatar);
   }
 
   @override
@@ -1795,7 +1768,11 @@ class PlatformNativeSheetItem {
 }
 
 class PlatformNativeSheetLink {
-  PlatformNativeSheetLink({required this.url, this.title, this.faviconUrl});
+  PlatformNativeSheetLink({
+    required this.url,
+    this.title,
+    this.faviconUrl,
+  });
 
   String url;
 
@@ -1804,12 +1781,15 @@ class PlatformNativeSheetLink {
   String? faviconUrl;
 
   List<Object?> _toList() {
-    return <Object?>[url, title, faviconUrl];
+    return <Object?>[
+      url,
+      title,
+      faviconUrl,
+    ];
   }
 
   Object encode() {
-    return _toList();
-  }
+    return _toList();  }
 
   static PlatformNativeSheetLink decode(Object result) {
     result as List<Object?>;
@@ -1829,9 +1809,7 @@ class PlatformNativeSheetLink {
     if (identical(this, other)) {
       return true;
     }
-    return _deepEquals(url, other.url) &&
-        _deepEquals(title, other.title) &&
-        _deepEquals(faviconUrl, other.faviconUrl);
+    return _deepEquals(url, other.url) && _deepEquals(title, other.title) && _deepEquals(faviconUrl, other.faviconUrl);
   }
 
   @override
@@ -1845,7 +1823,11 @@ class PlatformNativeSheetLink {
 }
 
 class PlatformNativeSheetSection {
-  PlatformNativeSheetSection({this.title, this.footer, required this.items});
+  PlatformNativeSheetSection({
+    this.title,
+    this.footer,
+    required this.items,
+  });
 
   String? title;
 
@@ -1854,12 +1836,15 @@ class PlatformNativeSheetSection {
   List<PlatformNativeSheetItem> items;
 
   List<Object?> _toList() {
-    return <Object?>[title, footer, items];
+    return <Object?>[
+      title,
+      footer,
+      items,
+    ];
   }
 
   Object encode() {
-    return _toList();
-  }
+    return _toList();  }
 
   static PlatformNativeSheetSection decode(Object result) {
     result as List<Object?>;
@@ -1873,16 +1858,13 @@ class PlatformNativeSheetSection {
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
   bool operator ==(Object other) {
-    if (other is! PlatformNativeSheetSection ||
-        other.runtimeType != runtimeType) {
+    if (other is! PlatformNativeSheetSection || other.runtimeType != runtimeType) {
       return false;
     }
     if (identical(this, other)) {
       return true;
     }
-    return _deepEquals(title, other.title) &&
-        _deepEquals(footer, other.footer) &&
-        _deepEquals(items, other.items);
+    return _deepEquals(title, other.title) && _deepEquals(footer, other.footer) && _deepEquals(items, other.items);
   }
 
   @override
@@ -2001,8 +1983,7 @@ class PlatformNativeEditProfileSheetConfig {
   }
 
   Object encode() {
-    return _toList();
-  }
+    return _toList();  }
 
   static PlatformNativeEditProfileSheetConfig decode(Object result) {
     result as List<Object?>;
@@ -2037,40 +2018,13 @@ class PlatformNativeEditProfileSheetConfig {
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
   bool operator ==(Object other) {
-    if (other is! PlatformNativeEditProfileSheetConfig ||
-        other.runtimeType != runtimeType) {
+    if (other is! PlatformNativeEditProfileSheetConfig || other.runtimeType != runtimeType) {
       return false;
     }
     if (identical(this, other)) {
       return true;
     }
-    return _deepEquals(title, other.title) &&
-        _deepEquals(saveLabel, other.saveLabel) &&
-        _deepEquals(cancelLabel, other.cancelLabel) &&
-        _deepEquals(okLabel, other.okLabel) &&
-        _deepEquals(footerText, other.footerText) &&
-        _deepEquals(nameLabel, other.nameLabel) &&
-        _deepEquals(nameRequiredMessage, other.nameRequiredMessage) &&
-        _deepEquals(
-          customGenderRequiredMessage,
-          other.customGenderRequiredMessage,
-        ) &&
-        _deepEquals(bioLabel, other.bioLabel) &&
-        _deepEquals(bioHint, other.bioHint) &&
-        _deepEquals(genderLabel, other.genderLabel) &&
-        _deepEquals(genderPreferNotToSay, other.genderPreferNotToSay) &&
-        _deepEquals(genderMale, other.genderMale) &&
-        _deepEquals(genderFemale, other.genderFemale) &&
-        _deepEquals(genderCustom, other.genderCustom) &&
-        _deepEquals(customGenderLabel, other.customGenderLabel) &&
-        _deepEquals(customGenderHint, other.customGenderHint) &&
-        _deepEquals(birthDateLabel, other.birthDateLabel) &&
-        _deepEquals(selectBirthDateLabel, other.selectBirthDateLabel) &&
-        _deepEquals(clearLabel, other.clearLabel) &&
-        _deepEquals(uploadFromDeviceLabel, other.uploadFromDeviceLabel) &&
-        _deepEquals(useInitialsLabel, other.useInitialsLabel) &&
-        _deepEquals(removeAvatarLabel, other.removeAvatarLabel) &&
-        _deepEquals(currentAvatarLabel, other.currentAvatarLabel);
+    return _deepEquals(title, other.title) && _deepEquals(saveLabel, other.saveLabel) && _deepEquals(cancelLabel, other.cancelLabel) && _deepEquals(okLabel, other.okLabel) && _deepEquals(footerText, other.footerText) && _deepEquals(nameLabel, other.nameLabel) && _deepEquals(nameRequiredMessage, other.nameRequiredMessage) && _deepEquals(customGenderRequiredMessage, other.customGenderRequiredMessage) && _deepEquals(bioLabel, other.bioLabel) && _deepEquals(bioHint, other.bioHint) && _deepEquals(genderLabel, other.genderLabel) && _deepEquals(genderPreferNotToSay, other.genderPreferNotToSay) && _deepEquals(genderMale, other.genderMale) && _deepEquals(genderFemale, other.genderFemale) && _deepEquals(genderCustom, other.genderCustom) && _deepEquals(customGenderLabel, other.customGenderLabel) && _deepEquals(customGenderHint, other.customGenderHint) && _deepEquals(birthDateLabel, other.birthDateLabel) && _deepEquals(selectBirthDateLabel, other.selectBirthDateLabel) && _deepEquals(clearLabel, other.clearLabel) && _deepEquals(uploadFromDeviceLabel, other.uploadFromDeviceLabel) && _deepEquals(useInitialsLabel, other.useInitialsLabel) && _deepEquals(removeAvatarLabel, other.removeAvatarLabel) && _deepEquals(currentAvatarLabel, other.currentAvatarLabel);
   }
 
   @override
@@ -2137,8 +2091,7 @@ class PlatformNativeProfileSheetUser {
   }
 
   Object encode() {
-    return _toList();
-  }
+    return _toList();  }
 
   static PlatformNativeProfileSheetUser decode(Object result) {
     result as List<Object?>;
@@ -2149,8 +2102,7 @@ class PlatformNativeProfileSheetUser {
       avatarUrl: result[3] as String?,
       avatarBytes: result[4] as Uint8List?,
       avatarIsTemplate: result[5]! as bool,
-      avatarHeaders: (result[6]! as Map<Object?, Object?>)
-          .cast<String, String>(),
+      avatarHeaders: (result[6]! as Map<Object?, Object?>).cast<String, String>(),
       bio: result[7] as String?,
       gender: result[8] as String?,
       dateOfBirth: result[9] as String?,
@@ -2161,24 +2113,13 @@ class PlatformNativeProfileSheetUser {
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
   bool operator ==(Object other) {
-    if (other is! PlatformNativeProfileSheetUser ||
-        other.runtimeType != runtimeType) {
+    if (other is! PlatformNativeProfileSheetUser || other.runtimeType != runtimeType) {
       return false;
     }
     if (identical(this, other)) {
       return true;
     }
-    return _deepEquals(displayName, other.displayName) &&
-        _deepEquals(email, other.email) &&
-        _deepEquals(initials, other.initials) &&
-        _deepEquals(avatarUrl, other.avatarUrl) &&
-        _deepEquals(avatarBytes, other.avatarBytes) &&
-        _deepEquals(avatarIsTemplate, other.avatarIsTemplate) &&
-        _deepEquals(avatarHeaders, other.avatarHeaders) &&
-        _deepEquals(bio, other.bio) &&
-        _deepEquals(gender, other.gender) &&
-        _deepEquals(dateOfBirth, other.dateOfBirth) &&
-        _deepEquals(profileImageUrl, other.profileImageUrl);
+    return _deepEquals(displayName, other.displayName) && _deepEquals(email, other.email) && _deepEquals(initials, other.initials) && _deepEquals(avatarUrl, other.avatarUrl) && _deepEquals(avatarBytes, other.avatarBytes) && _deepEquals(avatarIsTemplate, other.avatarIsTemplate) && _deepEquals(avatarHeaders, other.avatarHeaders) && _deepEquals(bio, other.bio) && _deepEquals(gender, other.gender) && _deepEquals(dateOfBirth, other.dateOfBirth) && _deepEquals(profileImageUrl, other.profileImageUrl);
   }
 
   @override
@@ -2242,8 +2183,7 @@ class PlatformNativeSheetDetail {
   }
 
   Object encode() {
-    return _toList();
-  }
+    return _toList();  }
 
   static PlatformNativeSheetDetail decode(Object result) {
     result as List<Object?>;
@@ -2252,8 +2192,7 @@ class PlatformNativeSheetDetail {
       title: result[1]! as String,
       subtitle: result[2] as String?,
       items: (result[3]! as List<Object?>).cast<PlatformNativeSheetItem>(),
-      sections: (result[4]! as List<Object?>)
-          .cast<PlatformNativeSheetSection>(),
+      sections: (result[4]! as List<Object?>).cast<PlatformNativeSheetSection>(),
       confirmActionId: result[5] as String?,
       confirmActionLabel: result[6] as String?,
       maxHeightFraction: result[7] as double?,
@@ -2265,23 +2204,13 @@ class PlatformNativeSheetDetail {
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
   bool operator ==(Object other) {
-    if (other is! PlatformNativeSheetDetail ||
-        other.runtimeType != runtimeType) {
+    if (other is! PlatformNativeSheetDetail || other.runtimeType != runtimeType) {
       return false;
     }
     if (identical(this, other)) {
       return true;
     }
-    return _deepEquals(id, other.id) &&
-        _deepEquals(title, other.title) &&
-        _deepEquals(subtitle, other.subtitle) &&
-        _deepEquals(items, other.items) &&
-        _deepEquals(sections, other.sections) &&
-        _deepEquals(confirmActionId, other.confirmActionId) &&
-        _deepEquals(confirmActionLabel, other.confirmActionLabel) &&
-        _deepEquals(maxHeightFraction, other.maxHeightFraction) &&
-        _deepEquals(trailingActionId, other.trailingActionId) &&
-        _deepEquals(trailingActionSfSymbol, other.trailingActionSfSymbol);
+    return _deepEquals(id, other.id) && _deepEquals(title, other.title) && _deepEquals(subtitle, other.subtitle) && _deepEquals(items, other.items) && _deepEquals(sections, other.sections) && _deepEquals(confirmActionId, other.confirmActionId) && _deepEquals(confirmActionLabel, other.confirmActionLabel) && _deepEquals(maxHeightFraction, other.maxHeightFraction) && _deepEquals(trailingActionId, other.trailingActionId) && _deepEquals(trailingActionSfSymbol, other.trailingActionSfSymbol);
   }
 
   @override
@@ -2344,8 +2273,7 @@ class PlatformNativeProfileSheetConfig {
   }
 
   Object encode() {
-    return _toList();
-  }
+    return _toList();  }
 
   static PlatformNativeProfileSheetConfig decode(Object result) {
     result as List<Object?>;
@@ -2357,35 +2285,22 @@ class PlatformNativeProfileSheetConfig {
       supportTitle: result[4] as String?,
       supportSubtitle: result[5] as String?,
       menuItems: (result[6]! as List<Object?>).cast<PlatformNativeSheetItem>(),
-      supportItems: (result[7]! as List<Object?>)
-          .cast<PlatformNativeSheetItem>(),
-      sections: (result[8]! as List<Object?>)
-          .cast<PlatformNativeSheetSection>(),
-      detailSheets: (result[9]! as List<Object?>)
-          .cast<PlatformNativeSheetDetail>(),
+      supportItems: (result[7]! as List<Object?>).cast<PlatformNativeSheetItem>(),
+      sections: (result[8]! as List<Object?>).cast<PlatformNativeSheetSection>(),
+      detailSheets: (result[9]! as List<Object?>).cast<PlatformNativeSheetDetail>(),
     );
   }
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
   bool operator ==(Object other) {
-    if (other is! PlatformNativeProfileSheetConfig ||
-        other.runtimeType != runtimeType) {
+    if (other is! PlatformNativeProfileSheetConfig || other.runtimeType != runtimeType) {
       return false;
     }
     if (identical(this, other)) {
       return true;
     }
-    return _deepEquals(profile, other.profile) &&
-        _deepEquals(profileMenuTitle, other.profileMenuTitle) &&
-        _deepEquals(editProfileLabel, other.editProfileLabel) &&
-        _deepEquals(editProfileSheet, other.editProfileSheet) &&
-        _deepEquals(supportTitle, other.supportTitle) &&
-        _deepEquals(supportSubtitle, other.supportSubtitle) &&
-        _deepEquals(menuItems, other.menuItems) &&
-        _deepEquals(supportItems, other.supportItems) &&
-        _deepEquals(sections, other.sections) &&
-        _deepEquals(detailSheets, other.detailSheets);
+    return _deepEquals(profile, other.profile) && _deepEquals(profileMenuTitle, other.profileMenuTitle) && _deepEquals(editProfileLabel, other.editProfileLabel) && _deepEquals(editProfileSheet, other.editProfileSheet) && _deepEquals(supportTitle, other.supportTitle) && _deepEquals(supportSubtitle, other.supportSubtitle) && _deepEquals(menuItems, other.menuItems) && _deepEquals(supportItems, other.supportItems) && _deepEquals(sections, other.sections) && _deepEquals(detailSheets, other.detailSheets);
   }
 
   @override
@@ -2440,8 +2355,7 @@ class PlatformNativeSheetModelOption {
   }
 
   Object encode() {
-    return _toList();
-  }
+    return _toList();  }
 
   static PlatformNativeSheetModelOption decode(Object result) {
     result as List<Object?>;
@@ -2452,8 +2366,7 @@ class PlatformNativeSheetModelOption {
       sfSymbol: result[3] as String?,
       avatarUrl: result[4] as String?,
       avatarBytes: result[5] as Uint8List?,
-      avatarHeaders: (result[6]! as Map<Object?, Object?>)
-          .cast<String, String>(),
+      avatarHeaders: (result[6]! as Map<Object?, Object?>).cast<String, String>(),
       tags: (result[7]! as List<Object?>).cast<String>(),
     );
   }
@@ -2461,21 +2374,13 @@ class PlatformNativeSheetModelOption {
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
   bool operator ==(Object other) {
-    if (other is! PlatformNativeSheetModelOption ||
-        other.runtimeType != runtimeType) {
+    if (other is! PlatformNativeSheetModelOption || other.runtimeType != runtimeType) {
       return false;
     }
     if (identical(this, other)) {
       return true;
     }
-    return _deepEquals(id, other.id) &&
-        _deepEquals(name, other.name) &&
-        _deepEquals(subtitle, other.subtitle) &&
-        _deepEquals(sfSymbol, other.sfSymbol) &&
-        _deepEquals(avatarUrl, other.avatarUrl) &&
-        _deepEquals(avatarBytes, other.avatarBytes) &&
-        _deepEquals(avatarHeaders, other.avatarHeaders) &&
-        _deepEquals(tags, other.tags);
+    return _deepEquals(id, other.id) && _deepEquals(name, other.name) && _deepEquals(subtitle, other.subtitle) && _deepEquals(sfSymbol, other.sfSymbol) && _deepEquals(avatarUrl, other.avatarUrl) && _deepEquals(avatarBytes, other.avatarBytes) && _deepEquals(avatarHeaders, other.avatarHeaders) && _deepEquals(tags, other.tags);
   }
 
   @override
@@ -2570,8 +2475,7 @@ class PlatformNativeSheetModelSelectorRequest {
   }
 
   Object encode() {
-    return _toList();
-  }
+    return _toList();  }
 
   static PlatformNativeSheetModelSelectorRequest decode(Object result) {
     result as List<Object?>;
@@ -2579,8 +2483,7 @@ class PlatformNativeSheetModelSelectorRequest {
       presentationId: result[0]! as String,
       title: result[1]! as String,
       selectedModelId: result[2] as String?,
-      models: (result[3]! as List<Object?>)
-          .cast<PlatformNativeSheetModelOption>(),
+      models: (result[3]! as List<Object?>).cast<PlatformNativeSheetModelOption>(),
       pinnedModelIds: (result[4]! as List<Object?>).cast<String>(),
       featuredModelIds: (result[5]! as List<Object?>).cast<String>(),
       allowsPinning: result[6]! as bool,
@@ -2591,8 +2494,7 @@ class PlatformNativeSheetModelSelectorRequest {
       reasoningEffortTitle: result[11]! as String,
       reasoningEffortValue: result[12]! as String,
       reasoningEffortOptions: (result[13]! as List<Object?>).cast<String>(),
-      reasoningEffortLabels: (result[14]! as Map<Object?, Object?>)
-          .cast<String, String>(),
+      reasoningEffortLabels: (result[14]! as Map<Object?, Object?>).cast<String, String>(),
       allowsCustomReasoningEffort: result[15]! as bool,
       customReasoningEffortTitle: result[16]! as String,
       customReasoningEffortHint: result[17]! as String,
@@ -2602,37 +2504,13 @@ class PlatformNativeSheetModelSelectorRequest {
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
   bool operator ==(Object other) {
-    if (other is! PlatformNativeSheetModelSelectorRequest ||
-        other.runtimeType != runtimeType) {
+    if (other is! PlatformNativeSheetModelSelectorRequest || other.runtimeType != runtimeType) {
       return false;
     }
     if (identical(this, other)) {
       return true;
     }
-    return _deepEquals(presentationId, other.presentationId) &&
-        _deepEquals(title, other.title) &&
-        _deepEquals(selectedModelId, other.selectedModelId) &&
-        _deepEquals(models, other.models) &&
-        _deepEquals(pinnedModelIds, other.pinnedModelIds) &&
-        _deepEquals(featuredModelIds, other.featuredModelIds) &&
-        _deepEquals(allowsPinning, other.allowsPinning) &&
-        _deepEquals(pinTitle, other.pinTitle) &&
-        _deepEquals(unpinTitle, other.unpinTitle) &&
-        _deepEquals(moreModelsTitle, other.moreModelsTitle) &&
-        _deepEquals(searchModelsTitle, other.searchModelsTitle) &&
-        _deepEquals(reasoningEffortTitle, other.reasoningEffortTitle) &&
-        _deepEquals(reasoningEffortValue, other.reasoningEffortValue) &&
-        _deepEquals(reasoningEffortOptions, other.reasoningEffortOptions) &&
-        _deepEquals(reasoningEffortLabels, other.reasoningEffortLabels) &&
-        _deepEquals(
-          allowsCustomReasoningEffort,
-          other.allowsCustomReasoningEffort,
-        ) &&
-        _deepEquals(
-          customReasoningEffortTitle,
-          other.customReasoningEffortTitle,
-        ) &&
-        _deepEquals(customReasoningEffortHint, other.customReasoningEffortHint);
+    return _deepEquals(presentationId, other.presentationId) && _deepEquals(title, other.title) && _deepEquals(selectedModelId, other.selectedModelId) && _deepEquals(models, other.models) && _deepEquals(pinnedModelIds, other.pinnedModelIds) && _deepEquals(featuredModelIds, other.featuredModelIds) && _deepEquals(allowsPinning, other.allowsPinning) && _deepEquals(pinTitle, other.pinTitle) && _deepEquals(unpinTitle, other.unpinTitle) && _deepEquals(moreModelsTitle, other.moreModelsTitle) && _deepEquals(searchModelsTitle, other.searchModelsTitle) && _deepEquals(reasoningEffortTitle, other.reasoningEffortTitle) && _deepEquals(reasoningEffortValue, other.reasoningEffortValue) && _deepEquals(reasoningEffortOptions, other.reasoningEffortOptions) && _deepEquals(reasoningEffortLabels, other.reasoningEffortLabels) && _deepEquals(allowsCustomReasoningEffort, other.allowsCustomReasoningEffort) && _deepEquals(customReasoningEffortTitle, other.customReasoningEffortTitle) && _deepEquals(customReasoningEffortHint, other.customReasoningEffortHint);
   }
 
   @override
@@ -2665,12 +2543,17 @@ class PlatformNativeSheetOptionsSelectorRequest {
   List<PlatformNativeSheetOption> options;
 
   List<Object?> _toList() {
-    return <Object?>[title, subtitle, selectedOptionId, searchable, options];
+    return <Object?>[
+      title,
+      subtitle,
+      selectedOptionId,
+      searchable,
+      options,
+    ];
   }
 
   Object encode() {
-    return _toList();
-  }
+    return _toList();  }
 
   static PlatformNativeSheetOptionsSelectorRequest decode(Object result) {
     result as List<Object?>;
@@ -2686,18 +2569,13 @@ class PlatformNativeSheetOptionsSelectorRequest {
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
   bool operator ==(Object other) {
-    if (other is! PlatformNativeSheetOptionsSelectorRequest ||
-        other.runtimeType != runtimeType) {
+    if (other is! PlatformNativeSheetOptionsSelectorRequest || other.runtimeType != runtimeType) {
       return false;
     }
     if (identical(this, other)) {
       return true;
     }
-    return _deepEquals(title, other.title) &&
-        _deepEquals(subtitle, other.subtitle) &&
-        _deepEquals(selectedOptionId, other.selectedOptionId) &&
-        _deepEquals(searchable, other.searchable) &&
-        _deepEquals(options, other.options);
+    return _deepEquals(title, other.title) && _deepEquals(subtitle, other.subtitle) && _deepEquals(selectedOptionId, other.selectedOptionId) && _deepEquals(searchable, other.searchable) && _deepEquals(options, other.options);
   }
 
   @override
@@ -2744,8 +2622,7 @@ class PlatformNativeSheetDatePickerRequest {
   }
 
   Object encode() {
-    return _toList();
-  }
+    return _toList();  }
 
   static PlatformNativeSheetDatePickerRequest decode(Object result) {
     result as List<Object?>;
@@ -2762,19 +2639,13 @@ class PlatformNativeSheetDatePickerRequest {
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
   bool operator ==(Object other) {
-    if (other is! PlatformNativeSheetDatePickerRequest ||
-        other.runtimeType != runtimeType) {
+    if (other is! PlatformNativeSheetDatePickerRequest || other.runtimeType != runtimeType) {
       return false;
     }
     if (identical(this, other)) {
       return true;
     }
-    return _deepEquals(title, other.title) &&
-        _deepEquals(initialDateIso8601, other.initialDateIso8601) &&
-        _deepEquals(firstDateIso8601, other.firstDateIso8601) &&
-        _deepEquals(lastDateIso8601, other.lastDateIso8601) &&
-        _deepEquals(doneLabel, other.doneLabel) &&
-        _deepEquals(cancelLabel, other.cancelLabel);
+    return _deepEquals(title, other.title) && _deepEquals(initialDateIso8601, other.initialDateIso8601) && _deepEquals(firstDateIso8601, other.firstDateIso8601) && _deepEquals(lastDateIso8601, other.lastDateIso8601) && _deepEquals(doneLabel, other.doneLabel) && _deepEquals(cancelLabel, other.cancelLabel);
   }
 
   @override
@@ -2825,8 +2696,7 @@ class PlatformNativeSheetTextEditorRequest {
   }
 
   Object encode() {
-    return _toList();
-  }
+    return _toList();  }
 
   static PlatformNativeSheetTextEditorRequest decode(Object result) {
     result as List<Object?>;
@@ -2844,20 +2714,13 @@ class PlatformNativeSheetTextEditorRequest {
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
   bool operator ==(Object other) {
-    if (other is! PlatformNativeSheetTextEditorRequest ||
-        other.runtimeType != runtimeType) {
+    if (other is! PlatformNativeSheetTextEditorRequest || other.runtimeType != runtimeType) {
       return false;
     }
     if (identical(this, other)) {
       return true;
     }
-    return _deepEquals(title, other.title) &&
-        _deepEquals(value, other.value) &&
-        _deepEquals(placeholder, other.placeholder) &&
-        _deepEquals(sendLabel, other.sendLabel) &&
-        _deepEquals(valueId, other.valueId) &&
-        _deepEquals(sendActionId, other.sendActionId) &&
-        _deepEquals(closeActionId, other.closeActionId);
+    return _deepEquals(title, other.title) && _deepEquals(value, other.value) && _deepEquals(placeholder, other.placeholder) && _deepEquals(sendLabel, other.sendLabel) && _deepEquals(valueId, other.valueId) && _deepEquals(sendActionId, other.sendActionId) && _deepEquals(closeActionId, other.closeActionId);
   }
 
   @override
@@ -2881,34 +2744,33 @@ class PlatformNativeSheetResultRequest {
   List<PlatformNativeSheetDetail> detailSheets;
 
   List<Object?> _toList() {
-    return <Object?>[root, detailSheets];
+    return <Object?>[
+      root,
+      detailSheets,
+    ];
   }
 
   Object encode() {
-    return _toList();
-  }
+    return _toList();  }
 
   static PlatformNativeSheetResultRequest decode(Object result) {
     result as List<Object?>;
     return PlatformNativeSheetResultRequest(
       root: result[0]! as PlatformNativeSheetDetail,
-      detailSheets: (result[1]! as List<Object?>)
-          .cast<PlatformNativeSheetDetail>(),
+      detailSheets: (result[1]! as List<Object?>).cast<PlatformNativeSheetDetail>(),
     );
   }
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
   bool operator ==(Object other) {
-    if (other is! PlatformNativeSheetResultRequest ||
-        other.runtimeType != runtimeType) {
+    if (other is! PlatformNativeSheetResultRequest || other.runtimeType != runtimeType) {
       return false;
     }
     if (identical(this, other)) {
       return true;
     }
-    return _deepEquals(root, other.root) &&
-        _deepEquals(detailSheets, other.detailSheets);
+    return _deepEquals(root, other.root) && _deepEquals(detailSheets, other.detailSheets);
   }
 
   @override
@@ -2959,41 +2821,31 @@ class PlatformNativeSheetApplyDetailPatchRequest {
   }
 
   Object encode() {
-    return _toList();
-  }
+    return _toList();  }
 
   static PlatformNativeSheetApplyDetailPatchRequest decode(Object result) {
     result as List<Object?>;
     return PlatformNativeSheetApplyDetailPatchRequest(
       detailId: result[0]! as String,
       items: (result[1]! as List<Object?>).cast<PlatformNativeSheetItem>(),
-      sections: (result[2]! as List<Object?>)
-          .cast<PlatformNativeSheetSection>(),
+      sections: (result[2]! as List<Object?>).cast<PlatformNativeSheetSection>(),
       title: result[3] as String?,
       subtitle: result[4] as String?,
       clearSubtitle: result[5]! as bool,
-      detailSheets: (result[6] as List<Object?>?)
-          ?.cast<PlatformNativeSheetDetail>(),
+      detailSheets: (result[6] as List<Object?>?)?.cast<PlatformNativeSheetDetail>(),
     );
   }
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
   bool operator ==(Object other) {
-    if (other is! PlatformNativeSheetApplyDetailPatchRequest ||
-        other.runtimeType != runtimeType) {
+    if (other is! PlatformNativeSheetApplyDetailPatchRequest || other.runtimeType != runtimeType) {
       return false;
     }
     if (identical(this, other)) {
       return true;
     }
-    return _deepEquals(detailId, other.detailId) &&
-        _deepEquals(items, other.items) &&
-        _deepEquals(sections, other.sections) &&
-        _deepEquals(title, other.title) &&
-        _deepEquals(subtitle, other.subtitle) &&
-        _deepEquals(clearSubtitle, other.clearSubtitle) &&
-        _deepEquals(detailSheets, other.detailSheets);
+    return _deepEquals(detailId, other.detailId) && _deepEquals(items, other.items) && _deepEquals(sections, other.sections) && _deepEquals(title, other.title) && _deepEquals(subtitle, other.subtitle) && _deepEquals(clearSubtitle, other.clearSubtitle) && _deepEquals(detailSheets, other.detailSheets);
   }
 
   @override
@@ -3007,19 +2859,24 @@ class PlatformNativeSheetApplyDetailPatchRequest {
 }
 
 class PlatformNativeSheetControlChangedEvent {
-  PlatformNativeSheetControlChangedEvent({required this.id, this.value});
+  PlatformNativeSheetControlChangedEvent({
+    required this.id,
+    this.value,
+  });
 
   String id;
 
   Object? value;
 
   List<Object?> _toList() {
-    return <Object?>[id, value];
+    return <Object?>[
+      id,
+      value,
+    ];
   }
 
   Object encode() {
-    return _toList();
-  }
+    return _toList();  }
 
   static PlatformNativeSheetControlChangedEvent decode(Object result) {
     result as List<Object?>;
@@ -3032,8 +2889,7 @@ class PlatformNativeSheetControlChangedEvent {
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
   bool operator ==(Object other) {
-    if (other is! PlatformNativeSheetControlChangedEvent ||
-        other.runtimeType != runtimeType) {
+    if (other is! PlatformNativeSheetControlChangedEvent || other.runtimeType != runtimeType) {
       return false;
     }
     if (identical(this, other)) {
@@ -3053,17 +2909,20 @@ class PlatformNativeSheetControlChangedEvent {
 }
 
 class PlatformNativeSheetDetailAppearedEvent {
-  PlatformNativeSheetDetailAppearedEvent({required this.detailId});
+  PlatformNativeSheetDetailAppearedEvent({
+    required this.detailId,
+  });
 
   String detailId;
 
   List<Object?> _toList() {
-    return <Object?>[detailId];
+    return <Object?>[
+      detailId,
+    ];
   }
 
   Object encode() {
-    return _toList();
-  }
+    return _toList();  }
 
   static PlatformNativeSheetDetailAppearedEvent decode(Object result) {
     result as List<Object?>;
@@ -3075,8 +2934,7 @@ class PlatformNativeSheetDetailAppearedEvent {
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
   bool operator ==(Object other) {
-    if (other is! PlatformNativeSheetDetailAppearedEvent ||
-        other.runtimeType != runtimeType) {
+    if (other is! PlatformNativeSheetDetailAppearedEvent || other.runtimeType != runtimeType) {
       return false;
     }
     if (identical(this, other)) {
@@ -3096,17 +2954,20 @@ class PlatformNativeSheetDetailAppearedEvent {
 }
 
 class PlatformNativeSheetModelPinToggledEvent {
-  PlatformNativeSheetModelPinToggledEvent({required this.modelId});
+  PlatformNativeSheetModelPinToggledEvent({
+    required this.modelId,
+  });
 
   String modelId;
 
   List<Object?> _toList() {
-    return <Object?>[modelId];
+    return <Object?>[
+      modelId,
+    ];
   }
 
   Object encode() {
-    return _toList();
-  }
+    return _toList();  }
 
   static PlatformNativeSheetModelPinToggledEvent decode(Object result) {
     result as List<Object?>;
@@ -3118,8 +2979,7 @@ class PlatformNativeSheetModelPinToggledEvent {
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
   bool operator ==(Object other) {
-    if (other is! PlatformNativeSheetModelPinToggledEvent ||
-        other.runtimeType != runtimeType) {
+    if (other is! PlatformNativeSheetModelPinToggledEvent || other.runtimeType != runtimeType) {
       return false;
     }
     if (identical(this, other)) {
@@ -3139,17 +2999,20 @@ class PlatformNativeSheetModelPinToggledEvent {
 }
 
 class PlatformNativeSheetReasoningEffortChangedEvent {
-  PlatformNativeSheetReasoningEffortChangedEvent({required this.value});
+  PlatformNativeSheetReasoningEffortChangedEvent({
+    required this.value,
+  });
 
   String value;
 
   List<Object?> _toList() {
-    return <Object?>[value];
+    return <Object?>[
+      value,
+    ];
   }
 
   Object encode() {
-    return _toList();
-  }
+    return _toList();  }
 
   static PlatformNativeSheetReasoningEffortChangedEvent decode(Object result) {
     result as List<Object?>;
@@ -3161,8 +3024,7 @@ class PlatformNativeSheetReasoningEffortChangedEvent {
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
   bool operator ==(Object other) {
-    if (other is! PlatformNativeSheetReasoningEffortChangedEvent ||
-        other.runtimeType != runtimeType) {
+    if (other is! PlatformNativeSheetReasoningEffortChangedEvent || other.runtimeType != runtimeType) {
       return false;
     }
     if (identical(this, other)) {
@@ -3201,12 +3063,17 @@ class PlatformNativeEditProfileCommittedEvent {
   String? dateOfBirth;
 
   List<Object?> _toList() {
-    return <Object?>[name, profileImageUrl, bio, gender, dateOfBirth];
+    return <Object?>[
+      name,
+      profileImageUrl,
+      bio,
+      gender,
+      dateOfBirth,
+    ];
   }
 
   Object encode() {
-    return _toList();
-  }
+    return _toList();  }
 
   static PlatformNativeEditProfileCommittedEvent decode(Object result) {
     result as List<Object?>;
@@ -3222,18 +3089,13 @@ class PlatformNativeEditProfileCommittedEvent {
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
   bool operator ==(Object other) {
-    if (other is! PlatformNativeEditProfileCommittedEvent ||
-        other.runtimeType != runtimeType) {
+    if (other is! PlatformNativeEditProfileCommittedEvent || other.runtimeType != runtimeType) {
       return false;
     }
     if (identical(this, other)) {
       return true;
     }
-    return _deepEquals(name, other.name) &&
-        _deepEquals(profileImageUrl, other.profileImageUrl) &&
-        _deepEquals(bio, other.bio) &&
-        _deepEquals(gender, other.gender) &&
-        _deepEquals(dateOfBirth, other.dateOfBirth);
+    return _deepEquals(name, other.name) && _deepEquals(profileImageUrl, other.profileImageUrl) && _deepEquals(bio, other.bio) && _deepEquals(gender, other.gender) && _deepEquals(dateOfBirth, other.dateOfBirth);
   }
 
   @override
@@ -3257,12 +3119,14 @@ class PlatformNativeSheetActionResult {
   Map<String, Object?> values;
 
   List<Object?> _toList() {
-    return <Object?>[actionId, values];
+    return <Object?>[
+      actionId,
+      values,
+    ];
   }
 
   Object encode() {
-    return _toList();
-  }
+    return _toList();  }
 
   static PlatformNativeSheetActionResult decode(Object result) {
     result as List<Object?>;
@@ -3275,15 +3139,13 @@ class PlatformNativeSheetActionResult {
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
   bool operator ==(Object other) {
-    if (other is! PlatformNativeSheetActionResult ||
-        other.runtimeType != runtimeType) {
+    if (other is! PlatformNativeSheetActionResult || other.runtimeType != runtimeType) {
       return false;
     }
     if (identical(this, other)) {
       return true;
     }
-    return _deepEquals(actionId, other.actionId) &&
-        _deepEquals(values, other.values);
+    return _deepEquals(actionId, other.actionId) && _deepEquals(values, other.values);
   }
 
   @override
@@ -3338,8 +3200,7 @@ class PlatformPccStatus {
   }
 
   Object encode() {
-    return _toList();
-  }
+    return _toList();  }
 
   static PlatformPccStatus decode(Object result) {
     result as List<Object?>;
@@ -3364,14 +3225,7 @@ class PlatformPccStatus {
     if (identical(this, other)) {
       return true;
     }
-    return _deepEquals(availability, other.availability) &&
-        _deepEquals(quotaStatus, other.quotaStatus) &&
-        _deepEquals(quotaLimitReached, other.quotaLimitReached) &&
-        _deepEquals(canIncreaseQuota, other.canIncreaseQuota) &&
-        _deepEquals(message, other.message) &&
-        _deepEquals(quotaResetAtMilliseconds, other.quotaResetAtMilliseconds) &&
-        _deepEquals(contextSize, other.contextSize) &&
-        _deepEquals(supportsCurrentLocale, other.supportsCurrentLocale);
+    return _deepEquals(availability, other.availability) && _deepEquals(quotaStatus, other.quotaStatus) && _deepEquals(quotaLimitReached, other.quotaLimitReached) && _deepEquals(canIncreaseQuota, other.canIncreaseQuota) && _deepEquals(message, other.message) && _deepEquals(quotaResetAtMilliseconds, other.quotaResetAtMilliseconds) && _deepEquals(contextSize, other.contextSize) && _deepEquals(supportsCurrentLocale, other.supportsCurrentLocale);
   }
 
   @override
@@ -3385,19 +3239,24 @@ class PlatformPccStatus {
 }
 
 class PlatformPccImage {
-  PlatformPccImage({required this.mimeType, required this.bytes});
+  PlatformPccImage({
+    required this.mimeType,
+    required this.bytes,
+  });
 
   String mimeType;
 
   Uint8List bytes;
 
   List<Object?> _toList() {
-    return <Object?>[mimeType, bytes];
+    return <Object?>[
+      mimeType,
+      bytes,
+    ];
   }
 
   Object encode() {
-    return _toList();
-  }
+    return _toList();  }
 
   static PlatformPccImage decode(Object result) {
     result as List<Object?>;
@@ -3416,8 +3275,7 @@ class PlatformPccImage {
     if (identical(this, other)) {
       return true;
     }
-    return _deepEquals(mimeType, other.mimeType) &&
-        _deepEquals(bytes, other.bytes);
+    return _deepEquals(mimeType, other.mimeType) && _deepEquals(bytes, other.bytes);
   }
 
   @override
@@ -3444,12 +3302,15 @@ class PlatformPccMessage {
   List<PlatformPccImage> images;
 
   List<Object?> _toList() {
-    return <Object?>[role, content, images];
+    return <Object?>[
+      role,
+      content,
+      images,
+    ];
   }
 
   Object encode() {
-    return _toList();
-  }
+    return _toList();  }
 
   static PlatformPccMessage decode(Object result) {
     result as List<Object?>;
@@ -3469,9 +3330,7 @@ class PlatformPccMessage {
     if (identical(this, other)) {
       return true;
     }
-    return _deepEquals(role, other.role) &&
-        _deepEquals(content, other.content) &&
-        _deepEquals(images, other.images);
+    return _deepEquals(role, other.role) && _deepEquals(content, other.content) && _deepEquals(images, other.images);
   }
 
   @override
@@ -3498,12 +3357,15 @@ class PlatformPccToolDefinition {
   String inputSchemaJson;
 
   List<Object?> _toList() {
-    return <Object?>[name, toolDescription, inputSchemaJson];
+    return <Object?>[
+      name,
+      toolDescription,
+      inputSchemaJson,
+    ];
   }
 
   Object encode() {
-    return _toList();
-  }
+    return _toList();  }
 
   static PlatformPccToolDefinition decode(Object result) {
     result as List<Object?>;
@@ -3517,16 +3379,13 @@ class PlatformPccToolDefinition {
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
   bool operator ==(Object other) {
-    if (other is! PlatformPccToolDefinition ||
-        other.runtimeType != runtimeType) {
+    if (other is! PlatformPccToolDefinition || other.runtimeType != runtimeType) {
       return false;
     }
     if (identical(this, other)) {
       return true;
     }
-    return _deepEquals(name, other.name) &&
-        _deepEquals(toolDescription, other.toolDescription) &&
-        _deepEquals(inputSchemaJson, other.inputSchemaJson);
+    return _deepEquals(name, other.name) && _deepEquals(toolDescription, other.toolDescription) && _deepEquals(inputSchemaJson, other.inputSchemaJson);
   }
 
   @override
@@ -3556,12 +3415,16 @@ class PlatformPccToolCall {
   String argumentsJson;
 
   List<Object?> _toList() {
-    return <Object?>[runId, callId, name, argumentsJson];
+    return <Object?>[
+      runId,
+      callId,
+      name,
+      argumentsJson,
+    ];
   }
 
   Object encode() {
-    return _toList();
-  }
+    return _toList();  }
 
   static PlatformPccToolCall decode(Object result) {
     result as List<Object?>;
@@ -3582,10 +3445,7 @@ class PlatformPccToolCall {
     if (identical(this, other)) {
       return true;
     }
-    return _deepEquals(runId, other.runId) &&
-        _deepEquals(callId, other.callId) &&
-        _deepEquals(name, other.name) &&
-        _deepEquals(argumentsJson, other.argumentsJson);
+    return _deepEquals(runId, other.runId) && _deepEquals(callId, other.callId) && _deepEquals(name, other.name) && _deepEquals(argumentsJson, other.argumentsJson);
   }
 
   @override
@@ -3599,19 +3459,24 @@ class PlatformPccToolCall {
 }
 
 class PlatformPccToolResult {
-  PlatformPccToolResult({required this.content, required this.cancelled});
+  PlatformPccToolResult({
+    required this.content,
+    required this.cancelled,
+  });
 
   String content;
 
   bool cancelled;
 
   List<Object?> _toList() {
-    return <Object?>[content, cancelled];
+    return <Object?>[
+      content,
+      cancelled,
+    ];
   }
 
   Object encode() {
-    return _toList();
-  }
+    return _toList();  }
 
   static PlatformPccToolResult decode(Object result) {
     result as List<Object?>;
@@ -3630,8 +3495,7 @@ class PlatformPccToolResult {
     if (identical(this, other)) {
       return true;
     }
-    return _deepEquals(content, other.content) &&
-        _deepEquals(cancelled, other.cancelled);
+    return _deepEquals(content, other.content) && _deepEquals(cancelled, other.cancelled);
   }
 
   @override
@@ -3710,8 +3574,7 @@ class PlatformPccCompletionRequest {
   }
 
   Object encode() {
-    return _toList();
-  }
+    return _toList();  }
 
   static PlatformPccCompletionRequest decode(Object result) {
     result as List<Object?>;
@@ -3736,27 +3599,13 @@ class PlatformPccCompletionRequest {
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
   bool operator ==(Object other) {
-    if (other is! PlatformPccCompletionRequest ||
-        other.runtimeType != runtimeType) {
+    if (other is! PlatformPccCompletionRequest || other.runtimeType != runtimeType) {
       return false;
     }
     if (identical(this, other)) {
       return true;
     }
-    return _deepEquals(runId, other.runId) &&
-        _deepEquals(model, other.model) &&
-        _deepEquals(messages, other.messages) &&
-        _deepEquals(tools, other.tools) &&
-        _deepEquals(allowOnDeviceFallback, other.allowOnDeviceFallback) &&
-        _deepEquals(reasoningLevel, other.reasoningLevel) &&
-        _deepEquals(temperature, other.temperature) &&
-        _deepEquals(maximumResponseTokens, other.maximumResponseTokens) &&
-        _deepEquals(topP, other.topP) &&
-        _deepEquals(topK, other.topK) &&
-        _deepEquals(seed, other.seed) &&
-        _deepEquals(greedySampling, other.greedySampling) &&
-        _deepEquals(responseSchemaName, other.responseSchemaName) &&
-        _deepEquals(responseSchemaJson, other.responseSchemaJson);
+    return _deepEquals(runId, other.runId) && _deepEquals(model, other.model) && _deepEquals(messages, other.messages) && _deepEquals(tools, other.tools) && _deepEquals(allowOnDeviceFallback, other.allowOnDeviceFallback) && _deepEquals(reasoningLevel, other.reasoningLevel) && _deepEquals(temperature, other.temperature) && _deepEquals(maximumResponseTokens, other.maximumResponseTokens) && _deepEquals(topP, other.topP) && _deepEquals(topK, other.topK) && _deepEquals(seed, other.seed) && _deepEquals(greedySampling, other.greedySampling) && _deepEquals(responseSchemaName, other.responseSchemaName) && _deepEquals(responseSchemaJson, other.responseSchemaJson);
   }
 
   @override
@@ -3807,8 +3656,7 @@ class PlatformPccStreamEvent {
   }
 
   Object encode() {
-    return _toList();
-  }
+    return _toList();  }
 
   static PlatformPccStreamEvent decode(Object result) {
     result as List<Object?>;
@@ -3832,13 +3680,7 @@ class PlatformPccStreamEvent {
     if (identical(this, other)) {
       return true;
     }
-    return _deepEquals(runId, other.runId) &&
-        _deepEquals(kind, other.kind) &&
-        _deepEquals(content, other.content) &&
-        _deepEquals(inputTokenCount, other.inputTokenCount) &&
-        _deepEquals(outputTokenCount, other.outputTokenCount) &&
-        _deepEquals(reasoningTokenCount, other.reasoningTokenCount) &&
-        _deepEquals(totalTokenCount, other.totalTokenCount);
+    return _deepEquals(runId, other.runId) && _deepEquals(kind, other.kind) && _deepEquals(content, other.content) && _deepEquals(inputTokenCount, other.inputTokenCount) && _deepEquals(outputTokenCount, other.outputTokenCount) && _deepEquals(reasoningTokenCount, other.reasoningTokenCount) && _deepEquals(totalTokenCount, other.totalTokenCount);
   }
 
   @override
@@ -3851,6 +3693,7 @@ class PlatformPccStreamEvent {
   }
 }
 
+
 class _PigeonCodec extends StandardMessageCodec {
   const _PigeonCodec();
   @override
@@ -3858,184 +3701,184 @@ class _PigeonCodec extends StandardMessageCodec {
     if (value is int) {
       buffer.putUint8(4);
       buffer.putInt64(value);
-    } else if (value is PlatformBackgroundStreamKind) {
+    }    else if (value is PlatformBackgroundStreamKind) {
       buffer.putUint8(129);
       writeValue(buffer, value.index);
-    } else if (value is PlatformNativePasteKind) {
+    }    else if (value is PlatformNativePasteKind) {
       buffer.putUint8(130);
       writeValue(buffer, value.index);
-    } else if (value is PlatformPccAvailability) {
+    }    else if (value is PlatformPccAvailability) {
       buffer.putUint8(131);
       writeValue(buffer, value.index);
-    } else if (value is PlatformAppleModel) {
+    }    else if (value is PlatformAppleModel) {
       buffer.putUint8(132);
       writeValue(buffer, value.index);
-    } else if (value is PlatformPccQuotaStatus) {
+    }    else if (value is PlatformPccQuotaStatus) {
       buffer.putUint8(133);
       writeValue(buffer, value.index);
-    } else if (value is PlatformPccEventKind) {
+    }    else if (value is PlatformPccEventKind) {
       buffer.putUint8(134);
       writeValue(buffer, value.index);
-    } else if (value is PlatformNativeSheetItemKind) {
+    }    else if (value is PlatformNativeSheetItemKind) {
       buffer.putUint8(135);
       writeValue(buffer, value.index);
-    } else if (value is PlatformKeyboardAttachmentActionKind) {
+    }    else if (value is PlatformKeyboardAttachmentActionKind) {
       buffer.putUint8(136);
       writeValue(buffer, value.index);
-    } else if (value is PlatformBackgroundStreamLease) {
+    }    else if (value is PlatformBackgroundStreamLease) {
       buffer.putUint8(137);
       writeValue(buffer, value.encode());
-    } else if (value is PlatformBackgroundStartRequest) {
+    }    else if (value is PlatformBackgroundStartRequest) {
       buffer.putUint8(138);
       writeValue(buffer, value.encode());
-    } else if (value is PlatformBackgroundStopRequest) {
+    }    else if (value is PlatformBackgroundStopRequest) {
       buffer.putUint8(139);
       writeValue(buffer, value.encode());
-    } else if (value is PlatformBackgroundKeepAliveRequest) {
+    }    else if (value is PlatformBackgroundKeepAliveRequest) {
       buffer.putUint8(140);
       writeValue(buffer, value.encode());
-    } else if (value is PlatformBackgroundAudioSessionOwnerRequest) {
+    }    else if (value is PlatformBackgroundAudioSessionOwnerRequest) {
       buffer.putUint8(141);
       writeValue(buffer, value.encode());
-    } else if (value is PlatformServiceFailureEvent) {
+    }    else if (value is PlatformServiceFailureEvent) {
       buffer.putUint8(142);
       writeValue(buffer, value.encode());
-    } else if (value is PlatformTimeLimitWarningEvent) {
+    }    else if (value is PlatformTimeLimitWarningEvent) {
       buffer.putUint8(143);
       writeValue(buffer, value.encode());
-    } else if (value is PlatformStreamsSuspendingEvent) {
+    }    else if (value is PlatformStreamsSuspendingEvent) {
       buffer.putUint8(144);
       writeValue(buffer, value.encode());
-    } else if (value is PlatformBackgroundTaskExtendedEvent) {
+    }    else if (value is PlatformBackgroundTaskExtendedEvent) {
       buffer.putUint8(145);
       writeValue(buffer, value.encode());
-    } else if (value is PlatformAppIntentImagePayload) {
+    }    else if (value is PlatformAppIntentImagePayload) {
       buffer.putUint8(146);
       writeValue(buffer, value.encode());
-    } else if (value is PlatformAppIntentResponse) {
+    }    else if (value is PlatformAppIntentResponse) {
       buffer.putUint8(147);
       writeValue(buffer, value.encode());
-    } else if (value is PlatformNativePasteImageItem) {
+    }    else if (value is PlatformNativePasteImageItem) {
       buffer.putUint8(148);
       writeValue(buffer, value.encode());
-    } else if (value is PlatformNativePastePayload) {
+    }    else if (value is PlatformNativePastePayload) {
       buffer.putUint8(149);
       writeValue(buffer, value.encode());
-    } else if (value is PlatformKeyboardAttachmentActionConfig) {
+    }    else if (value is PlatformKeyboardAttachmentActionConfig) {
       buffer.putUint8(150);
       writeValue(buffer, value.encode());
-    } else if (value is PlatformKeyboardAttachmentConfig) {
+    }    else if (value is PlatformKeyboardAttachmentConfig) {
       buffer.putUint8(151);
       writeValue(buffer, value.encode());
-    } else if (value is PlatformKeyboardAttachmentActionEvent) {
+    }    else if (value is PlatformKeyboardAttachmentActionEvent) {
       buffer.putUint8(152);
       writeValue(buffer, value.encode());
-    } else if (value is PlatformKeyboardAttachmentVisibilityEvent) {
+    }    else if (value is PlatformKeyboardAttachmentVisibilityEvent) {
       buffer.putUint8(153);
       writeValue(buffer, value.encode());
-    } else if (value is PlatformRect) {
+    }    else if (value is PlatformRect) {
       buffer.putUint8(154);
       writeValue(buffer, value.encode());
-    } else if (value is PlatformDropdownOption) {
+    }    else if (value is PlatformDropdownOption) {
       buffer.putUint8(155);
       writeValue(buffer, value.encode());
-    } else if (value is PlatformImageViewerItem) {
+    }    else if (value is PlatformImageViewerItem) {
       buffer.putUint8(156);
       writeValue(buffer, value.encode());
-    } else if (value is PlatformImageViewerRequest) {
+    }    else if (value is PlatformImageViewerRequest) {
       buffer.putUint8(157);
       writeValue(buffer, value.encode());
-    } else if (value is PlatformDropdownRequest) {
+    }    else if (value is PlatformDropdownRequest) {
       buffer.putUint8(158);
       writeValue(buffer, value.encode());
-    } else if (value is PlatformNativeSheetOption) {
+    }    else if (value is PlatformNativeSheetOption) {
       buffer.putUint8(159);
       writeValue(buffer, value.encode());
-    } else if (value is PlatformNativeSheetTheme) {
+    }    else if (value is PlatformNativeSheetTheme) {
       buffer.putUint8(160);
       writeValue(buffer, value.encode());
-    } else if (value is PlatformNativeSheetItem) {
+    }    else if (value is PlatformNativeSheetItem) {
       buffer.putUint8(161);
       writeValue(buffer, value.encode());
-    } else if (value is PlatformNativeSheetLink) {
+    }    else if (value is PlatformNativeSheetLink) {
       buffer.putUint8(162);
       writeValue(buffer, value.encode());
-    } else if (value is PlatformNativeSheetSection) {
+    }    else if (value is PlatformNativeSheetSection) {
       buffer.putUint8(163);
       writeValue(buffer, value.encode());
-    } else if (value is PlatformNativeEditProfileSheetConfig) {
+    }    else if (value is PlatformNativeEditProfileSheetConfig) {
       buffer.putUint8(164);
       writeValue(buffer, value.encode());
-    } else if (value is PlatformNativeProfileSheetUser) {
+    }    else if (value is PlatformNativeProfileSheetUser) {
       buffer.putUint8(165);
       writeValue(buffer, value.encode());
-    } else if (value is PlatformNativeSheetDetail) {
+    }    else if (value is PlatformNativeSheetDetail) {
       buffer.putUint8(166);
       writeValue(buffer, value.encode());
-    } else if (value is PlatformNativeProfileSheetConfig) {
+    }    else if (value is PlatformNativeProfileSheetConfig) {
       buffer.putUint8(167);
       writeValue(buffer, value.encode());
-    } else if (value is PlatformNativeSheetModelOption) {
+    }    else if (value is PlatformNativeSheetModelOption) {
       buffer.putUint8(168);
       writeValue(buffer, value.encode());
-    } else if (value is PlatformNativeSheetModelSelectorRequest) {
+    }    else if (value is PlatformNativeSheetModelSelectorRequest) {
       buffer.putUint8(169);
       writeValue(buffer, value.encode());
-    } else if (value is PlatformNativeSheetOptionsSelectorRequest) {
+    }    else if (value is PlatformNativeSheetOptionsSelectorRequest) {
       buffer.putUint8(170);
       writeValue(buffer, value.encode());
-    } else if (value is PlatformNativeSheetDatePickerRequest) {
+    }    else if (value is PlatformNativeSheetDatePickerRequest) {
       buffer.putUint8(171);
       writeValue(buffer, value.encode());
-    } else if (value is PlatformNativeSheetTextEditorRequest) {
+    }    else if (value is PlatformNativeSheetTextEditorRequest) {
       buffer.putUint8(172);
       writeValue(buffer, value.encode());
-    } else if (value is PlatformNativeSheetResultRequest) {
+    }    else if (value is PlatformNativeSheetResultRequest) {
       buffer.putUint8(173);
       writeValue(buffer, value.encode());
-    } else if (value is PlatformNativeSheetApplyDetailPatchRequest) {
+    }    else if (value is PlatformNativeSheetApplyDetailPatchRequest) {
       buffer.putUint8(174);
       writeValue(buffer, value.encode());
-    } else if (value is PlatformNativeSheetControlChangedEvent) {
+    }    else if (value is PlatformNativeSheetControlChangedEvent) {
       buffer.putUint8(175);
       writeValue(buffer, value.encode());
-    } else if (value is PlatformNativeSheetDetailAppearedEvent) {
+    }    else if (value is PlatformNativeSheetDetailAppearedEvent) {
       buffer.putUint8(176);
       writeValue(buffer, value.encode());
-    } else if (value is PlatformNativeSheetModelPinToggledEvent) {
+    }    else if (value is PlatformNativeSheetModelPinToggledEvent) {
       buffer.putUint8(177);
       writeValue(buffer, value.encode());
-    } else if (value is PlatformNativeSheetReasoningEffortChangedEvent) {
+    }    else if (value is PlatformNativeSheetReasoningEffortChangedEvent) {
       buffer.putUint8(178);
       writeValue(buffer, value.encode());
-    } else if (value is PlatformNativeEditProfileCommittedEvent) {
+    }    else if (value is PlatformNativeEditProfileCommittedEvent) {
       buffer.putUint8(179);
       writeValue(buffer, value.encode());
-    } else if (value is PlatformNativeSheetActionResult) {
+    }    else if (value is PlatformNativeSheetActionResult) {
       buffer.putUint8(180);
       writeValue(buffer, value.encode());
-    } else if (value is PlatformPccStatus) {
+    }    else if (value is PlatformPccStatus) {
       buffer.putUint8(181);
       writeValue(buffer, value.encode());
-    } else if (value is PlatformPccImage) {
+    }    else if (value is PlatformPccImage) {
       buffer.putUint8(182);
       writeValue(buffer, value.encode());
-    } else if (value is PlatformPccMessage) {
+    }    else if (value is PlatformPccMessage) {
       buffer.putUint8(183);
       writeValue(buffer, value.encode());
-    } else if (value is PlatformPccToolDefinition) {
+    }    else if (value is PlatformPccToolDefinition) {
       buffer.putUint8(184);
       writeValue(buffer, value.encode());
-    } else if (value is PlatformPccToolCall) {
+    }    else if (value is PlatformPccToolCall) {
       buffer.putUint8(185);
       writeValue(buffer, value.encode());
-    } else if (value is PlatformPccToolResult) {
+    }    else if (value is PlatformPccToolResult) {
       buffer.putUint8(186);
       writeValue(buffer, value.encode());
-    } else if (value is PlatformPccCompletionRequest) {
+    }    else if (value is PlatformPccCompletionRequest) {
       buffer.putUint8(187);
       writeValue(buffer, value.encode());
-    } else if (value is PlatformPccStreamEvent) {
+    }    else if (value is PlatformPccStreamEvent) {
       buffer.putUint8(188);
       writeValue(buffer, value.encode());
     } else {
@@ -4048,9 +3891,7 @@ class _PigeonCodec extends StandardMessageCodec {
     switch (type) {
       case 129:
         final value = readValue(buffer) as int?;
-        return value == null
-            ? null
-            : PlatformBackgroundStreamKind.values[value];
+        return value == null ? null : PlatformBackgroundStreamKind.values[value];
       case 130:
         final value = readValue(buffer) as int?;
         return value == null ? null : PlatformNativePasteKind.values[value];
@@ -4071,9 +3912,7 @@ class _PigeonCodec extends StandardMessageCodec {
         return value == null ? null : PlatformNativeSheetItemKind.values[value];
       case 136:
         final value = readValue(buffer) as int?;
-        return value == null
-            ? null
-            : PlatformKeyboardAttachmentActionKind.values[value];
+        return value == null ? null : PlatformKeyboardAttachmentActionKind.values[value];
       case 137:
         return PlatformBackgroundStreamLease.decode(readValue(buffer)!);
       case 138:
@@ -4083,9 +3922,7 @@ class _PigeonCodec extends StandardMessageCodec {
       case 140:
         return PlatformBackgroundKeepAliveRequest.decode(readValue(buffer)!);
       case 141:
-        return PlatformBackgroundAudioSessionOwnerRequest.decode(
-          readValue(buffer)!,
-        );
+        return PlatformBackgroundAudioSessionOwnerRequest.decode(readValue(buffer)!);
       case 142:
         return PlatformServiceFailureEvent.decode(readValue(buffer)!);
       case 143:
@@ -4103,17 +3940,13 @@ class _PigeonCodec extends StandardMessageCodec {
       case 149:
         return PlatformNativePastePayload.decode(readValue(buffer)!);
       case 150:
-        return PlatformKeyboardAttachmentActionConfig.decode(
-          readValue(buffer)!,
-        );
+        return PlatformKeyboardAttachmentActionConfig.decode(readValue(buffer)!);
       case 151:
         return PlatformKeyboardAttachmentConfig.decode(readValue(buffer)!);
       case 152:
         return PlatformKeyboardAttachmentActionEvent.decode(readValue(buffer)!);
       case 153:
-        return PlatformKeyboardAttachmentVisibilityEvent.decode(
-          readValue(buffer)!,
-        );
+        return PlatformKeyboardAttachmentVisibilityEvent.decode(readValue(buffer)!);
       case 154:
         return PlatformRect.decode(readValue(buffer)!);
       case 155:
@@ -4145,13 +3978,9 @@ class _PigeonCodec extends StandardMessageCodec {
       case 168:
         return PlatformNativeSheetModelOption.decode(readValue(buffer)!);
       case 169:
-        return PlatformNativeSheetModelSelectorRequest.decode(
-          readValue(buffer)!,
-        );
+        return PlatformNativeSheetModelSelectorRequest.decode(readValue(buffer)!);
       case 170:
-        return PlatformNativeSheetOptionsSelectorRequest.decode(
-          readValue(buffer)!,
-        );
+        return PlatformNativeSheetOptionsSelectorRequest.decode(readValue(buffer)!);
       case 171:
         return PlatformNativeSheetDatePickerRequest.decode(readValue(buffer)!);
       case 172:
@@ -4159,29 +3988,17 @@ class _PigeonCodec extends StandardMessageCodec {
       case 173:
         return PlatformNativeSheetResultRequest.decode(readValue(buffer)!);
       case 174:
-        return PlatformNativeSheetApplyDetailPatchRequest.decode(
-          readValue(buffer)!,
-        );
+        return PlatformNativeSheetApplyDetailPatchRequest.decode(readValue(buffer)!);
       case 175:
-        return PlatformNativeSheetControlChangedEvent.decode(
-          readValue(buffer)!,
-        );
+        return PlatformNativeSheetControlChangedEvent.decode(readValue(buffer)!);
       case 176:
-        return PlatformNativeSheetDetailAppearedEvent.decode(
-          readValue(buffer)!,
-        );
+        return PlatformNativeSheetDetailAppearedEvent.decode(readValue(buffer)!);
       case 177:
-        return PlatformNativeSheetModelPinToggledEvent.decode(
-          readValue(buffer)!,
-        );
+        return PlatformNativeSheetModelPinToggledEvent.decode(readValue(buffer)!);
       case 178:
-        return PlatformNativeSheetReasoningEffortChangedEvent.decode(
-          readValue(buffer)!,
-        );
+        return PlatformNativeSheetReasoningEffortChangedEvent.decode(readValue(buffer)!);
       case 179:
-        return PlatformNativeEditProfileCommittedEvent.decode(
-          readValue(buffer)!,
-        );
+        return PlatformNativeEditProfileCommittedEvent.decode(readValue(buffer)!);
       case 180:
         return PlatformNativeSheetActionResult.decode(readValue(buffer)!);
       case 181:
@@ -4210,86 +4027,71 @@ class BackgroundStreamingHostApi {
   /// Constructor for [BackgroundStreamingHostApi]. The [binaryMessenger] named argument is
   /// available for dependency injection. If it is left null, the default
   /// BinaryMessenger will be used which routes to the host platform.
-  BackgroundStreamingHostApi({
-    BinaryMessenger? binaryMessenger,
-    String messageChannelSuffix = '',
-  }) : pigeonVar_binaryMessenger = binaryMessenger,
-       pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty
-           ? '.$messageChannelSuffix'
-           : '';
+  BackgroundStreamingHostApi({BinaryMessenger? binaryMessenger, String messageChannelSuffix = ''})
+      : pigeonVar_binaryMessenger = binaryMessenger,
+        pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
   final BinaryMessenger? pigeonVar_binaryMessenger;
 
   static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
 
   final String pigeonVar_messageChannelSuffix;
 
-  Future<void> startBackgroundExecution(
-    PlatformBackgroundStartRequest request,
-  ) async {
-    final pigeonVar_channelName =
-        'dev.flutter.pigeon.conduit.BackgroundStreamingHostApi.startBackgroundExecution$pigeonVar_messageChannelSuffix';
+  Future<void> startBackgroundExecution(PlatformBackgroundStartRequest request) async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.conduit.BackgroundStreamingHostApi.startBackgroundExecution$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
-      <Object?>[request],
-    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[request]);
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     _extractReplyValueOrThrow(
-      pigeonVar_replyList,
-      pigeonVar_channelName,
-      isNullValid: true,
-    );
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: true,
+    )
+    ;
   }
 
-  Future<void> stopBackgroundExecution(
-    PlatformBackgroundStopRequest request,
-  ) async {
-    final pigeonVar_channelName =
-        'dev.flutter.pigeon.conduit.BackgroundStreamingHostApi.stopBackgroundExecution$pigeonVar_messageChannelSuffix';
+  Future<void> stopBackgroundExecution(PlatformBackgroundStopRequest request) async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.conduit.BackgroundStreamingHostApi.stopBackgroundExecution$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
-      <Object?>[request],
-    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[request]);
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     _extractReplyValueOrThrow(
-      pigeonVar_replyList,
-      pigeonVar_channelName,
-      isNullValid: true,
-    );
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: true,
+    )
+    ;
   }
 
   Future<void> keepAlive(PlatformBackgroundKeepAliveRequest request) async {
-    final pigeonVar_channelName =
-        'dev.flutter.pigeon.conduit.BackgroundStreamingHostApi.keepAlive$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName = 'dev.flutter.pigeon.conduit.BackgroundStreamingHostApi.keepAlive$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
-      <Object?>[request],
-    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[request]);
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     _extractReplyValueOrThrow(
-      pigeonVar_replyList,
-      pigeonVar_channelName,
-      isNullValid: true,
-    );
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: true,
+    )
+    ;
   }
 
   Future<bool> checkBackgroundRefreshStatus() async {
-    final pigeonVar_channelName =
-        'dev.flutter.pigeon.conduit.BackgroundStreamingHostApi.checkBackgroundRefreshStatus$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName = 'dev.flutter.pigeon.conduit.BackgroundStreamingHostApi.checkBackgroundRefreshStatus$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -4299,16 +4101,16 @@ class BackgroundStreamingHostApi {
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
-      pigeonVar_replyList,
-      pigeonVar_channelName,
-      isNullValid: false,
-    );
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: false,
+    )
+    ;
     return pigeonVar_replyValue! as bool;
   }
 
   Future<bool> checkNotificationPermission() async {
-    final pigeonVar_channelName =
-        'dev.flutter.pigeon.conduit.BackgroundStreamingHostApi.checkNotificationPermission$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName = 'dev.flutter.pigeon.conduit.BackgroundStreamingHostApi.checkNotificationPermission$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -4318,38 +4120,34 @@ class BackgroundStreamingHostApi {
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
-      pigeonVar_replyList,
-      pigeonVar_channelName,
-      isNullValid: false,
-    );
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: false,
+    )
+    ;
     return pigeonVar_replyValue! as bool;
   }
 
-  Future<void> setExternalAudioSessionOwner(
-    PlatformBackgroundAudioSessionOwnerRequest request,
-  ) async {
-    final pigeonVar_channelName =
-        'dev.flutter.pigeon.conduit.BackgroundStreamingHostApi.setExternalAudioSessionOwner$pigeonVar_messageChannelSuffix';
+  Future<void> setExternalAudioSessionOwner(PlatformBackgroundAudioSessionOwnerRequest request) async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.conduit.BackgroundStreamingHostApi.setExternalAudioSessionOwner$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
-      <Object?>[request],
-    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[request]);
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     _extractReplyValueOrThrow(
-      pigeonVar_replyList,
-      pigeonVar_channelName,
-      isNullValid: true,
-    );
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: true,
+    )
+    ;
   }
 
   Future<int> getActiveStreamCount() async {
-    final pigeonVar_channelName =
-        'dev.flutter.pigeon.conduit.BackgroundStreamingHostApi.getActiveStreamCount$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName = 'dev.flutter.pigeon.conduit.BackgroundStreamingHostApi.getActiveStreamCount$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -4359,16 +4157,16 @@ class BackgroundStreamingHostApi {
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
-      pigeonVar_replyList,
-      pigeonVar_channelName,
-      isNullValid: false,
-    );
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: false,
+    )
+    ;
     return pigeonVar_replyValue! as int;
   }
 
   Future<List<PlatformBackgroundStreamLease>> getActiveStreamLeases() async {
-    final pigeonVar_channelName =
-        'dev.flutter.pigeon.conduit.BackgroundStreamingHostApi.getActiveStreamLeases$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName = 'dev.flutter.pigeon.conduit.BackgroundStreamingHostApi.getActiveStreamLeases$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -4378,17 +4176,16 @@ class BackgroundStreamingHostApi {
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
-      pigeonVar_replyList,
-      pigeonVar_channelName,
-      isNullValid: false,
-    );
-    return (pigeonVar_replyValue! as List<Object?>)
-        .cast<PlatformBackgroundStreamLease>();
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: false,
+    )
+    ;
+    return (pigeonVar_replyValue! as List<Object?>).cast<PlatformBackgroundStreamLease>();
   }
 
   Future<void> stopAllBackgroundExecution() async {
-    final pigeonVar_channelName =
-        'dev.flutter.pigeon.conduit.BackgroundStreamingHostApi.stopAllBackgroundExecution$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName = 'dev.flutter.pigeon.conduit.BackgroundStreamingHostApi.stopAllBackgroundExecution$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -4398,10 +4195,11 @@ class BackgroundStreamingHostApi {
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     _extractReplyValueOrThrow(
-      pigeonVar_replyList,
-      pigeonVar_channelName,
-      isNullValid: true,
-    );
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: true,
+    )
+    ;
   }
 }
 
@@ -4424,20 +4222,12 @@ abstract class BackgroundStreamingFlutterApi {
 
   void microphonePermissionFallback();
 
-  static void setUp(
-    BackgroundStreamingFlutterApi? api, {
-    BinaryMessenger? binaryMessenger,
-    String messageChannelSuffix = '',
-  }) {
-    messageChannelSuffix = messageChannelSuffix.isNotEmpty
-        ? '.$messageChannelSuffix'
-        : '';
+  static void setUp(BackgroundStreamingFlutterApi? api, {BinaryMessenger? binaryMessenger, String messageChannelSuffix = '',}) {
+    messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
     {
       final pigeonVar_channel = BasicMessageChannel<Object?>(
-        'dev.flutter.pigeon.conduit.BackgroundStreamingFlutterApi.checkStreams$messageChannelSuffix',
-        pigeonChannelCodec,
-        binaryMessenger: binaryMessenger,
-      );
+          'dev.flutter.pigeon.conduit.BackgroundStreamingFlutterApi.checkStreams$messageChannelSuffix', pigeonChannelCodec,
+          binaryMessenger: binaryMessenger);
       if (api == null) {
         pigeonVar_channel.setMessageHandler(null);
       } else {
@@ -4447,46 +4237,37 @@ abstract class BackgroundStreamingFlutterApi {
             return wrapResponse(result: output);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
-          } catch (e) {
-            return wrapResponse(
-              error: PlatformException(code: 'error', message: e.toString()),
-            );
+          }          catch (e) {
+            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
           }
         });
       }
     }
     {
       final pigeonVar_channel = BasicMessageChannel<Object?>(
-        'dev.flutter.pigeon.conduit.BackgroundStreamingFlutterApi.streamsSuspending$messageChannelSuffix',
-        pigeonChannelCodec,
-        binaryMessenger: binaryMessenger,
-      );
+          'dev.flutter.pigeon.conduit.BackgroundStreamingFlutterApi.streamsSuspending$messageChannelSuffix', pigeonChannelCodec,
+          binaryMessenger: binaryMessenger);
       if (api == null) {
         pigeonVar_channel.setMessageHandler(null);
       } else {
         pigeonVar_channel.setMessageHandler((Object? message) async {
           final List<Object?> args = message! as List<Object?>;
-          final PlatformStreamsSuspendingEvent arg_event =
-              args[0]! as PlatformStreamsSuspendingEvent;
+          final PlatformStreamsSuspendingEvent arg_event = args[0]! as PlatformStreamsSuspendingEvent;
           try {
             api.streamsSuspending(arg_event);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
-          } catch (e) {
-            return wrapResponse(
-              error: PlatformException(code: 'error', message: e.toString()),
-            );
+          }          catch (e) {
+            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
           }
         });
       }
     }
     {
       final pigeonVar_channel = BasicMessageChannel<Object?>(
-        'dev.flutter.pigeon.conduit.BackgroundStreamingFlutterApi.backgroundTaskExpiring$messageChannelSuffix',
-        pigeonChannelCodec,
-        binaryMessenger: binaryMessenger,
-      );
+          'dev.flutter.pigeon.conduit.BackgroundStreamingFlutterApi.backgroundTaskExpiring$messageChannelSuffix', pigeonChannelCodec,
+          binaryMessenger: binaryMessenger);
       if (api == null) {
         pigeonVar_channel.setMessageHandler(null);
       } else {
@@ -4496,46 +4277,37 @@ abstract class BackgroundStreamingFlutterApi {
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
-          } catch (e) {
-            return wrapResponse(
-              error: PlatformException(code: 'error', message: e.toString()),
-            );
+          }          catch (e) {
+            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
           }
         });
       }
     }
     {
       final pigeonVar_channel = BasicMessageChannel<Object?>(
-        'dev.flutter.pigeon.conduit.BackgroundStreamingFlutterApi.backgroundTaskExtended$messageChannelSuffix',
-        pigeonChannelCodec,
-        binaryMessenger: binaryMessenger,
-      );
+          'dev.flutter.pigeon.conduit.BackgroundStreamingFlutterApi.backgroundTaskExtended$messageChannelSuffix', pigeonChannelCodec,
+          binaryMessenger: binaryMessenger);
       if (api == null) {
         pigeonVar_channel.setMessageHandler(null);
       } else {
         pigeonVar_channel.setMessageHandler((Object? message) async {
           final List<Object?> args = message! as List<Object?>;
-          final PlatformBackgroundTaskExtendedEvent arg_event =
-              args[0]! as PlatformBackgroundTaskExtendedEvent;
+          final PlatformBackgroundTaskExtendedEvent arg_event = args[0]! as PlatformBackgroundTaskExtendedEvent;
           try {
             api.backgroundTaskExtended(arg_event);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
-          } catch (e) {
-            return wrapResponse(
-              error: PlatformException(code: 'error', message: e.toString()),
-            );
+          }          catch (e) {
+            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
           }
         });
       }
     }
     {
       final pigeonVar_channel = BasicMessageChannel<Object?>(
-        'dev.flutter.pigeon.conduit.BackgroundStreamingFlutterApi.backgroundKeepAlive$messageChannelSuffix',
-        pigeonChannelCodec,
-        binaryMessenger: binaryMessenger,
-      );
+          'dev.flutter.pigeon.conduit.BackgroundStreamingFlutterApi.backgroundKeepAlive$messageChannelSuffix', pigeonChannelCodec,
+          binaryMessenger: binaryMessenger);
       if (api == null) {
         pigeonVar_channel.setMessageHandler(null);
       } else {
@@ -4545,72 +4317,58 @@ abstract class BackgroundStreamingFlutterApi {
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
-          } catch (e) {
-            return wrapResponse(
-              error: PlatformException(code: 'error', message: e.toString()),
-            );
+          }          catch (e) {
+            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
           }
         });
       }
     }
     {
       final pigeonVar_channel = BasicMessageChannel<Object?>(
-        'dev.flutter.pigeon.conduit.BackgroundStreamingFlutterApi.serviceFailed$messageChannelSuffix',
-        pigeonChannelCodec,
-        binaryMessenger: binaryMessenger,
-      );
+          'dev.flutter.pigeon.conduit.BackgroundStreamingFlutterApi.serviceFailed$messageChannelSuffix', pigeonChannelCodec,
+          binaryMessenger: binaryMessenger);
       if (api == null) {
         pigeonVar_channel.setMessageHandler(null);
       } else {
         pigeonVar_channel.setMessageHandler((Object? message) async {
           final List<Object?> args = message! as List<Object?>;
-          final PlatformServiceFailureEvent arg_event =
-              args[0]! as PlatformServiceFailureEvent;
+          final PlatformServiceFailureEvent arg_event = args[0]! as PlatformServiceFailureEvent;
           try {
             api.serviceFailed(arg_event);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
-          } catch (e) {
-            return wrapResponse(
-              error: PlatformException(code: 'error', message: e.toString()),
-            );
+          }          catch (e) {
+            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
           }
         });
       }
     }
     {
       final pigeonVar_channel = BasicMessageChannel<Object?>(
-        'dev.flutter.pigeon.conduit.BackgroundStreamingFlutterApi.timeLimitApproaching$messageChannelSuffix',
-        pigeonChannelCodec,
-        binaryMessenger: binaryMessenger,
-      );
+          'dev.flutter.pigeon.conduit.BackgroundStreamingFlutterApi.timeLimitApproaching$messageChannelSuffix', pigeonChannelCodec,
+          binaryMessenger: binaryMessenger);
       if (api == null) {
         pigeonVar_channel.setMessageHandler(null);
       } else {
         pigeonVar_channel.setMessageHandler((Object? message) async {
           final List<Object?> args = message! as List<Object?>;
-          final PlatformTimeLimitWarningEvent arg_event =
-              args[0]! as PlatformTimeLimitWarningEvent;
+          final PlatformTimeLimitWarningEvent arg_event = args[0]! as PlatformTimeLimitWarningEvent;
           try {
             api.timeLimitApproaching(arg_event);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
-          } catch (e) {
-            return wrapResponse(
-              error: PlatformException(code: 'error', message: e.toString()),
-            );
+          }          catch (e) {
+            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
           }
         });
       }
     }
     {
       final pigeonVar_channel = BasicMessageChannel<Object?>(
-        'dev.flutter.pigeon.conduit.BackgroundStreamingFlutterApi.microphonePermissionFallback$messageChannelSuffix',
-        pigeonChannelCodec,
-        binaryMessenger: binaryMessenger,
-      );
+          'dev.flutter.pigeon.conduit.BackgroundStreamingFlutterApi.microphonePermissionFallback$messageChannelSuffix', pigeonChannelCodec,
+          binaryMessenger: binaryMessenger);
       if (api == null) {
         pigeonVar_channel.setMessageHandler(null);
       } else {
@@ -4620,10 +4378,8 @@ abstract class BackgroundStreamingFlutterApi {
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
-          } catch (e) {
-            return wrapResponse(
-              error: PlatformException(code: 'error', message: e.toString()),
-            );
+          }          catch (e) {
+            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
           }
         });
       }
@@ -4634,10 +4390,7 @@ abstract class BackgroundStreamingFlutterApi {
 abstract class AppIntentFlutterApi {
   static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
 
-  Future<PlatformAppIntentResponse> askChat(
-    String invocationId,
-    String? prompt,
-  );
+  Future<PlatformAppIntentResponse> askChat(String invocationId, String? prompt);
 
   Future<PlatformAppIntentResponse> startVoiceCall(String invocationId);
 
@@ -4645,25 +4398,14 @@ abstract class AppIntentFlutterApi {
 
   Future<PlatformAppIntentResponse> sendUrl(String invocationId, String url);
 
-  Future<PlatformAppIntentResponse> sendImage(
-    String invocationId,
-    PlatformAppIntentImagePayload payload,
-  );
+  Future<PlatformAppIntentResponse> sendImage(String invocationId, PlatformAppIntentImagePayload payload);
 
-  static void setUp(
-    AppIntentFlutterApi? api, {
-    BinaryMessenger? binaryMessenger,
-    String messageChannelSuffix = '',
-  }) {
-    messageChannelSuffix = messageChannelSuffix.isNotEmpty
-        ? '.$messageChannelSuffix'
-        : '';
+  static void setUp(AppIntentFlutterApi? api, {BinaryMessenger? binaryMessenger, String messageChannelSuffix = '',}) {
+    messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
     {
       final pigeonVar_channel = BasicMessageChannel<Object?>(
-        'dev.flutter.pigeon.conduit.AppIntentFlutterApi.askChat$messageChannelSuffix',
-        pigeonChannelCodec,
-        binaryMessenger: binaryMessenger,
-      );
+          'dev.flutter.pigeon.conduit.AppIntentFlutterApi.askChat$messageChannelSuffix', pigeonChannelCodec,
+          binaryMessenger: binaryMessenger);
       if (api == null) {
         pigeonVar_channel.setMessageHandler(null);
       } else {
@@ -4672,27 +4414,20 @@ abstract class AppIntentFlutterApi {
           final String arg_invocationId = args[0]! as String;
           final String? arg_prompt = args[1] as String?;
           try {
-            final PlatformAppIntentResponse output = await api.askChat(
-              arg_invocationId,
-              arg_prompt,
-            );
+            final PlatformAppIntentResponse output = await api.askChat(arg_invocationId, arg_prompt);
             return wrapResponse(result: output);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
-          } catch (e) {
-            return wrapResponse(
-              error: PlatformException(code: 'error', message: e.toString()),
-            );
+          }          catch (e) {
+            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
           }
         });
       }
     }
     {
       final pigeonVar_channel = BasicMessageChannel<Object?>(
-        'dev.flutter.pigeon.conduit.AppIntentFlutterApi.startVoiceCall$messageChannelSuffix',
-        pigeonChannelCodec,
-        binaryMessenger: binaryMessenger,
-      );
+          'dev.flutter.pigeon.conduit.AppIntentFlutterApi.startVoiceCall$messageChannelSuffix', pigeonChannelCodec,
+          binaryMessenger: binaryMessenger);
       if (api == null) {
         pigeonVar_channel.setMessageHandler(null);
       } else {
@@ -4700,26 +4435,20 @@ abstract class AppIntentFlutterApi {
           final List<Object?> args = message! as List<Object?>;
           final String arg_invocationId = args[0]! as String;
           try {
-            final PlatformAppIntentResponse output = await api.startVoiceCall(
-              arg_invocationId,
-            );
+            final PlatformAppIntentResponse output = await api.startVoiceCall(arg_invocationId);
             return wrapResponse(result: output);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
-          } catch (e) {
-            return wrapResponse(
-              error: PlatformException(code: 'error', message: e.toString()),
-            );
+          }          catch (e) {
+            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
           }
         });
       }
     }
     {
       final pigeonVar_channel = BasicMessageChannel<Object?>(
-        'dev.flutter.pigeon.conduit.AppIntentFlutterApi.sendText$messageChannelSuffix',
-        pigeonChannelCodec,
-        binaryMessenger: binaryMessenger,
-      );
+          'dev.flutter.pigeon.conduit.AppIntentFlutterApi.sendText$messageChannelSuffix', pigeonChannelCodec,
+          binaryMessenger: binaryMessenger);
       if (api == null) {
         pigeonVar_channel.setMessageHandler(null);
       } else {
@@ -4728,27 +4457,20 @@ abstract class AppIntentFlutterApi {
           final String arg_invocationId = args[0]! as String;
           final String arg_text = args[1]! as String;
           try {
-            final PlatformAppIntentResponse output = await api.sendText(
-              arg_invocationId,
-              arg_text,
-            );
+            final PlatformAppIntentResponse output = await api.sendText(arg_invocationId, arg_text);
             return wrapResponse(result: output);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
-          } catch (e) {
-            return wrapResponse(
-              error: PlatformException(code: 'error', message: e.toString()),
-            );
+          }          catch (e) {
+            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
           }
         });
       }
     }
     {
       final pigeonVar_channel = BasicMessageChannel<Object?>(
-        'dev.flutter.pigeon.conduit.AppIntentFlutterApi.sendUrl$messageChannelSuffix',
-        pigeonChannelCodec,
-        binaryMessenger: binaryMessenger,
-      );
+          'dev.flutter.pigeon.conduit.AppIntentFlutterApi.sendUrl$messageChannelSuffix', pigeonChannelCodec,
+          binaryMessenger: binaryMessenger);
       if (api == null) {
         pigeonVar_channel.setMessageHandler(null);
       } else {
@@ -4757,47 +4479,34 @@ abstract class AppIntentFlutterApi {
           final String arg_invocationId = args[0]! as String;
           final String arg_url = args[1]! as String;
           try {
-            final PlatformAppIntentResponse output = await api.sendUrl(
-              arg_invocationId,
-              arg_url,
-            );
+            final PlatformAppIntentResponse output = await api.sendUrl(arg_invocationId, arg_url);
             return wrapResponse(result: output);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
-          } catch (e) {
-            return wrapResponse(
-              error: PlatformException(code: 'error', message: e.toString()),
-            );
+          }          catch (e) {
+            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
           }
         });
       }
     }
     {
       final pigeonVar_channel = BasicMessageChannel<Object?>(
-        'dev.flutter.pigeon.conduit.AppIntentFlutterApi.sendImage$messageChannelSuffix',
-        pigeonChannelCodec,
-        binaryMessenger: binaryMessenger,
-      );
+          'dev.flutter.pigeon.conduit.AppIntentFlutterApi.sendImage$messageChannelSuffix', pigeonChannelCodec,
+          binaryMessenger: binaryMessenger);
       if (api == null) {
         pigeonVar_channel.setMessageHandler(null);
       } else {
         pigeonVar_channel.setMessageHandler((Object? message) async {
           final List<Object?> args = message! as List<Object?>;
           final String arg_invocationId = args[0]! as String;
-          final PlatformAppIntentImagePayload arg_payload =
-              args[1]! as PlatformAppIntentImagePayload;
+          final PlatformAppIntentImagePayload arg_payload = args[1]! as PlatformAppIntentImagePayload;
           try {
-            final PlatformAppIntentResponse output = await api.sendImage(
-              arg_invocationId,
-              arg_payload,
-            );
+            final PlatformAppIntentResponse output = await api.sendImage(arg_invocationId, arg_payload);
             return wrapResponse(result: output);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
-          } catch (e) {
-            return wrapResponse(
-              error: PlatformException(code: 'error', message: e.toString()),
-            );
+          }          catch (e) {
+            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
           }
         });
       }
@@ -4809,13 +4518,9 @@ class AppIntentHostApi {
   /// Constructor for [AppIntentHostApi]. The [binaryMessenger] named argument is
   /// available for dependency injection. If it is left null, the default
   /// BinaryMessenger will be used which routes to the host platform.
-  AppIntentHostApi({
-    BinaryMessenger? binaryMessenger,
-    String messageChannelSuffix = '',
-  }) : pigeonVar_binaryMessenger = binaryMessenger,
-       pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty
-           ? '.$messageChannelSuffix'
-           : '';
+  AppIntentHostApi({BinaryMessenger? binaryMessenger, String messageChannelSuffix = ''})
+      : pigeonVar_binaryMessenger = binaryMessenger,
+        pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
   final BinaryMessenger? pigeonVar_binaryMessenger;
 
   static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
@@ -4823,23 +4528,21 @@ class AppIntentHostApi {
   final String pigeonVar_messageChannelSuffix;
 
   Future<void> setReady(bool ready) async {
-    final pigeonVar_channelName =
-        'dev.flutter.pigeon.conduit.AppIntentHostApi.setReady$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName = 'dev.flutter.pigeon.conduit.AppIntentHostApi.setReady$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
-      <Object?>[ready],
-    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[ready]);
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     _extractReplyValueOrThrow(
-      pigeonVar_replyList,
-      pigeonVar_channelName,
-      isNullValid: true,
-    );
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: true,
+    )
+    ;
   }
 }
 
@@ -4847,13 +4550,9 @@ class NativePasteHostApi {
   /// Constructor for [NativePasteHostApi]. The [binaryMessenger] named argument is
   /// available for dependency injection. If it is left null, the default
   /// BinaryMessenger will be used which routes to the host platform.
-  NativePasteHostApi({
-    BinaryMessenger? binaryMessenger,
-    String messageChannelSuffix = '',
-  }) : pigeonVar_binaryMessenger = binaryMessenger,
-       pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty
-           ? '.$messageChannelSuffix'
-           : '';
+  NativePasteHostApi({BinaryMessenger? binaryMessenger, String messageChannelSuffix = ''})
+      : pigeonVar_binaryMessenger = binaryMessenger,
+        pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
   final BinaryMessenger? pigeonVar_binaryMessenger;
 
   static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
@@ -4861,8 +4560,7 @@ class NativePasteHostApi {
   final String pigeonVar_messageChannelSuffix;
 
   Future<bool> requestPaste() async {
-    final pigeonVar_channelName =
-        'dev.flutter.pigeon.conduit.NativePasteHostApi.requestPaste$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName = 'dev.flutter.pigeon.conduit.NativePasteHostApi.requestPaste$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -4872,10 +4570,11 @@ class NativePasteHostApi {
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
-      pigeonVar_replyList,
-      pigeonVar_channelName,
-      isNullValid: false,
-    );
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: false,
+    )
+    ;
     return pigeonVar_replyValue! as bool;
   }
 }
@@ -4885,36 +4584,25 @@ abstract class NativePasteFlutterApi {
 
   Future<bool> onPaste(PlatformNativePastePayload payload);
 
-  static void setUp(
-    NativePasteFlutterApi? api, {
-    BinaryMessenger? binaryMessenger,
-    String messageChannelSuffix = '',
-  }) {
-    messageChannelSuffix = messageChannelSuffix.isNotEmpty
-        ? '.$messageChannelSuffix'
-        : '';
+  static void setUp(NativePasteFlutterApi? api, {BinaryMessenger? binaryMessenger, String messageChannelSuffix = '',}) {
+    messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
     {
       final pigeonVar_channel = BasicMessageChannel<Object?>(
-        'dev.flutter.pigeon.conduit.NativePasteFlutterApi.onPaste$messageChannelSuffix',
-        pigeonChannelCodec,
-        binaryMessenger: binaryMessenger,
-      );
+          'dev.flutter.pigeon.conduit.NativePasteFlutterApi.onPaste$messageChannelSuffix', pigeonChannelCodec,
+          binaryMessenger: binaryMessenger);
       if (api == null) {
         pigeonVar_channel.setMessageHandler(null);
       } else {
         pigeonVar_channel.setMessageHandler((Object? message) async {
           final List<Object?> args = message! as List<Object?>;
-          final PlatformNativePastePayload arg_payload =
-              args[0]! as PlatformNativePastePayload;
+          final PlatformNativePastePayload arg_payload = args[0]! as PlatformNativePastePayload;
           try {
             final bool output = await api.onPaste(arg_payload);
             return wrapResponse(result: output);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
-          } catch (e) {
-            return wrapResponse(
-              error: PlatformException(code: 'error', message: e.toString()),
-            );
+          }          catch (e) {
+            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
           }
         });
       }
@@ -4926,13 +4614,9 @@ class NativeKeyboardAttachmentHostApi {
   /// Constructor for [NativeKeyboardAttachmentHostApi]. The [binaryMessenger] named argument is
   /// available for dependency injection. If it is left null, the default
   /// BinaryMessenger will be used which routes to the host platform.
-  NativeKeyboardAttachmentHostApi({
-    BinaryMessenger? binaryMessenger,
-    String messageChannelSuffix = '',
-  }) : pigeonVar_binaryMessenger = binaryMessenger,
-       pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty
-           ? '.$messageChannelSuffix'
-           : '';
+  NativeKeyboardAttachmentHostApi({BinaryMessenger? binaryMessenger, String messageChannelSuffix = ''})
+      : pigeonVar_binaryMessenger = binaryMessenger,
+        pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
   final BinaryMessenger? pigeonVar_binaryMessenger;
 
   static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
@@ -4940,49 +4624,44 @@ class NativeKeyboardAttachmentHostApi {
   final String pigeonVar_messageChannelSuffix;
 
   Future<void> configure(PlatformKeyboardAttachmentConfig config) async {
-    final pigeonVar_channelName =
-        'dev.flutter.pigeon.conduit.NativeKeyboardAttachmentHostApi.configure$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName = 'dev.flutter.pigeon.conduit.NativeKeyboardAttachmentHostApi.configure$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
-      <Object?>[config],
-    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[config]);
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     _extractReplyValueOrThrow(
-      pigeonVar_replyList,
-      pigeonVar_channelName,
-      isNullValid: true,
-    );
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: true,
+    )
+    ;
   }
 
   Future<bool> toggle(PlatformKeyboardAttachmentConfig config) async {
-    final pigeonVar_channelName =
-        'dev.flutter.pigeon.conduit.NativeKeyboardAttachmentHostApi.toggle$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName = 'dev.flutter.pigeon.conduit.NativeKeyboardAttachmentHostApi.toggle$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
-      <Object?>[config],
-    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[config]);
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
-      pigeonVar_replyList,
-      pigeonVar_channelName,
-      isNullValid: false,
-    );
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: false,
+    )
+    ;
     return pigeonVar_replyValue! as bool;
   }
 
   Future<void> hide() async {
-    final pigeonVar_channelName =
-        'dev.flutter.pigeon.conduit.NativeKeyboardAttachmentHostApi.hide$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName = 'dev.flutter.pigeon.conduit.NativeKeyboardAttachmentHostApi.hide$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -4992,10 +4671,11 @@ class NativeKeyboardAttachmentHostApi {
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     _extractReplyValueOrThrow(
-      pigeonVar_replyList,
-      pigeonVar_channelName,
-      isNullValid: true,
-    );
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: true,
+    )
+    ;
   }
 }
 
@@ -5006,62 +4686,46 @@ abstract class NativeKeyboardAttachmentFlutterApi {
 
   void onVisibilityChanged(PlatformKeyboardAttachmentVisibilityEvent event);
 
-  static void setUp(
-    NativeKeyboardAttachmentFlutterApi? api, {
-    BinaryMessenger? binaryMessenger,
-    String messageChannelSuffix = '',
-  }) {
-    messageChannelSuffix = messageChannelSuffix.isNotEmpty
-        ? '.$messageChannelSuffix'
-        : '';
+  static void setUp(NativeKeyboardAttachmentFlutterApi? api, {BinaryMessenger? binaryMessenger, String messageChannelSuffix = '',}) {
+    messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
     {
       final pigeonVar_channel = BasicMessageChannel<Object?>(
-        'dev.flutter.pigeon.conduit.NativeKeyboardAttachmentFlutterApi.onAction$messageChannelSuffix',
-        pigeonChannelCodec,
-        binaryMessenger: binaryMessenger,
-      );
+          'dev.flutter.pigeon.conduit.NativeKeyboardAttachmentFlutterApi.onAction$messageChannelSuffix', pigeonChannelCodec,
+          binaryMessenger: binaryMessenger);
       if (api == null) {
         pigeonVar_channel.setMessageHandler(null);
       } else {
         pigeonVar_channel.setMessageHandler((Object? message) async {
           final List<Object?> args = message! as List<Object?>;
-          final PlatformKeyboardAttachmentActionEvent arg_event =
-              args[0]! as PlatformKeyboardAttachmentActionEvent;
+          final PlatformKeyboardAttachmentActionEvent arg_event = args[0]! as PlatformKeyboardAttachmentActionEvent;
           try {
             api.onAction(arg_event);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
-          } catch (e) {
-            return wrapResponse(
-              error: PlatformException(code: 'error', message: e.toString()),
-            );
+          }          catch (e) {
+            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
           }
         });
       }
     }
     {
       final pigeonVar_channel = BasicMessageChannel<Object?>(
-        'dev.flutter.pigeon.conduit.NativeKeyboardAttachmentFlutterApi.onVisibilityChanged$messageChannelSuffix',
-        pigeonChannelCodec,
-        binaryMessenger: binaryMessenger,
-      );
+          'dev.flutter.pigeon.conduit.NativeKeyboardAttachmentFlutterApi.onVisibilityChanged$messageChannelSuffix', pigeonChannelCodec,
+          binaryMessenger: binaryMessenger);
       if (api == null) {
         pigeonVar_channel.setMessageHandler(null);
       } else {
         pigeonVar_channel.setMessageHandler((Object? message) async {
           final List<Object?> args = message! as List<Object?>;
-          final PlatformKeyboardAttachmentVisibilityEvent arg_event =
-              args[0]! as PlatformKeyboardAttachmentVisibilityEvent;
+          final PlatformKeyboardAttachmentVisibilityEvent arg_event = args[0]! as PlatformKeyboardAttachmentVisibilityEvent;
           try {
             api.onVisibilityChanged(arg_event);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
-          } catch (e) {
-            return wrapResponse(
-              error: PlatformException(code: 'error', message: e.toString()),
-            );
+          }          catch (e) {
+            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
           }
         });
       }
@@ -5073,13 +4737,9 @@ class NativeDropdownHostApi {
   /// Constructor for [NativeDropdownHostApi]. The [binaryMessenger] named argument is
   /// available for dependency injection. If it is left null, the default
   /// BinaryMessenger will be used which routes to the host platform.
-  NativeDropdownHostApi({
-    BinaryMessenger? binaryMessenger,
-    String messageChannelSuffix = '',
-  }) : pigeonVar_binaryMessenger = binaryMessenger,
-       pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty
-           ? '.$messageChannelSuffix'
-           : '';
+  NativeDropdownHostApi({BinaryMessenger? binaryMessenger, String messageChannelSuffix = ''})
+      : pigeonVar_binaryMessenger = binaryMessenger,
+        pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
   final BinaryMessenger? pigeonVar_binaryMessenger;
 
   static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
@@ -5087,23 +4747,21 @@ class NativeDropdownHostApi {
   final String pigeonVar_messageChannelSuffix;
 
   Future<String?> show(PlatformDropdownRequest request) async {
-    final pigeonVar_channelName =
-        'dev.flutter.pigeon.conduit.NativeDropdownHostApi.show$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName = 'dev.flutter.pigeon.conduit.NativeDropdownHostApi.show$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
-      <Object?>[request],
-    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[request]);
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
-      pigeonVar_replyList,
-      pigeonVar_channelName,
-      isNullValid: true,
-    );
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: true,
+    )
+    ;
     return pigeonVar_replyValue as String?;
   }
 }
@@ -5113,13 +4771,9 @@ class NativeImageViewerHostApi {
   /// Constructor for [NativeImageViewerHostApi]. The [binaryMessenger] named argument is
   /// available for dependency injection. If it is left null, the default
   /// BinaryMessenger will be used which routes to the host platform.
-  NativeImageViewerHostApi({
-    BinaryMessenger? binaryMessenger,
-    String messageChannelSuffix = '',
-  }) : pigeonVar_binaryMessenger = binaryMessenger,
-       pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty
-           ? '.$messageChannelSuffix'
-           : '';
+  NativeImageViewerHostApi({BinaryMessenger? binaryMessenger, String messageChannelSuffix = ''})
+      : pigeonVar_binaryMessenger = binaryMessenger,
+        pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
   final BinaryMessenger? pigeonVar_binaryMessenger;
 
   static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
@@ -5128,23 +4782,21 @@ class NativeImageViewerHostApi {
 
   /// Completes when the viewer is dismissed. Fails when it cannot be shown.
   Future<void> present(PlatformImageViewerRequest request) async {
-    final pigeonVar_channelName =
-        'dev.flutter.pigeon.conduit.NativeImageViewerHostApi.present$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName = 'dev.flutter.pigeon.conduit.NativeImageViewerHostApi.present$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
-      <Object?>[request],
-    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[request]);
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     _extractReplyValueOrThrow(
-      pigeonVar_replyList,
-      pigeonVar_channelName,
-      isNullValid: true,
-    );
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: true,
+    )
+    ;
   }
 }
 
@@ -5153,13 +4805,9 @@ class ImageGalleryHostApi {
   /// Constructor for [ImageGalleryHostApi]. The [binaryMessenger] named argument is
   /// available for dependency injection. If it is left null, the default
   /// BinaryMessenger will be used which routes to the host platform.
-  ImageGalleryHostApi({
-    BinaryMessenger? binaryMessenger,
-    String messageChannelSuffix = '',
-  }) : pigeonVar_binaryMessenger = binaryMessenger,
-       pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty
-           ? '.$messageChannelSuffix'
-           : '';
+  ImageGalleryHostApi({BinaryMessenger? binaryMessenger, String messageChannelSuffix = ''})
+      : pigeonVar_binaryMessenger = binaryMessenger,
+        pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
   final BinaryMessenger? pigeonVar_binaryMessenger;
 
   static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
@@ -5167,8 +4815,7 @@ class ImageGalleryHostApi {
   final String pigeonVar_messageChannelSuffix;
 
   Future<bool> canSaveImages() async {
-    final pigeonVar_channelName =
-        'dev.flutter.pigeon.conduit.ImageGalleryHostApi.canSaveImages$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName = 'dev.flutter.pigeon.conduit.ImageGalleryHostApi.canSaveImages$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -5178,35 +4825,30 @@ class ImageGalleryHostApi {
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
-      pigeonVar_replyList,
-      pigeonVar_channelName,
-      isNullValid: false,
-    );
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: false,
+    )
+    ;
     return pigeonVar_replyValue! as bool;
   }
 
-  Future<void> saveImage(
-    String path,
-    String mimeType,
-    String displayName,
-  ) async {
-    final pigeonVar_channelName =
-        'dev.flutter.pigeon.conduit.ImageGalleryHostApi.saveImage$pigeonVar_messageChannelSuffix';
+  Future<void> saveImage(String path, String mimeType, String displayName) async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.conduit.ImageGalleryHostApi.saveImage$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
-      <Object?>[path, mimeType, displayName],
-    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[path, mimeType, displayName]);
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     _extractReplyValueOrThrow(
-      pigeonVar_replyList,
-      pigeonVar_channelName,
-      isNullValid: true,
-    );
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: true,
+    )
+    ;
   }
 }
 
@@ -5214,13 +4856,9 @@ class NativeSheetHostApi {
   /// Constructor for [NativeSheetHostApi]. The [binaryMessenger] named argument is
   /// available for dependency injection. If it is left null, the default
   /// BinaryMessenger will be used which routes to the host platform.
-  NativeSheetHostApi({
-    BinaryMessenger? binaryMessenger,
-    String messageChannelSuffix = '',
-  }) : pigeonVar_binaryMessenger = binaryMessenger,
-       pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty
-           ? '.$messageChannelSuffix'
-           : '';
+  NativeSheetHostApi({BinaryMessenger? binaryMessenger, String messageChannelSuffix = ''})
+      : pigeonVar_binaryMessenger = binaryMessenger,
+        pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
   final BinaryMessenger? pigeonVar_binaryMessenger;
 
   static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
@@ -5228,51 +4866,44 @@ class NativeSheetHostApi {
   final String pigeonVar_messageChannelSuffix;
 
   Future<void> setTheme(PlatformNativeSheetTheme theme) async {
-    final pigeonVar_channelName =
-        'dev.flutter.pigeon.conduit.NativeSheetHostApi.setTheme$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName = 'dev.flutter.pigeon.conduit.NativeSheetHostApi.setTheme$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
-      <Object?>[theme],
-    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[theme]);
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     _extractReplyValueOrThrow(
-      pigeonVar_replyList,
-      pigeonVar_channelName,
-      isNullValid: true,
-    );
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: true,
+    )
+    ;
   }
 
-  Future<bool> presentProfileMenu(
-    PlatformNativeProfileSheetConfig config,
-  ) async {
-    final pigeonVar_channelName =
-        'dev.flutter.pigeon.conduit.NativeSheetHostApi.presentProfileMenu$pigeonVar_messageChannelSuffix';
+  Future<bool> presentProfileMenu(PlatformNativeProfileSheetConfig config) async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.conduit.NativeSheetHostApi.presentProfileMenu$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
-      <Object?>[config],
-    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[config]);
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
-      pigeonVar_replyList,
-      pigeonVar_channelName,
-      isNullValid: false,
-    );
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: false,
+    )
+    ;
     return pigeonVar_replyValue! as bool;
   }
 
   Future<bool> dismiss() async {
-    final pigeonVar_channelName =
-        'dev.flutter.pigeon.conduit.NativeSheetHostApi.dismiss$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName = 'dev.flutter.pigeon.conduit.NativeSheetHostApi.dismiss$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -5282,16 +4913,16 @@ class NativeSheetHostApi {
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
-      pigeonVar_replyList,
-      pigeonVar_channelName,
-      isNullValid: false,
-    );
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: false,
+    )
+    ;
     return pigeonVar_replyValue! as bool;
   }
 
   Future<bool> requestAppStoreReview() async {
-    final pigeonVar_channelName =
-        'dev.flutter.pigeon.conduit.NativeSheetHostApi.requestAppStoreReview$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName = 'dev.flutter.pigeon.conduit.NativeSheetHostApi.requestAppStoreReview$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -5301,196 +4932,161 @@ class NativeSheetHostApi {
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
-      pigeonVar_replyList,
-      pigeonVar_channelName,
-      isNullValid: false,
-    );
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: false,
+    )
+    ;
     return pigeonVar_replyValue! as bool;
   }
 
-  Future<String?> presentModelSelector(
-    PlatformNativeSheetModelSelectorRequest request,
-  ) async {
-    final pigeonVar_channelName =
-        'dev.flutter.pigeon.conduit.NativeSheetHostApi.presentModelSelector$pigeonVar_messageChannelSuffix';
+  Future<String?> presentModelSelector(PlatformNativeSheetModelSelectorRequest request) async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.conduit.NativeSheetHostApi.presentModelSelector$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
-      <Object?>[request],
-    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[request]);
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
-      pigeonVar_replyList,
-      pigeonVar_channelName,
-      isNullValid: true,
-    );
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: true,
+    )
+    ;
     return pigeonVar_replyValue as String?;
   }
 
-  Future<void> updateModelSelectorModels(
-    String presentationId,
-    List<PlatformNativeSheetModelOption> models,
-  ) async {
-    final pigeonVar_channelName =
-        'dev.flutter.pigeon.conduit.NativeSheetHostApi.updateModelSelectorModels$pigeonVar_messageChannelSuffix';
+  Future<void> updateModelSelectorModels(String presentationId, List<PlatformNativeSheetModelOption> models) async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.conduit.NativeSheetHostApi.updateModelSelectorModels$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
-      <Object?>[presentationId, models],
-    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[presentationId, models]);
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     _extractReplyValueOrThrow(
-      pigeonVar_replyList,
-      pigeonVar_channelName,
-      isNullValid: true,
-    );
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: true,
+    )
+    ;
   }
 
-  Future<void> updateModelSelectorReasoningEffort(
-    String presentationId,
-    String value,
-    List<String> options,
-    bool allowsCustom,
-  ) async {
-    final pigeonVar_channelName =
-        'dev.flutter.pigeon.conduit.NativeSheetHostApi.updateModelSelectorReasoningEffort$pigeonVar_messageChannelSuffix';
+  Future<void> updateModelSelectorReasoningEffort(String presentationId, String value, List<String> options, bool allowsCustom) async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.conduit.NativeSheetHostApi.updateModelSelectorReasoningEffort$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
-      <Object?>[presentationId, value, options, allowsCustom],
-    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[presentationId, value, options, allowsCustom]);
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     _extractReplyValueOrThrow(
-      pigeonVar_replyList,
-      pigeonVar_channelName,
-      isNullValid: true,
-    );
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: true,
+    )
+    ;
   }
 
-  Future<String?> presentOptionsSelector(
-    PlatformNativeSheetOptionsSelectorRequest request,
-  ) async {
-    final pigeonVar_channelName =
-        'dev.flutter.pigeon.conduit.NativeSheetHostApi.presentOptionsSelector$pigeonVar_messageChannelSuffix';
+  Future<String?> presentOptionsSelector(PlatformNativeSheetOptionsSelectorRequest request) async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.conduit.NativeSheetHostApi.presentOptionsSelector$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
-      <Object?>[request],
-    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[request]);
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
-      pigeonVar_replyList,
-      pigeonVar_channelName,
-      isNullValid: true,
-    );
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: true,
+    )
+    ;
     return pigeonVar_replyValue as String?;
   }
 
-  Future<String?> presentDatePicker(
-    PlatformNativeSheetDatePickerRequest request,
-  ) async {
-    final pigeonVar_channelName =
-        'dev.flutter.pigeon.conduit.NativeSheetHostApi.presentDatePicker$pigeonVar_messageChannelSuffix';
+  Future<String?> presentDatePicker(PlatformNativeSheetDatePickerRequest request) async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.conduit.NativeSheetHostApi.presentDatePicker$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
-      <Object?>[request],
-    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[request]);
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
-      pigeonVar_replyList,
-      pigeonVar_channelName,
-      isNullValid: true,
-    );
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: true,
+    )
+    ;
     return pigeonVar_replyValue as String?;
   }
 
-  Future<PlatformNativeSheetActionResult?> presentTextEditor(
-    PlatformNativeSheetTextEditorRequest request,
-  ) async {
-    final pigeonVar_channelName =
-        'dev.flutter.pigeon.conduit.NativeSheetHostApi.presentTextEditor$pigeonVar_messageChannelSuffix';
+  Future<PlatformNativeSheetActionResult?> presentTextEditor(PlatformNativeSheetTextEditorRequest request) async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.conduit.NativeSheetHostApi.presentTextEditor$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
-      <Object?>[request],
-    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[request]);
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
-      pigeonVar_replyList,
-      pigeonVar_channelName,
-      isNullValid: true,
-    );
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: true,
+    )
+    ;
     return pigeonVar_replyValue as PlatformNativeSheetActionResult?;
   }
 
-  Future<PlatformNativeSheetActionResult?> presentResultSheet(
-    PlatformNativeSheetResultRequest request,
-  ) async {
-    final pigeonVar_channelName =
-        'dev.flutter.pigeon.conduit.NativeSheetHostApi.presentResultSheet$pigeonVar_messageChannelSuffix';
+  Future<PlatformNativeSheetActionResult?> presentResultSheet(PlatformNativeSheetResultRequest request) async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.conduit.NativeSheetHostApi.presentResultSheet$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
-      <Object?>[request],
-    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[request]);
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
-      pigeonVar_replyList,
-      pigeonVar_channelName,
-      isNullValid: true,
-    );
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: true,
+    )
+    ;
     return pigeonVar_replyValue as PlatformNativeSheetActionResult?;
   }
 
-  Future<bool> applyDetailPatch(
-    PlatformNativeSheetApplyDetailPatchRequest request,
-  ) async {
-    final pigeonVar_channelName =
-        'dev.flutter.pigeon.conduit.NativeSheetHostApi.applyDetailPatch$pigeonVar_messageChannelSuffix';
+  Future<bool> applyDetailPatch(PlatformNativeSheetApplyDetailPatchRequest request) async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.conduit.NativeSheetHostApi.applyDetailPatch$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
-      <Object?>[request],
-    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[request]);
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
-      pigeonVar_replyList,
-      pigeonVar_channelName,
-      isNullValid: false,
-    );
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: false,
+    )
+    ;
     return pigeonVar_replyValue! as bool;
   }
 }
@@ -5508,26 +5104,16 @@ abstract class NativeSheetFlutterApi {
 
   void onModelPinToggled(PlatformNativeSheetModelPinToggledEvent event);
 
-  void onReasoningEffortChanged(
-    PlatformNativeSheetReasoningEffortChangedEvent event,
-  );
+  void onReasoningEffortChanged(PlatformNativeSheetReasoningEffortChangedEvent event);
 
   void commitEditProfile(PlatformNativeEditProfileCommittedEvent event);
 
-  static void setUp(
-    NativeSheetFlutterApi? api, {
-    BinaryMessenger? binaryMessenger,
-    String messageChannelSuffix = '',
-  }) {
-    messageChannelSuffix = messageChannelSuffix.isNotEmpty
-        ? '.$messageChannelSuffix'
-        : '';
+  static void setUp(NativeSheetFlutterApi? api, {BinaryMessenger? binaryMessenger, String messageChannelSuffix = '',}) {
+    messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
     {
       final pigeonVar_channel = BasicMessageChannel<Object?>(
-        'dev.flutter.pigeon.conduit.NativeSheetFlutterApi.onDismissed$messageChannelSuffix',
-        pigeonChannelCodec,
-        binaryMessenger: binaryMessenger,
-      );
+          'dev.flutter.pigeon.conduit.NativeSheetFlutterApi.onDismissed$messageChannelSuffix', pigeonChannelCodec,
+          binaryMessenger: binaryMessenger);
       if (api == null) {
         pigeonVar_channel.setMessageHandler(null);
       } else {
@@ -5537,20 +5123,16 @@ abstract class NativeSheetFlutterApi {
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
-          } catch (e) {
-            return wrapResponse(
-              error: PlatformException(code: 'error', message: e.toString()),
-            );
+          }          catch (e) {
+            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
           }
         });
       }
     }
     {
       final pigeonVar_channel = BasicMessageChannel<Object?>(
-        'dev.flutter.pigeon.conduit.NativeSheetFlutterApi.onLogoutRequested$messageChannelSuffix',
-        pigeonChannelCodec,
-        binaryMessenger: binaryMessenger,
-      );
+          'dev.flutter.pigeon.conduit.NativeSheetFlutterApi.onLogoutRequested$messageChannelSuffix', pigeonChannelCodec,
+          binaryMessenger: binaryMessenger);
       if (api == null) {
         pigeonVar_channel.setMessageHandler(null);
       } else {
@@ -5560,140 +5142,113 @@ abstract class NativeSheetFlutterApi {
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
-          } catch (e) {
-            return wrapResponse(
-              error: PlatformException(code: 'error', message: e.toString()),
-            );
+          }          catch (e) {
+            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
           }
         });
       }
     }
     {
       final pigeonVar_channel = BasicMessageChannel<Object?>(
-        'dev.flutter.pigeon.conduit.NativeSheetFlutterApi.onControlChanged$messageChannelSuffix',
-        pigeonChannelCodec,
-        binaryMessenger: binaryMessenger,
-      );
+          'dev.flutter.pigeon.conduit.NativeSheetFlutterApi.onControlChanged$messageChannelSuffix', pigeonChannelCodec,
+          binaryMessenger: binaryMessenger);
       if (api == null) {
         pigeonVar_channel.setMessageHandler(null);
       } else {
         pigeonVar_channel.setMessageHandler((Object? message) async {
           final List<Object?> args = message! as List<Object?>;
-          final PlatformNativeSheetControlChangedEvent arg_event =
-              args[0]! as PlatformNativeSheetControlChangedEvent;
+          final PlatformNativeSheetControlChangedEvent arg_event = args[0]! as PlatformNativeSheetControlChangedEvent;
           try {
             api.onControlChanged(arg_event);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
-          } catch (e) {
-            return wrapResponse(
-              error: PlatformException(code: 'error', message: e.toString()),
-            );
+          }          catch (e) {
+            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
           }
         });
       }
     }
     {
       final pigeonVar_channel = BasicMessageChannel<Object?>(
-        'dev.flutter.pigeon.conduit.NativeSheetFlutterApi.onDetailAppeared$messageChannelSuffix',
-        pigeonChannelCodec,
-        binaryMessenger: binaryMessenger,
-      );
+          'dev.flutter.pigeon.conduit.NativeSheetFlutterApi.onDetailAppeared$messageChannelSuffix', pigeonChannelCodec,
+          binaryMessenger: binaryMessenger);
       if (api == null) {
         pigeonVar_channel.setMessageHandler(null);
       } else {
         pigeonVar_channel.setMessageHandler((Object? message) async {
           final List<Object?> args = message! as List<Object?>;
-          final PlatformNativeSheetDetailAppearedEvent arg_event =
-              args[0]! as PlatformNativeSheetDetailAppearedEvent;
+          final PlatformNativeSheetDetailAppearedEvent arg_event = args[0]! as PlatformNativeSheetDetailAppearedEvent;
           try {
             api.onDetailAppeared(arg_event);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
-          } catch (e) {
-            return wrapResponse(
-              error: PlatformException(code: 'error', message: e.toString()),
-            );
+          }          catch (e) {
+            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
           }
         });
       }
     }
     {
       final pigeonVar_channel = BasicMessageChannel<Object?>(
-        'dev.flutter.pigeon.conduit.NativeSheetFlutterApi.onModelPinToggled$messageChannelSuffix',
-        pigeonChannelCodec,
-        binaryMessenger: binaryMessenger,
-      );
+          'dev.flutter.pigeon.conduit.NativeSheetFlutterApi.onModelPinToggled$messageChannelSuffix', pigeonChannelCodec,
+          binaryMessenger: binaryMessenger);
       if (api == null) {
         pigeonVar_channel.setMessageHandler(null);
       } else {
         pigeonVar_channel.setMessageHandler((Object? message) async {
           final List<Object?> args = message! as List<Object?>;
-          final PlatformNativeSheetModelPinToggledEvent arg_event =
-              args[0]! as PlatformNativeSheetModelPinToggledEvent;
+          final PlatformNativeSheetModelPinToggledEvent arg_event = args[0]! as PlatformNativeSheetModelPinToggledEvent;
           try {
             api.onModelPinToggled(arg_event);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
-          } catch (e) {
-            return wrapResponse(
-              error: PlatformException(code: 'error', message: e.toString()),
-            );
+          }          catch (e) {
+            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
           }
         });
       }
     }
     {
       final pigeonVar_channel = BasicMessageChannel<Object?>(
-        'dev.flutter.pigeon.conduit.NativeSheetFlutterApi.onReasoningEffortChanged$messageChannelSuffix',
-        pigeonChannelCodec,
-        binaryMessenger: binaryMessenger,
-      );
+          'dev.flutter.pigeon.conduit.NativeSheetFlutterApi.onReasoningEffortChanged$messageChannelSuffix', pigeonChannelCodec,
+          binaryMessenger: binaryMessenger);
       if (api == null) {
         pigeonVar_channel.setMessageHandler(null);
       } else {
         pigeonVar_channel.setMessageHandler((Object? message) async {
           final List<Object?> args = message! as List<Object?>;
-          final PlatformNativeSheetReasoningEffortChangedEvent arg_event =
-              args[0]! as PlatformNativeSheetReasoningEffortChangedEvent;
+          final PlatformNativeSheetReasoningEffortChangedEvent arg_event = args[0]! as PlatformNativeSheetReasoningEffortChangedEvent;
           try {
             api.onReasoningEffortChanged(arg_event);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
-          } catch (e) {
-            return wrapResponse(
-              error: PlatformException(code: 'error', message: e.toString()),
-            );
+          }          catch (e) {
+            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
           }
         });
       }
     }
     {
       final pigeonVar_channel = BasicMessageChannel<Object?>(
-        'dev.flutter.pigeon.conduit.NativeSheetFlutterApi.commitEditProfile$messageChannelSuffix',
-        pigeonChannelCodec,
-        binaryMessenger: binaryMessenger,
-      );
+          'dev.flutter.pigeon.conduit.NativeSheetFlutterApi.commitEditProfile$messageChannelSuffix', pigeonChannelCodec,
+          binaryMessenger: binaryMessenger);
       if (api == null) {
         pigeonVar_channel.setMessageHandler(null);
       } else {
         pigeonVar_channel.setMessageHandler((Object? message) async {
           final List<Object?> args = message! as List<Object?>;
-          final PlatformNativeEditProfileCommittedEvent arg_event =
-              args[0]! as PlatformNativeEditProfileCommittedEvent;
+          final PlatformNativeEditProfileCommittedEvent arg_event = args[0]! as PlatformNativeEditProfileCommittedEvent;
           try {
             api.commitEditProfile(arg_event);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
-          } catch (e) {
-            return wrapResponse(
-              error: PlatformException(code: 'error', message: e.toString()),
-            );
+          }          catch (e) {
+            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
           }
         });
       }
@@ -5705,13 +5260,9 @@ class PccHostApi {
   /// Constructor for [PccHostApi]. The [binaryMessenger] named argument is
   /// available for dependency injection. If it is left null, the default
   /// BinaryMessenger will be used which routes to the host platform.
-  PccHostApi({
-    BinaryMessenger? binaryMessenger,
-    String messageChannelSuffix = '',
-  }) : pigeonVar_binaryMessenger = binaryMessenger,
-       pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty
-           ? '.$messageChannelSuffix'
-           : '';
+  PccHostApi({BinaryMessenger? binaryMessenger, String messageChannelSuffix = ''})
+      : pigeonVar_binaryMessenger = binaryMessenger,
+        pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
   final BinaryMessenger? pigeonVar_binaryMessenger;
 
   static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
@@ -5719,29 +5270,26 @@ class PccHostApi {
   final String pigeonVar_messageChannelSuffix;
 
   Future<PlatformPccStatus> getStatus(PlatformAppleModel model) async {
-    final pigeonVar_channelName =
-        'dev.flutter.pigeon.conduit.PccHostApi.getStatus$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName = 'dev.flutter.pigeon.conduit.PccHostApi.getStatus$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
-      <Object?>[model],
-    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[model]);
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
-      pigeonVar_replyList,
-      pigeonVar_channelName,
-      isNullValid: false,
-    );
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: false,
+    )
+    ;
     return pigeonVar_replyValue! as PlatformPccStatus;
   }
 
   Future<bool> showQuotaIncreaseSuggestion() async {
-    final pigeonVar_channelName =
-        'dev.flutter.pigeon.conduit.PccHostApi.showQuotaIncreaseSuggestion$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName = 'dev.flutter.pigeon.conduit.PccHostApi.showQuotaIncreaseSuggestion$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -5751,51 +5299,48 @@ class PccHostApi {
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
-      pigeonVar_replyList,
-      pigeonVar_channelName,
-      isNullValid: false,
-    );
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: false,
+    )
+    ;
     return pigeonVar_replyValue! as bool;
   }
 
   Future<void> start(PlatformPccCompletionRequest request) async {
-    final pigeonVar_channelName =
-        'dev.flutter.pigeon.conduit.PccHostApi.start$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName = 'dev.flutter.pigeon.conduit.PccHostApi.start$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
-      <Object?>[request],
-    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[request]);
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     _extractReplyValueOrThrow(
-      pigeonVar_replyList,
-      pigeonVar_channelName,
-      isNullValid: true,
-    );
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: true,
+    )
+    ;
   }
 
   Future<void> cancel(String runId) async {
-    final pigeonVar_channelName =
-        'dev.flutter.pigeon.conduit.PccHostApi.cancel$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName = 'dev.flutter.pigeon.conduit.PccHostApi.cancel$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
-      <Object?>[runId],
-    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[runId]);
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     _extractReplyValueOrThrow(
-      pigeonVar_replyList,
-      pigeonVar_channelName,
-      isNullValid: true,
-    );
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: true,
+    )
+    ;
   }
 }
 
@@ -5806,46 +5351,33 @@ abstract class PccFlutterApi {
 
   Future<PlatformPccToolResult> onToolCall(PlatformPccToolCall call);
 
-  static void setUp(
-    PccFlutterApi? api, {
-    BinaryMessenger? binaryMessenger,
-    String messageChannelSuffix = '',
-  }) {
-    messageChannelSuffix = messageChannelSuffix.isNotEmpty
-        ? '.$messageChannelSuffix'
-        : '';
+  static void setUp(PccFlutterApi? api, {BinaryMessenger? binaryMessenger, String messageChannelSuffix = '',}) {
+    messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
     {
       final pigeonVar_channel = BasicMessageChannel<Object?>(
-        'dev.flutter.pigeon.conduit.PccFlutterApi.onEvent$messageChannelSuffix',
-        pigeonChannelCodec,
-        binaryMessenger: binaryMessenger,
-      );
+          'dev.flutter.pigeon.conduit.PccFlutterApi.onEvent$messageChannelSuffix', pigeonChannelCodec,
+          binaryMessenger: binaryMessenger);
       if (api == null) {
         pigeonVar_channel.setMessageHandler(null);
       } else {
         pigeonVar_channel.setMessageHandler((Object? message) async {
           final List<Object?> args = message! as List<Object?>;
-          final PlatformPccStreamEvent arg_event =
-              args[0]! as PlatformPccStreamEvent;
+          final PlatformPccStreamEvent arg_event = args[0]! as PlatformPccStreamEvent;
           try {
             api.onEvent(arg_event);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
-          } catch (e) {
-            return wrapResponse(
-              error: PlatformException(code: 'error', message: e.toString()),
-            );
+          }          catch (e) {
+            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
           }
         });
       }
     }
     {
       final pigeonVar_channel = BasicMessageChannel<Object?>(
-        'dev.flutter.pigeon.conduit.PccFlutterApi.onToolCall$messageChannelSuffix',
-        pigeonChannelCodec,
-        binaryMessenger: binaryMessenger,
-      );
+          'dev.flutter.pigeon.conduit.PccFlutterApi.onToolCall$messageChannelSuffix', pigeonChannelCodec,
+          binaryMessenger: binaryMessenger);
       if (api == null) {
         pigeonVar_channel.setMessageHandler(null);
       } else {
@@ -5857,10 +5389,8 @@ abstract class PccFlutterApi {
             return wrapResponse(result: output);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
-          } catch (e) {
-            return wrapResponse(
-              error: PlatformException(code: 'error', message: e.toString()),
-            );
+          }          catch (e) {
+            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
           }
         });
       }

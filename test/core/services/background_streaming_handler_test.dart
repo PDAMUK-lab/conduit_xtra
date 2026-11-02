@@ -25,18 +25,33 @@ void main() {
     expect(lease.startedAtMillis, 123456);
   });
 
-  test('filters socket keepalive before native lease creation', () {
+  test('a socket keepalive becomes a lease of its own', () {
+    // It used to be filtered out here, so asking the platform to keep the process
+    // alive for a socket started nothing at all — the whole reason a locked phone
+    // stopped receiving turns.
     final leases = buildBackgroundStreamLeasesForTesting(
       const [BackgroundStreamingHandler.socketKeepaliveId, 'chat-stream-1'],
-      requiresMicrophone: false,
+      requiresMicrophone: true,
       kind: BackgroundStreamKind.chat,
       startedAt: DateTime.fromMillisecondsSinceEpoch(1),
     );
 
-    expect(leases.map((lease) => lease.id), ['chat-stream-1']);
+    expect(leases.map((lease) => lease.id), [
+      BackgroundStreamingHandler.socketKeepaliveId,
+      'chat-stream-1',
+    ]);
+    final keepalive = leases.first;
+    expect(keepalive.kind, BackgroundStreamKind.socket);
+    expect(
+      keepalive.requiresMicrophone,
+      isFalse,
+      reason: 'a socket lease must never claim the microphone',
+    );
+    expect(leases.last.kind, BackgroundStreamKind.chat);
+    expect(leases.last.requiresMicrophone, isTrue);
   });
 
-  test('does not create native leases for socket-only keepalive', () {
+  test('a socket-only request still produces one lease', () {
     final leases = buildBackgroundStreamLeasesForTesting(
       const [BackgroundStreamingHandler.socketKeepaliveId],
       requiresMicrophone: false,
@@ -44,7 +59,8 @@ void main() {
       startedAt: DateTime.fromMillisecondsSinceEpoch(1),
     );
 
-    expect(leases, isEmpty);
+    expect(leases, hasLength(1));
+    expect(leases.single.kind, BackgroundStreamKind.socket);
   });
 
   test('only a reply being written counts as a reply in progress', () {

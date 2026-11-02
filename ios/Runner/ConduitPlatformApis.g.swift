@@ -191,6 +191,7 @@ private func nilOrValue<T>(_ value: Any?) -> T? {
 enum PlatformBackgroundStreamKind: Int, CaseIterable {
   case chat = 0
   case voice = 1
+  case socket = 2
 }
 
 enum PlatformNativePasteKind: Int, CaseIterable {

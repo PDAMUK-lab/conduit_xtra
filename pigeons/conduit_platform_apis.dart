@@ -11,7 +11,7 @@ import 'package:pigeon/pigeon.dart';
     dartPackageName: 'conduit',
   ),
 )
-enum PlatformBackgroundStreamKind { chat, voice }
+enum PlatformBackgroundStreamKind { chat, voice, socket }
 
 enum PlatformNativePasteKind { text, images, unsupported }
 
