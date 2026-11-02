@@ -41,6 +41,8 @@ import 'package:conduit_core/services/api_service.dart';
 import 'package:conduit_core/models/conversation.dart';
 
 import '../services/background_streaming_handler.dart';
+import 'package:conduit_core/ports/app_lifecycle.dart';
+import 'package:conduit_core/providers/host_ports.dart';
 
 import 'package:conduit_core/services/socket_service.dart';
 
@@ -1375,6 +1377,55 @@ final silentLoginCoordinatorProvider = Provider<void>((ref) {
 ///
 /// Rationale: Socket.IO does not replay historical events. If the app was suspended,
 /// we may miss updates. On resume, invalidate conversations to reconcile state.
+/// Keeps the process alive for a Hermes socket while the app is backgrounded.
+///
+/// The lease alone is not enough: nothing acquired it. Without this, a locked
+/// phone drops the socket and a turn — or an approval — only lands when the user
+/// comes back. It is held only while the open conversation is a native Hermes
+/// one, and released on resume, so the persistent notification never appears for
+/// ordinary chats.
+final hermesSocketKeepaliveProvider = Provider<void>((ref) {
+  final lifecycle = ref.watch(appLifecycleProvider);
+  var held = false;
+
+  void release() {
+    if (!held) return;
+    held = false;
+    unawaited(
+      BackgroundStreamingHandler.instance.stopBackgroundExecution(
+        const [BackgroundStreamingHandler.socketKeepaliveId],
+      ),
+    );
+  }
+
+  final subscription = lifecycle.changes.listen((phase) {
+    switch (phase) {
+      case AppLifecyclePhase.paused:
+      case AppLifecyclePhase.hidden:
+        if (held) return;
+        try {
+          final active = ref.read(activeConversationProvider);
+          if (!isNativeHermesConversation(active)) return;
+        } catch (_) {
+          // The conversation engine may not be up yet; nothing to keep alive.
+          return;
+        }
+        held = true;
+        unawaited(
+          BackgroundStreamingHandler.instance.startBackgroundExecution(
+            const [BackgroundStreamingHandler.socketKeepaliveId],
+          ),
+        );
+      case AppLifecyclePhase.resumed:
+      case AppLifecyclePhase.inactive:
+      case AppLifecyclePhase.detached:
+        release();
+    }
+  });
+
+  ref.onDispose(subscription.cancel);
+});
+
 final foregroundRefreshProvider = Provider<void>((ref) {
   final observer = _ForegroundRefreshObserver(ref);
   WidgetsBinding.instance.addObserver(observer);

@@ -532,6 +532,10 @@ void main() {
       // install its method-channel handler before frame-scheduled startup work.
       providerContainer.read(carPlayCoordinatorProvider);
 
+      // Hold a socket lease while backgrounded so a locked phone still receives
+      // the turn it is waiting on (released on resume).
+      providerContainer.read(hermesSocketKeepaliveProvider);
+
       installConduitErrorWidgetBuilder();
 
       await modelLogosLoaded;
