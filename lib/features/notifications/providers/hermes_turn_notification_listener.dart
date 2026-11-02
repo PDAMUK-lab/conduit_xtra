@@ -41,6 +41,8 @@ final hermesTurnNotificationListenerProvider = Provider<void>((ref) {
   // dropped silently.
   HermesBackgroundAlerts.onReplyReady = (storedId) {
           final live = ref.read(hermesConfigProvider);
+          // ignore: avoid_print
+          print('HERMES_SINK called stored=$storedId enabled=${live.enabled} mode=${live.mode} fg=$foreground');
           if (!live.enabled || live.mode != HermesBackendMode.desktopGateway) {
             return;
           }

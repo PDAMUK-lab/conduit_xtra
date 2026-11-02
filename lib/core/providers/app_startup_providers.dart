@@ -1440,10 +1440,18 @@ final hermesSocketKeepaliveProvider = Provider<void>((ref) {
             const [BackgroundStreamingHandler.socketKeepaliveId],
           ),
         );
+      // Release on `resumed` only. `inactive` is NOT a background state: MIUI
+      // emits `hidden` then `inactive` when the screen locks, so releasing on
+      // `inactive` tore down the lease four milliseconds after acquiring it —
+      // no foreground service, the process froze, and no turn or notification
+      // could ever arrive. `inactive` also fires for a pulled-down shade while
+      // the app is still visible, where holding the lease briefly is harmless.
       case AppLifecyclePhase.resumed:
-      case AppLifecyclePhase.inactive:
       case AppLifecyclePhase.detached:
         release();
+      case AppLifecyclePhase.inactive:
+        // Deliberately hold: see the comment above.
+        break;
     }
   });
 

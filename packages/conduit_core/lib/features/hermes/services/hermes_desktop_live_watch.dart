@@ -36,6 +36,8 @@ extension _HermesDesktopLiveWatch on HermesDesktopApiService {
 
   Future<void> _liveWatchTick() async {
     final storedId = _liveSessionId;
+    // ignore: avoid_print
+    print('HERMES_WATCH tick stored=$storedId fg=$_foreground');
     // Runs while backgrounded too: with no socket events arriving on a locked
     // phone (MIUI reports `inactive`, never `paused`, and the lease keeps the
     // isolate alive), this poll is the only thing that learns the reply landed.
@@ -163,6 +165,8 @@ extension _HermesDesktopLiveWatch on HermesDesktopApiService {
       final knownId = local == null || local.isEmpty ? null : local.last['id'];
       // No tail at all (a chat opened before it had rows) counts as stale too.
       if (newestId == null || newestId == knownId) return;
+      // ignore: avoid_print
+      print('HERMES_WATCH new-tail newest=$newestId known=$knownId fg=$_foreground');
       _queueTranscriptChange(storedId);
       // A new tail while the app is not looking is exactly the case the socket
       // event was supposed to report and did not. Fire the alert from the poll
