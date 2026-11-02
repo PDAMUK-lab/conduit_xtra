@@ -157,7 +157,12 @@ extension _HermesDesktopLiveWatch on HermesDesktopApiService {
           'GET',
           '/api/sessions/${Uri.encodeComponent(storedId)}/messages',
           query: {
-            'limit': 1,
+            // A page, not one row. A turn appends an assistant tool-call row and
+            // its tool results before the answer, so the newest row is often not
+            // the reply — and the refresh this probe queues can move the local
+            // transcript past the answer before the next tick. Scanning a page
+            // finds the answer either way.
+            'limit': 20,
             'offset': 0,
             'order': 'latest',
             'include_compacted': true,
@@ -167,30 +172,38 @@ extension _HermesDesktopLiveWatch on HermesDesktopApiService {
         'messages',
       );
       if (_closed || probe.isEmpty) return;
-      final newestRow = probe.last;
-      final newestId = newestRow['id'];
-      final newestRole = newestRow['role']?.toString();
-      final toolCalls = newestRow['tool_calls'];
-      final isReply = newestRole == 'assistant' &&
-          !(toolCalls is List && toolCalls.isNotEmpty);
+      final newestId = probe.last['id'];
       final knownId = local == null || local.isEmpty ? null : local.last['id'];
       // No tail at all (a chat opened before it had rows) counts as stale too.
       if (newestId == null || newestId == knownId) return;
+      // The answer is the newest assistant row that carries no tool calls.
+      Map<String, dynamic>? replyRow;
+      for (final row in probe.reversed) {
+        final calls = row['tool_calls'];
+        if (row['role']?.toString() == 'assistant' &&
+            !(calls is List && calls.isNotEmpty)) {
+          replyRow = row;
+          break;
+        }
+      }
+      final replyId = replyRow?['id'];
       // ignore: avoid_print
-      print('HERMES_WATCH new-tail newest=$newestId role=$newestRole '
-          'known=$knownId fg=$_foreground');
+      print('HERMES_WATCH new-tail newest=$newestId known=$knownId '
+          'reply=$replyId fg=$_foreground');
       _queueTranscriptChange(storedId);
       // A new tail while the app is not looking is exactly the case the socket
       // event was supposed to report and did not. Fire the alert from the poll
       // that provably ran, not from a frame that never arrived — once per row:
       // the transcript merge lags the probe, so an unguarded call re-alerts on
       // the same row every tick until the merge catches up.
-      // Only an assistant row is a reply. A turn appends tool rows as it works,
-      // and alerting on those posted "Reply ready" mid-turn — the operator saw
-      // two notifications for one answer. The transcript still refreshes on any
-      // new row; only the alert is restricted.
-      if (!_foreground && isReply && _alertedTailIds[storedId] != newestId) {
-        _alertedTailIds[storedId] = newestId;
+      // Only a real answer alerts: an assistant row with no tool calls. Never on
+      // the first load of a chat (knownId null) — that would announce a reply the
+      // user is already looking at.
+      if (!_foreground &&
+          knownId != null &&
+          replyId != null &&
+          _alertedTailIds[storedId] != replyId) {
+        _alertedTailIds[storedId] = replyId;
         HermesBackgroundAlerts.replyReady(storedId);
       }
     } catch (e) {
