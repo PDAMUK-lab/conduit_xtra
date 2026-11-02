@@ -202,10 +202,17 @@ void main() {
     expect(gateway.transcriptRequests.last.order, 'latest');
 
     // An idle refresh re-uses the snapshot instead of re-downloading.
-    final before = gateway.transcriptRequests.length;
+    //
+    // Count page reads, not raw requests: the live-watch poll runs while
+    // backgrounded too (that poll is what fires the locked-phone alert), and
+    // its `limit: 1` tail probe legitimately interleaves.
+    int pageReads() => gateway.transcriptRequests
+        .where((request) => request.limit != 1)
+        .length;
+    final before = pageReads();
     final again = await service.getSessionMessages('st-1');
     expect(identical(again, refreshed), isTrue);
-    expect(gateway.transcriptRequests.length, before + 1);
+    expect(pageReads(), before + 1);
   });
 
   test('a refused resume still opens the chat', () async {
