@@ -88,6 +88,11 @@ extension _HermesDesktopLiveRuntime on HermesDesktopApiService {
       // completion that followed it and the transcript never refreshed.
       final terminalEvent =
           event.type == 'message.complete' || event.type.endsWith('.request');
+      // ignore: avoid_print
+      if (terminalEvent || event.type == 'message.start') {
+        print('HERMES_EVENT type=${event.type} stored=$eventStoredId '
+            'runtime=${event.sessionId} foreground=$_foreground');
+      }
       if (terminalEvent && eventStoredId != null) {
         _queueTranscriptChange(eventStoredId);
         // The app is not looking at this screen: the reply is the only thing the
@@ -145,8 +150,17 @@ extension _HermesDesktopLiveRuntime on HermesDesktopApiService {
           unawaited(_liveWatchTick());
         });
       case AppLifecyclePhase.inactive:
-        break;
+        // A lock screen reports `inactive` on some devices (MIUI) and never
+        // reaches `paused` while the process is kept alive by a lease — so the
+        // client believed it was foregrounded through the whole lock and the
+        // background alert could never fire. Measured: foreground=true in the
+        // message.start line while the phone was being locked.
+        _foreground = false;
+        _reconciliationStale = true;
     }
+    // TEMP-DIAGNOSTIC: remove once the inactive-on-lock path is confirmed.
+    // ignore: avoid_print
+    print('HERMES_LIFECYCLE phase=$state foreground=$_foreground');
   }
 
   Future<void> _reconcileForeground() async {

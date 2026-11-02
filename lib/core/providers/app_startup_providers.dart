@@ -16,6 +16,7 @@ import 'package:conduit_core/auth/auth_state_manager.dart';
 
 import 'package:conduit_core/features/hermes/services/hermes_session_provenance.dart';
 import 'package:conduit_core/providers/app_providers.dart';
+import 'package:conduit_core/services/settings_service.dart';
 
 import 'package:conduit_core/sync/sync_triggers.dart';
 
@@ -824,6 +825,23 @@ Future<void> _initializeBackgroundStreaming(Ref ref) async {
           'message': 'Notification permission denied. Background streaming notifications will not be shown.',
         },
       );
+      // Notifications are on by default in this build, so a denied
+      // POST_NOTIFICATIONS would leave every alert invisible at the OS layer
+      // while the app believed it had posted one. Ask once, at startup; the OS
+      // shows the sheet only once per install either way.
+      if (ref.read(appSettingsProvider).notificationsEnabled) {
+        try {
+          await ref
+              .read(localNotificationServiceProvider)
+              .requestPermissions();
+        } catch (e) {
+          DebugLogger.error(
+            'notification-permission-request-failed',
+            scope: 'startup',
+            error: e,
+          );
+        }
+      }
     }
   } catch (e) {
     if (!ref.mounted) return;

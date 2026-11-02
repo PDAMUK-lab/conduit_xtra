@@ -32,6 +32,7 @@ AppNotification _channel({String id = 'chan-1', String key = 'k-chan'}) =>
     );
 
 void main() {
+  _defaultsRegression();
   // Master + both kinds + both sound flags on; surfaces on. Tests override.
   const allOn = AppSettings(
     notificationsEnabled: true,
@@ -289,6 +290,45 @@ void main() {
       verify(
         () => local.show(any(), playSound: any(named: 'playSound')),
       ).called(1);
+    });
+  });
+}
+
+// ---------------------------------------------------------------------------
+// The shipped default must actually notify. This is the regression that cost
+// five silent APKs: `notificationsEnabled` defaulted to false, so every alert
+// was dropped at gate 1 before any surface was chosen — the socket, the fan-out
+// and the foreground flag were all innocent.
+// ---------------------------------------------------------------------------
+void _defaultsRegression() {
+  group('shipped defaults', () {
+    test('a backgrounded turn notifies with no settings touched', () async {
+      final local = _MockLocalNotifications();
+      final sound = _MockSound();
+      when(
+        () => local.show(any(), playSound: any(named: 'playSound')),
+      ).thenAnswer((_) async {});
+      when(() => sound.play()).thenAnswer((_) async {});
+
+      // Const defaults only — exactly what a fresh install reads.
+      const settings = AppSettings();
+      check(settings.notificationsEnabled).isTrue();
+      check(settings.notificationSystem).isTrue();
+      check(settings.notificationChatEnabled).isTrue();
+
+      final router = NotificationRouter(
+        readSettings: () => settings,
+        readActiveView: () => const ActiveView(),
+        isAppForeground: () => false,
+        localNotifications: local,
+        sound: sound,
+        showInAppBanner: (_) {},
+        onChannelUnread: (_) {},
+      );
+
+      check(await router.route(_chat())).equals(NotificationSurface.system);
+      verify(() => local.show(any(), playSound: any(named: 'playSound')))
+          .called(1);
     });
   });
 }

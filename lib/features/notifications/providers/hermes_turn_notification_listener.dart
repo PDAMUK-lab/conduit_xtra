@@ -25,7 +25,7 @@ import 'notification_socket_listener.dart' show notificationRouterProvider;
 final hermesTurnNotificationListenerProvider = Provider<void>((ref) {
   // `watch`, not `read`: this provider is instantiated during startup, when the
   // saved Hermes config may not have loaded yet.
-  final config = ref.watch(hermesConfigProvider);
+  ref.watch(hermesConfigProvider);
   final router = ref.watch(notificationRouterProvider);
   final lifecycle = ref.watch(appLifecycleProvider);
 
@@ -44,9 +44,12 @@ final hermesTurnNotificationListenerProvider = Provider<void>((ref) {
           if (!live.enabled || live.mode != HermesBackendMode.desktopGateway) {
             return;
           }
-          DebugLogger.info(
-            'hermes reply ready: $storedId foreground=$foreground',
-          );
+          // print(), not DebugLogger: DebugLogger writes nowhere visible on the
+          // device (no logcat line, no file), so it could never be diagnosed.
+          // ignore: avoid_print
+          print('HERMES_ALERT_SINK fired stored=$storedId foreground=$foreground');
+          // ignore: avoid_print
+          print('HERMES_ALERT_SINK gate: about to route');
           if (foreground) return;
           unawaited(
             router
@@ -61,13 +64,26 @@ final hermesTurnNotificationListenerProvider = Provider<void>((ref) {
                   ),
                   alert: true,
                 )
-                .catchError((Object e, StackTrace st) {
-                  DebugLogger.error(
-                    'hermes turn notification failed',
-                    error: e,
-                    stackTrace: st,
-                  );
-                }),
+                // `then` rather than `catchError`: the handler must return a
+                // NotificationSurface for `catchError`, and a dropped alert is
+                // worth logging but not worth synthesising a fake surface.
+                // The surface is the answer: `suppressed` here means a gate ate
+                // the alert (master toggle, per-kind, dedup, or foreground).
+                // Without this line a shut gate is indistinguishable from a
+                // notification the OS dropped.
+                .then(
+                  (surface) {
+                    // ignore: avoid_print
+                    print('HERMES_ALERT_SINK surface=$surface');
+                  },
+                  onError: (Object e, StackTrace st) {
+                    DebugLogger.error(
+                      'hermes turn notification failed',
+                      error: e,
+                      stackTrace: st,
+                    );
+                  },
+                ),
           );
         };
 

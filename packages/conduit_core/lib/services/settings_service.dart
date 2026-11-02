@@ -151,11 +151,14 @@ class SettingsService {
 
   // -- Notifications --------------------------------------------------------
 
-  /// Master notifications toggle. Defaults to `false`: notifications stay off
-  /// until the user opts in (which is also when permission is requested).
+  /// Master notifications toggle. Defaults to `true` in this Hermes-first
+  /// build: the turn-finished alert is the surface that makes a backgrounded
+  /// Hermes run useful, and a default of `false` silently dropped every
+  /// notification at the router's first gate (measured on device: no
+  /// `notifications_enabled` key stored and no notification ever posted).
   static Future<bool> getNotificationsEnabled() {
     return Future.value(
-      _getPreference<bool>(_notificationsEnabledKey) ?? false,
+      _getPreference<bool>(_notificationsEnabledKey) ?? true,
     );
   }
 
@@ -806,7 +809,7 @@ class SettingsService {
         getStringList(_pinnedModelsKey) ?? const <String>[],
       ),
       notificationsEnabled:
-          get<bool>(_notificationsEnabledKey) ?? false,
+          get<bool>(_notificationsEnabledKey) ?? true,
       notificationSound:
           get<bool>(_notificationSoundKey) ?? true,
       notificationSoundAlways:
@@ -936,7 +939,7 @@ class AppSettings {
     this.temporaryChatByDefault = false,
     this.advancedFeaturesEnabled = false,
     this.pinnedModels = const [],
-    this.notificationsEnabled = false,
+    this.notificationsEnabled = true,
     this.notificationSound = true,
     this.notificationSoundAlways = false,
     this.notificationInAppBanner = true,
