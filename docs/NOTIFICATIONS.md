@@ -1,7 +1,10 @@
 # Notifications while the phone is locked — design and first step
 
-Status: **not implemented.** This note records what exists, what is missing, and
-the exact change to make, so the work starts from evidence instead of a guess.
+Status: **keepalive shipped and verified on device (2026-11-02); the
+notification itself is not built.** The phone now receives a reply while locked —
+verified with the socket held open through a lock (server log: accepted 02:33:58,
+still ESTAB at 02:35:41, no close event; operator confirmed the reply was waiting
+on unlock). What is still missing is the lock-screen notification.
 
 ## What already works
 
@@ -17,7 +20,11 @@ the exact change to make, so the work starts from evidence instead of a guess.
 
 ## What is missing
 
-1. **A keepalive-only lease.** `BackgroundStreamingHandler.socketKeepaliveId`
+1. ~~**A keepalive-only lease.**~~ **Done** (`6907aba3`): `socketKeepaliveId`
+   becomes a lease of kind `socket` (Pigeon schema → Dart + Kotlin), and
+   `hermesSocketKeepaliveProvider` takes it while backgrounded on a native Hermes
+   conversation, releasing on resume.
+   ~~Original note:~~ `BackgroundStreamingHandler.socketKeepaliveId`
    exists, but `_buildBackgroundStreamLeases()` (line 100) drops that id with a
    `where` filter, so `startBackgroundExecution([socketKeepaliveId])` produces an
    empty lease list and starts nothing. Verified 2026-11-02 by reading the
