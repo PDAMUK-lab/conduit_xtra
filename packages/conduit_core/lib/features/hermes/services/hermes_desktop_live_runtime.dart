@@ -102,6 +102,10 @@ extension _HermesDesktopLiveRuntime on HermesDesktopApiService {
         // binding map cannot resolve. Ask the gateway which stored session that
         // runtime belongs to instead of dropping the completion on the floor —
         // dropping it is why the open chat only caught up after a switch.
+        // A turn this client did not start (locked phone, another window) lands
+        // here, not in the branch above — so the alert must be raised here too.
+        // Gated like the branch above; the unconditional form was a diagnostic.
+        if (!_foreground) HermesBackgroundAlerts.replyReady(event.sessionId!);
         unawaited(_resolveRuntimeBinding(event.sessionId!));
       }
     });

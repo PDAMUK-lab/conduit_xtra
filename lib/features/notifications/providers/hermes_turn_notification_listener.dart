@@ -35,13 +35,18 @@ final hermesTurnNotificationListenerProvider = Provider<void>((ref) {
     foreground = phase == AppLifecyclePhase.resumed;
   });
 
-  final configured =
-      config.enabled && config.mode == HermesBackendMode.desktopGateway;
-
-  HermesBackgroundAlerts.onReplyReady = !configured
-      ? null
-      : (storedId) {
-          DebugLogger.info('hermes reply ready while backgrounded: $storedId');
+  // Installed unconditionally and gated at call time. Installing it only when the
+  // saved config looked ready was a trap: this provider is read once at startup,
+  // before the config loads, so the sink stayed null forever and every alert was
+  // dropped silently.
+  HermesBackgroundAlerts.onReplyReady = (storedId) {
+          final live = ref.read(hermesConfigProvider);
+          if (!live.enabled || live.mode != HermesBackendMode.desktopGateway) {
+            return;
+          }
+          DebugLogger.info(
+            'hermes reply ready: $storedId foreground=$foreground',
+          );
           if (foreground) return;
           unawaited(
             router
