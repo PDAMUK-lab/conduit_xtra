@@ -18,10 +18,14 @@ the exact change to make, so the work starts from evidence instead of a guess.
 ## What is missing
 
 1. **A keepalive-only lease.** `BackgroundStreamingHandler.socketKeepaliveId`
-   exists, but `_buildBackgroundStreamLeases()` drops that id, so
-   `startBackgroundExecution([socketKeepaliveId])` returns without starting
-   anything. There is no way for Dart to ask the platform to keep the process
-   alive for a socket alone.
+   exists, but `_buildBackgroundStreamLeases()` (line 100) drops that id with a
+   `where` filter, so `startBackgroundExecution([socketKeepaliveId])` produces an
+   empty lease list and starts nothing. Verified 2026-11-02 by reading the
+   builder: the filter is the only reason the id cannot become a lease.
+   The fix is cross-language: `BackgroundStreamKind` has only `chat`/`voice`, both
+   mapped to `PlatformBackgroundStreamKind`, so a socket-only lease needs a third
+   kind in Dart *and* in the Kotlin service, plus a foreground-service type that
+   survives with no stream. Then the lifecycle wiring (item 2) can acquire it.
 2. **Lifecycle wiring.** Nothing acquires/releases that lease when the app is
    backgrounded with a Hermes connection configured.
 3. **Android service mode.** The service must survive with no active stream
