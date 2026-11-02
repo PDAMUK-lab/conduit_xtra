@@ -23,7 +23,10 @@ import 'notification_socket_listener.dart' show notificationRouterProvider;
 /// Hermes connection. A turn the user is watching fires no notification, and the
 /// router's own dedup keeps one turn from alerting twice.
 final hermesTurnNotificationListenerProvider = Provider<void>((ref) {
-  final config = ref.read(hermesConfigProvider);
+  // `watch`, not `read`: this provider is instantiated during startup, when the
+  // saved Hermes config may not have loaded yet. With `read` it saw "disabled",
+  // returned, and never re-ran — a listener that could never fire.
+  final config = ref.watch(hermesConfigProvider);
   if (!config.enabled || config.mode != HermesBackendMode.desktopGateway) {
     return;
   }
